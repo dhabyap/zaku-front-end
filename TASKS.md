@@ -18,7 +18,7 @@
   - Isi `VITE_API_BASE_URL` dengan URL backend API
   - Jalankan `php artisan key:generate`
 
-- [ ] **TASK-03** · Setup folder struktur views
+- [x] **TASK-03** · Setup folder struktur views
   - Buat folder: `resources/views/auth/`
   - Buat folder: `resources/views/dashboard/`
   - Buat folder: `resources/views/wallet/`
