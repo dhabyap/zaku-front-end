@@ -25,7 +25,7 @@
   - Buat folder: `resources/views/components/`
   - Buat folder: `resources/views/layouts/`
 
-- [ ] **TASK-04** · Setup file JS & CSS utama
+- [x] **TASK-04** · Setup file JS & CSS utama
   - Buat `resources/js/api-client.js` (axios instance + interceptor)
   - Buat `resources/js/auth.js` (helper autentikasi)
   - Buat `resources/js/utils.js` (fungsi-fungsi helper umum)
