@@ -3,9 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dompet Design</title>
+    <title>Dompet Design Tokens</title>
+    <style>
+        :root {
+            --ink:     #111010;
+            --paper:   #F5F0E8;
+            --cream:   #EDE8DC;
+            --punch:   #FF4D00;
+            --punch-2: #FFD600;
+            --mint:    #00E5A0;
+            --sky:     #C8F0FF;
+
+            --font-display: 'Syne', sans-serif;
+            --font-mono:    'DM Mono', monospace;
+            --font-serif:   'Fraunces', serif;
+
+            --bs:      4px 4px 0 var(--ink);
+            --bs-lg:   6px 6px 0 var(--ink);
+            --bs-xl:   8px 8px 0 var(--ink);
+        }
+
+        body {
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-display);
+            padding: 2rem;
+        }
+
+        .swatch {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            margin: 1rem;
+            border: 2px solid var(--ink);
+            box-shadow: var(--bs);
+        }
+    </style>
 </head>
 <body>
-    <!-- Content of dompet-design.html -->
+    <h1>Dompet Design System</h1>
+    <div style="display: flex; flex-wrap: wrap;">
+        <div class="swatch" style="background: var(--ink);"></div>
+        <div class="swatch" style="background: var(--paper);"></div>
+        <div class="swatch" style="background: var(--cream);"></div>
+        <div class="swatch" style="background: var(--punch);"></div>
+        <div class="swatch" style="background: var(--punch-2);"></div>
+        <div class="swatch" style="background: var(--mint);"></div>
+        <div class="swatch" style="background: var(--sky);"></div>
+    </div>
 </body>
 </html>

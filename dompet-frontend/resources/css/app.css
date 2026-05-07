@@ -1,0 +1,23 @@
+:root {
+  --ink:     #111010;      /* Dark background */
+  --paper:   #F5F0E8;      /* Light background */
+  --cream:   #EDE8DC;      /* Secondary background */
+  --punch:   #FF4D00;      /* Primary / CTA buttons */
+  --punch-2: #FFD600;      /* Secondary actions */
+  --mint:    #00E5A0;      /* Success states */
+  --sky:     #C8F0FF;      /* Info / Light states */
+
+  --font-display: 'Syne', sans-serif;       /* Headers */
+  --font-mono:    'DM Mono', monospace;     /* Numbers */
+  --font-serif:   'Fraunces', serif;        /* Accents */
+
+  --bs:      4px 4px 0 var(--ink);         /* Small shadow */
+  --bs-lg:   6px 6px 0 var(--ink);         /* Large shadow */
+  --bs-xl:   8px 8px 0 var(--ink);         /* Extra large shadow */
+}
+
+body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-display);
+}
