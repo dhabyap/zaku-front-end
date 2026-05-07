@@ -1,16 +1,28 @@
-$repo = "dhabyap/zaku-front-end"
+param (
+    [string]$Repo = "dhabyap/zaku-front-end"
+)
+
+$PRD_REF = "PRD-Frontend.md"
+$PHASE_0 = "Phase 0 — Project Setup"
+$PHASE_1 = "Phase 1 — API Client & Utilities"
+$PHASE_2 = "Phase 2 — Layout & Komponen Dasar"
+$PHASE_3 = "Phase 3 — Halaman Autentikasi"
+$PHASE_4 = "Phase 4 — Dashboard"
+$PHASE_5 = "Phase 5 — Fitur Wallet"
+$PHASE_6 = "Phase 6 — Laravel Routing"
+$PHASE_7 = "Phase 7 — Testing & Polish"
 $tmpFile = "$env:TEMP\gh_issue_body.md"
 
 function New-Issue($title, $label, $body) {
     $body | Out-File -FilePath $tmpFile -Encoding utf8
-    gh issue create --repo $repo --title $title --label $label --body-file $tmpFile
+    gh issue create --repo $Repo --title $title --label $label --body-file $tmpFile
     Start-Sleep -Milliseconds 500
 }
 
 # ─── PHASE 0: Project Setup ────────────────────────────────────────────────
 
 New-Issue "[TASK-02] Buat file konfigurasi environment" "phase:setup" @"
-## Phase 0 — Project Setup
+## $PHASE_0
 
 **Task:** Setup file `.env` dengan konfigurasi API
 
@@ -29,11 +41,11 @@ VITE_API_TIMEOUT=30000
 ```
 
 ## References
-PRD: PRD-Frontend.md — Environment Configuration section
+PRD: $PRD_REF — Environment Configuration section
 "@
 
 New-Issue "[TASK-03] Setup folder struktur views" "phase:setup" @"
-## Phase 0 — Project Setup
+## $PHASE_0
 
 **Task:** Buat semua folder views sesuai struktur PRD
 
@@ -45,7 +57,7 @@ New-Issue "[TASK-03] Setup folder struktur views" "phase:setup" @"
 - [ ] Buat folder: `resources/views/layouts/`
 
 ## References
-PRD: PRD-Frontend.md — Folder Structure section
+PRD: $PRD_REF — Folder Structure section
 "@
 
 New-Issue "[TASK-04] Setup file JS & CSS utama" "phase:setup" @"
@@ -61,7 +73,7 @@ New-Issue "[TASK-04] Setup file JS & CSS utama" "phase:setup" @"
 - [ ] Buat `resources/css/custom.css`
 
 ## References
-PRD: PRD-Frontend.md — Design System section
+PRD: $PRD_REF — Design System section
 "@
 
 # ─── PHASE 1: API Client & Utilities ──────────────────────────────────────
@@ -85,7 +97,7 @@ New-Issue "[TASK-05] Buat api-client.js (Axios instance & interceptors)" "phase:
 > IMPORTANT: Semua request API ke backend harus melalui instance ini, bukan axios langsung
 
 ## References
-PRD: PRD-Frontend.md — API Integration section
+PRD: $PRD_REF — API Integration section
 "@
 
 New-Issue "[TASK-06] Buat auth.js (authentication helper)" "phase:api" @"
@@ -104,7 +116,7 @@ New-Issue "[TASK-06] Buat auth.js (authentication helper)" "phase:api" @"
 `resources/js/auth.js`
 
 ## References
-PRD: PRD-Frontend.md — Storage section (localStorage JWT tokens)
+PRD: $PRD_REF — Storage section (localStorage JWT tokens)
 "@
 
 New-Issue "[TASK-07] Buat utils.js (helper functions)" "phase:api" @"
@@ -121,7 +133,7 @@ New-Issue "[TASK-07] Buat utils.js (helper functions)" "phase:api" @"
 `resources/js/utils.js`
 
 ## References
-PRD: PRD-Frontend.md — Design System section
+PRD: $PRD_REF — Design System section
 "@
 
 # ─── PHASE 2: Layout & Components ─────────────────────────────────────────
@@ -141,7 +153,7 @@ New-Issue "[TASK-08] Buat layout guest.blade.php" "phase:layout" @"
 `resources/views/layouts/guest.blade.php`
 
 ## References
-PRD: PRD-Frontend.md — Folder Structure section
+PRD: $PRD_REF — Folder Structure section
 "@
 
 New-Issue "[TASK-09] Buat layout app.blade.php" "phase:layout" @"
@@ -164,7 +176,7 @@ New-Issue "[TASK-09] Buat layout app.blade.php" "phase:layout" @"
 > WARNING: Guard redirect harus jalan SEBELUM halaman di-render
 
 ## References
-PRD: PRD-Frontend.md — Folder Structure section
+PRD: $PRD_REF — Folder Structure section
 "@
 
 New-Issue "[TASK-10] Buat komponen navigation.blade.php" "phase:layout" @"
@@ -186,7 +198,7 @@ New-Issue "[TASK-10] Buat komponen navigation.blade.php" "phase:layout" @"
 - Background: `var(--ink)` (#111010)
 
 ## References
-PRD: PRD-Frontend.md — Design System section
+PRD: $PRD_REF — Design System section
 "@
 
 New-Issue "[TASK-11] Buat komponen header.blade.php" "phase:layout" @"
@@ -203,7 +215,7 @@ New-Issue "[TASK-11] Buat komponen header.blade.php" "phase:layout" @"
 `resources/views/components/header.blade.php`
 
 ## References
-PRD: PRD-Frontend.md — Design System / Typography section
+PRD: $PRD_REF — Design System / Typography section
 "@
 
 New-Issue "[TASK-12] Buat komponen toast-notification.blade.php" "phase:layout" @"
@@ -227,7 +239,7 @@ New-Issue "[TASK-12] Buat komponen toast-notification.blade.php" "phase:layout" 
 - Info: `var(--sky)` (#C8F0FF)
 
 ## References
-PRD: PRD-Frontend.md — Components section
+PRD: $PRD_REF — Components section
 "@
 
 New-Issue "[TASK-13] Buat komponen loading-skeleton.blade.php" "phase:layout" @"
@@ -244,7 +256,7 @@ New-Issue "[TASK-13] Buat komponen loading-skeleton.blade.php" "phase:layout" @"
 `resources/views/components/loading-skeleton.blade.php`
 
 ## References
-PRD: PRD-Frontend.md — Components section
+PRD: $PRD_REF — Components section
 "@
 
 # ─── PHASE 3: Authentication Pages ────────────────────────────────────────
@@ -274,7 +286,7 @@ New-Issue "[TASK-14] Buat halaman Login" "phase:auth" @"
 `POST /api/auth/login`
 
 ## References
-PRD: PRD-Frontend.md — Phase 1: Login Page section
+PRD: $PRD_REF — Phase 1: Login Page section
 "@
 
 New-Issue "[TASK-15] Buat halaman Register" "phase:auth" @"
@@ -301,7 +313,7 @@ New-Issue "[TASK-15] Buat halaman Register" "phase:auth" @"
 `POST /api/auth/register`
 
 ## References
-PRD: PRD-Frontend.md — Phase 1: Register Page section
+PRD: $PRD_REF — Phase 1: Register Page section
 "@
 
 New-Issue "[TASK-16] Buat halaman Verifikasi Email" "phase:auth" @"
@@ -322,7 +334,7 @@ New-Issue "[TASK-16] Buat halaman Verifikasi Email" "phase:auth" @"
 - [ ] Panggil API resend verification jika tersedia
 
 ## References
-PRD: PRD-Frontend.md — Folder Structure section
+PRD: $PRD_REF — Folder Structure section
 "@
 
 New-Issue "[TASK-17] Buat halaman Lupa Password" "phase:auth" @"
@@ -347,7 +359,7 @@ New-Issue "[TASK-17] Buat halaman Lupa Password" "phase:auth" @"
 `POST /api/auth/forgot-password`
 
 ## References
-PRD: PRD-Frontend.md — Folder Structure section
+PRD: $PRD_REF — Folder Structure section
 "@
 
 # ─── PHASE 4: Dashboard ────────────────────────────────────────────────────
@@ -377,7 +389,7 @@ New-Issue "[TASK-18] Buat halaman Home Dashboard" "phase:dashboard" @"
 - `GET /api/transactions?limit=5`
 
 ## References
-PRD: PRD-Frontend.md — Dashboard section
+PRD: $PRD_REF — Dashboard section
 "@
 
 New-Issue "[TASK-19] Buat halaman Daftar Transaksi" "phase:dashboard" @"
@@ -406,7 +418,7 @@ New-Issue "[TASK-19] Buat halaman Daftar Transaksi" "phase:dashboard" @"
 - Masuk (kredit): `var(--mint)` (#00E5A0)
 
 ## References
-PRD: PRD-Frontend.md — Dashboard section
+PRD: $PRD_REF — Dashboard section
 "@
 
 New-Issue "[TASK-20] Buat halaman Detail Transaksi" "phase:dashboard" @"
@@ -431,7 +443,7 @@ New-Issue "[TASK-20] Buat halaman Detail Transaksi" "phase:dashboard" @"
 `GET /api/transactions/{id}`
 
 ## References
-PRD: PRD-Frontend.md — Dashboard section
+PRD: $PRD_REF — Dashboard section
 "@
 
 New-Issue "[TASK-21] Buat halaman Profil" "phase:dashboard" @"
@@ -455,7 +467,7 @@ New-Issue "[TASK-21] Buat halaman Profil" "phase:dashboard" @"
 `GET /api/auth/me`
 
 ## References
-PRD: PRD-Frontend.md — Dashboard section
+PRD: $PRD_REF — Dashboard section
 "@
 
 # ─── PHASE 5: Wallet Features ──────────────────────────────────────────────
@@ -483,7 +495,7 @@ New-Issue "[TASK-22] Buat halaman Top Up" "phase:wallet" @"
 `POST /api/wallet/topup`
 
 ## References
-PRD: PRD-Frontend.md — Wallet section
+PRD: $PRD_REF — Wallet section
 "@
 
 New-Issue "[TASK-23] Buat halaman Tarik Saldo" "phase:wallet" @"
@@ -509,7 +521,7 @@ New-Issue "[TASK-23] Buat halaman Tarik Saldo" "phase:wallet" @"
 `POST /api/wallet/withdraw`
 
 ## References
-PRD: PRD-Frontend.md — Wallet section
+PRD: $PRD_REF — Wallet section
 "@
 
 New-Issue "[TASK-24] Buat halaman Kirim Uang" "phase:wallet" @"
@@ -535,7 +547,7 @@ New-Issue "[TASK-24] Buat halaman Kirim Uang" "phase:wallet" @"
 `POST /api/wallet/send`
 
 ## References
-PRD: PRD-Frontend.md — Wallet section
+PRD: $PRD_REF — Wallet section
 "@
 
 # ─── PHASE 6: Routing ─────────────────────────────────────────────────────
@@ -566,7 +578,7 @@ New-Issue "[TASK-25] Setup routes/web.php" "phase:routing" @"
 | `/wallet/send` | GET | PageController@sendMoney |
 
 ## References
-PRD: PRD-Frontend.md — Routing section
+PRD: $PRD_REF — Routing section
 "@
 
 New-Issue "[TASK-26] Buat PageController.php" "phase:routing" @"
@@ -589,7 +601,7 @@ New-Issue "[TASK-26] Buat PageController.php" "phase:routing" @"
 > Controller ini hanya render view, TIDAK ada logic bisnis — semua logic ada di Alpine.js / JS
 
 ## References
-PRD: PRD-Frontend.md — Controllers section
+PRD: $PRD_REF — Controllers section
 "@
 
 # ─── PHASE 7: Testing & Polish ────────────────────────────────────────────
@@ -628,7 +640,7 @@ New-Issue "[TASK-28] Cek responsivitas mobile" "phase:testing" @"
 Layout shell: `max-width: 420px; height: 100dvh`
 
 ## References
-PRD: PRD-Frontend.md — Layout section
+PRD: $PRD_REF — Layout section
 "@
 
 New-Issue "[TASK-29] Review dan audit design system" "phase:testing" @"
@@ -654,7 +666,7 @@ New-Issue "[TASK-29] Review dan audit design system" "phase:testing" @"
 ```
 
 ## References
-PRD: PRD-Frontend.md — Design System section
+PRD: $PRD_REF — Design System section
 "@
 
 Write-Host "Done! All 29 issues created." -ForegroundColor Green

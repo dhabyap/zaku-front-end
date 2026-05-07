@@ -1,0 +1,29 @@
+[
+    {
+        "id": "TASK-02",
+        "title": "Buat file konfigurasi environment",
+        "phase": "Phase 0 — Project Setup",
+        "label": "phase:setup",
+        "steps": [
+            "Copy .env.example ke .env",
+            "Isi VITE_API_BASE_URL dengan URL backend API",
+            "Jalankan php artisan key:generate"
+        ],
+        "config": "APP_NAME=\"DOMPET Frontend\" APP_ENV=production APP_DEBUG=false VITE_API_BASE_URL=https://api.dompet.com/api VITE_API_TIMEOUT=30000",
+        "reference": "Environment Configuration section"
+    },
+    {
+        "id": "TASK-03",
+        "title": "Setup folder struktur views",
+        "phase": "Phase 0 — Project Setup",
+        "label": "phase:setup",
+        "steps": [
+            "Buat folder: resources/views/auth/",
+            "Buat folder: resources/views/dashboard/",
+            "Buat folder: resources/views/wallet/",
+            "Buat folder: resources/views/components/",
+            "Buat folder: resources/views/layouts/"
+        ],
+        "reference": "Folder Structure section"
+    }
+]
