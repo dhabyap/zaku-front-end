@@ -60,8 +60,8 @@
                     this.email = '';
                 } catch (error) {
                     console.error('Forgot password error:', error);
-                    const message = error.response?.data?.message || 'Alamat email tidak ditemukan atau terjadi kesalahan.';
-                    window.utils.showToast('error', message);
+                    const detailedMsg = window.utils.parseApiError(error, 'Alamat email tidak ditemukan atau terjadi kesalahan.');
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

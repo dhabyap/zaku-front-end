@@ -79,7 +79,9 @@
                     }, 1500);
                 } catch (e) {
                     console.error('Withdraw error:', e);
-                    window.utils.showToast('error', e.response?.data?.message || 'Gagal memproses penarikan');
+                    const detailedMsg = window.utils.parseApiError(e, 'Gagal memproses penarikan');
+                    // Show persistent error toast so user can read details
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

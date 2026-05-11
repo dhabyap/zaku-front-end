@@ -98,8 +98,9 @@
                     }, 2000);
                 } catch (error) {
                     console.error('Registration error:', error);
-                    const message = error.response?.data?.message || 'Gagal membuat akun. Silakan periksa kembali data Anda.';
-                    window.utils.showToast('error', message);
+                    const detailedMsg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');
+                    // Show persistent error toast so user can read details
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

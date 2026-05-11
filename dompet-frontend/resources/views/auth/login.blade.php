@@ -90,8 +90,10 @@
                     }, 1500);
                 } catch (error) {
                     console.error('Login error:', error);
-                    const message = error.response?.data?.message || 'Email atau password salah. Silakan coba lagi.';
-                    window.utils.showToast('error', message);
+                    // Parse detailed error messages from backend
+                    const detailedMsg = window.utils.parseApiError(error, 'Email atau password salah. Silakan coba lagi.');
+                    // Show persistent error toast so user can read details
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }
