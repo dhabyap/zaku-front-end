@@ -18,7 +18,7 @@
   - Isi `VITE_API_BASE_URL` dengan URL backend API
   - Jalankan `php artisan key:generate`
 
-- [ ] **TASK-03** · Setup folder struktur views
+- [x] **TASK-03** · Setup folder struktur views
   - Buat folder: `resources/views/auth/`
   - Buat folder: `resources/views/dashboard/`
   - Buat folder: `resources/views/wallet/`
@@ -36,21 +36,21 @@
 
 ## 🔌 PHASE 1 — API Client & Utilities
 
-- [ ] **TASK-05** · Buat `api-client.js`
+- [x] **TASK-05** · Buat `api-client.js`
   - Buat instance axios dengan `baseURL` dari env
   - Set default header `Content-Type: application/json`
   - Tambah request interceptor → sisipkan JWT token dari `localStorage`
   - Tambah response interceptor → handle error 401 (token expired)
   - Handle auto-refresh token jika ada `refresh_token`
 
-- [ ] **TASK-06** · Buat `auth.js`
+- [x] **TASK-06** · Buat `auth.js`
   - Fungsi `getToken()` → ambil dari `localStorage`
   - Fungsi `setToken(access, refresh)` → simpan ke `localStorage`
   - Fungsi `clearToken()` → hapus semua token & redirect ke `/login`
   - Fungsi `isLoggedIn()` → cek apakah token ada
   - Fungsi `getUser()` → ambil data user dari `sessionStorage`
 
-- [ ] **TASK-07** · Buat `utils.js`
+- [x] **TASK-07** · Buat `utils.js`
   - Fungsi `formatRupiah(amount)` → format angka ke format Rupiah (Rp 100.000)
   - Fungsi `showToast(type, message)` → tampilkan notifikasi toast
   - Fungsi `formatDate(date)` → format tanggal ke bahasa Indonesia
@@ -59,13 +59,13 @@
 
 ## 🏗️ PHASE 2 — Layout & Komponen Dasar
 
-- [ ] **TASK-08** · Buat layout `layouts/guest.blade.php`
+- [x] **TASK-08** · Buat layout `layouts/guest.blade.php`
   - Layout untuk halaman yang belum login (auth pages)
   - Load Alpine.js & Axios dari CDN atau dari Vite
   - Load CSS utama
   - Sisipkan `@yield('content')`
 
-- [ ] **TASK-09** · Buat layout `layouts/app.blade.php`
+- [x] **TASK-09** · Buat layout `layouts/app.blade.php`
   - Layout untuk halaman yang sudah login (dashboard, wallet, dll)
   - Include komponen navigasi bawah
   - Include komponen header atas
@@ -73,23 +73,23 @@
   - Sisipkan `@yield('content')`
   - Tambah logika cek login: jika token tidak ada → redirect ke `/login`
 
-- [ ] **TASK-10** · Buat komponen `components/navigation.blade.php`
+- [x] **TASK-10** · Buat komponen `components/navigation.blade.php`
   - Bottom navigation bar dengan 4 menu: Home, Transaksi, Wallet, Profil
   - Gunakan ikon (bisa pakai emoji atau heroicons)
   - Active state berdasarkan route yang sedang aktif
 
-- [ ] **TASK-11** · Buat komponen `components/header.blade.php`
+- [x] **TASK-11** · Buat komponen `components/header.blade.php`
   - Tampilkan nama user dari `sessionStorage`
   - Tampilkan tombol notifikasi (opsional)
   - Desain sesuai design system (font Syne, warna --ink)
 
-- [ ] **TASK-12** · Buat komponen `components/toast-notification.blade.php`
+- [x] **TASK-12** · Buat komponen `components/toast-notification.blade.php`
   - Toast muncul di bagian atas layar
   - Tipe: `success`, `error`, `info`
   - Auto-hilang setelah 3 detik
   - Gunakan Alpine.js untuk animasi show/hide
 
-- [ ] **TASK-13** · Buat komponen `components/loading-skeleton.blade.php`
+- [x] **TASK-13** · Buat komponen `components/loading-skeleton.blade.php`
   - Skeleton loading placeholder berbentuk card
   - Digunakan saat data API sedang di-fetch
 
@@ -97,7 +97,7 @@
 
 ## 🔐 PHASE 3 — Halaman Autentikasi
 
-- [ ] **TASK-14** · Buat halaman **Login** (`auth/login.blade.php`)
+- [x] **TASK-14** · Buat halaman **Login** (`auth/login.blade.php`)
   - Route: `GET /login`
   - Form: input email, input password, checkbox remember me
   - Validasi client-side: email format, password tidak kosong
@@ -107,7 +107,7 @@
   - Jika gagal → tampilkan pesan error lewat toast
   - Link ke halaman Register & Forgot Password
 
-- [ ] **TASK-15** · Buat halaman **Register** (`auth/register.blade.php`)
+- [x] **TASK-15** · Buat halaman **Register** (`auth/register.blade.php`)
   - Route: `GET /register`
   - Form: nama lengkap, email, password, konfirmasi password
   - Validasi: password match, minimal 8 karakter
@@ -115,13 +115,13 @@
   - Jika sukses → redirect ke `/verify-email`
   - Jika gagal → tampilkan error
 
-- [ ] **TASK-16** · Buat halaman **Verifikasi Email** (`auth/verify-email.blade.php`)
+- [x] **TASK-16** · Buat halaman **Verifikasi Email** (`auth/verify-email.blade.php`)
   - Route: `GET /verify-email`
   - Tampilkan instruksi untuk cek email
   - Tombol "Kirim Ulang Email Verifikasi"
   - Panggil API resend verification jika tersedia
 
-- [ ] **TASK-17** · Buat halaman **Lupa Password** (`auth/forgot-password.blade.php`)
+- [x] **TASK-17** · Buat halaman **Lupa Password** (`auth/forgot-password.blade.php`)
   - Route: `GET /forgot-password`
   - Form: input email
   - Panggil API forgot password
@@ -131,7 +131,7 @@
 
 ## 🏠 PHASE 4 — Dashboard
 
-- [ ] **TASK-18** · Buat halaman **Home Dashboard** (`dashboard/home.blade.php`)
+- [x] **TASK-18** · Buat halaman **Home Dashboard** (`dashboard/home.blade.php`)
   - Route: `GET /dashboard`
   - Gunakan layout `app.blade.php`
   - Tampilkan saldo wallet (ambil dari API, format Rupiah)
@@ -141,21 +141,21 @@
   - Panggil API `GET /api/wallet/balance`
   - Panggil API `GET /api/transactions?limit=5`
 
-- [ ] **TASK-19** · Buat halaman **Daftar Transaksi** (`dashboard/transactions.blade.php`)
+- [x] **TASK-19** · Buat halaman **Daftar Transaksi** (`dashboard/transactions.blade.php`)
   - Route: `GET /transactions`
   - Tampilkan semua transaksi dalam list/card
   - Setiap item: tanggal, deskripsi, jumlah (merah=keluar, hijau=masuk)
   - Bisa scroll infinite atau pagination
   - Panggil API `GET /api/transactions`
 
-- [ ] **TASK-20** · Buat halaman **Detail Transaksi** (`dashboard/transaction-detail.blade.php`)
+- [x] **TASK-20** · Buat halaman **Detail Transaksi** (`dashboard/transaction-detail.blade.php`)
   - Route: `GET /transactions/{id}`
   - Tampilkan detail lengkap satu transaksi
   - Tampilkan: tanggal, jumlah, tipe, deskripsi, status
   - Tombol kembali ke daftar transaksi
   - Panggil API `GET /api/transactions/{id}`
 
-- [ ] **TASK-21** · Buat halaman **Profil** (`dashboard/profile.blade.php`)
+- [x] **TASK-21** · Buat halaman **Profil** (`dashboard/profile.blade.php`)
   - Route: `GET /profile`
   - Tampilkan nama dan email user
   - Form edit nama (opsional untuk v1)
@@ -166,7 +166,7 @@
 
 ## 💰 PHASE 5 — Fitur Wallet
 
-- [ ] **TASK-22** · Buat halaman **Top Up** (`wallet/topup.blade.php`)
+- [x] **TASK-22** · Buat halaman **Top Up** (`wallet/topup.blade.php`)
   - Route: `GET /wallet/topup`
   - Form input jumlah top up
   - Pilihan nominal cepat (Rp 50k, 100k, 200k, 500k)
@@ -174,14 +174,14 @@
   - Panggil API `POST /api/wallet/topup`
   - Tampilkan konfirmasi sukses atau error
 
-- [ ] **TASK-23** · Buat halaman **Tarik Saldo** (`wallet/withdraw.blade.php`)
+- [x] **TASK-23** · Buat halaman **Tarik Saldo** (`wallet/withdraw.blade.php`)
   - Route: `GET /wallet/withdraw`
   - Form input jumlah tarik & nomor rekening tujuan
   - Validasi: jumlah tidak boleh melebihi saldo
   - Panggil API `POST /api/wallet/withdraw`
   - Tampilkan konfirmasi atau error
 
-- [ ] **TASK-24** · Buat halaman **Kirim Uang** (`wallet/send-money.blade.php`)
+- [x] **TASK-24** · Buat halaman **Kirim Uang** (`wallet/send-money.blade.php`)
   - Route: `GET /wallet/send`
   - Form input: email/ID penerima, jumlah, catatan (opsional)
   - Validasi: penerima tidak boleh sama dengan pengirim
@@ -192,7 +192,7 @@
 
 ## 🛣️ PHASE 6 — Routing Laravel
 
-- [ ] **TASK-25** · Setup `routes/web.php`
+- [x] **TASK-25** · Setup `routes/web.php`
   - Daftarkan semua route yang dibutuhkan:
     ```
     GET /login           → PageController@login
@@ -208,7 +208,7 @@
     GET /wallet/send     → PageController@sendMoney
     ```
 
-- [ ] **TASK-26** · Buat `PageController.php`
+- [x] **TASK-26** · Buat `PageController.php`
   - Satu controller untuk return semua view
   - Method per halaman yang hanya `return view('...')`
 
