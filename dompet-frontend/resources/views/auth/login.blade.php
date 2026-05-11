@@ -1,9 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-<!-- Include Toast for Feedback -->
-@include('components.toast-notification')
-
 <div class="min-h-dvh flex flex-col justify-center px-6 py-12" x-data="loginForm()">
     <div class="max-w-md w-full mx-auto space-y-8 bg-paper border-4 border-ink p-8 shadow-bs-lg">
         <div>

@@ -1,8 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-@include('components.toast-notification')
-
 <div class="min-h-dvh flex flex-col justify-center px-6 py-12" x-data="forgotPasswordForm()">
     <div class="max-w-md w-full mx-auto space-y-8 bg-paper border-4 border-ink p-8 shadow-bs-lg relative overflow-hidden">
         <!-- Abstract background element -->
