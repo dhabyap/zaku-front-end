@@ -34,6 +34,12 @@
                 class="w-full bg-ink text-paper border-4 border-ink p-4 font-display font-black uppercase text-lg shadow-bs hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all active:scale-95">
                 Keluar Sesi
             </button>
+
+            <div class="pt-4 text-center">
+                <a href="/verify-manual" class="font-mono text-xs text-ink underline decoration-2 underline-offset-4 hover:text-punch transition-colors">
+                    Punya kode verifikasi? Masukkan secara manual di sini
+                </a>
+            </div>
         </div>
 
         <div class="text-center">
@@ -46,15 +52,30 @@
     function verifyEmail() {
         return {
             loading: false,
+            // Try to get email from URL or Session
+            userEmail: new URLSearchParams(window.location.search).get('email') || window.auth.getUser()?.email,
+            
             async resend() {
                 if (this.loading) return;
+                
+                if (!this.userEmail) {
+                    window.utils.showToast('error', 'Alamat email tidak ditemukan. Silakan login kembali.');
+                    return;
+                }
+
                 this.loading = true;
                 try {
-                    await window.apiClient.post('/auth/email/verification-notification');
+                    // Endpoint /auth/resend-verification (baseURL already contains /api)
+                    await window.apiClient.post('/auth/resend-verification', {
+                        email: this.userEmail
+                    });
+                    
                     window.utils.showToast('success', 'Email verifikasi baru telah dikirim ke alamat Anda.');
                 } catch (error) {
                     console.error('Resend error:', error);
-                    window.utils.showToast('error', 'Gagal mengirim ulang email. Silakan coba lagi beberapa saat lagi.');
+                    // Use detailed error message from backend if available
+                    const detailedMsg = window.utils.parseApiError(error, 'Gagal mengirim ulang email. Silakan coba lagi beberapa saat lagi.');
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }
