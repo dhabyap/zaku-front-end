@@ -76,7 +76,8 @@
                     }, 1500);
                 } catch (e) {
                     console.error('Topup error:', e);
-                    window.utils.showToast('error', e.response?.data?.message || 'Gagal memproses top up');
+                    const detailedMsg = window.utils.parseApiError(e, 'Gagal memproses top up');
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

@@ -1,8 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-@include('components.toast-notification')
-
 <div class="min-h-dvh flex flex-col justify-center px-6 py-12" x-data="forgotPasswordForm()">
     <div class="max-w-md w-full mx-auto space-y-8 bg-paper border-4 border-ink p-8 shadow-bs-lg relative overflow-hidden">
         <!-- Abstract background element -->
@@ -60,8 +58,8 @@
                     this.email = '';
                 } catch (error) {
                     console.error('Forgot password error:', error);
-                    const message = error.response?.data?.message || 'Alamat email tidak ditemukan atau terjadi kesalahan.';
-                    window.utils.showToast('error', message);
+                    const detailedMsg = window.utils.parseApiError(error, 'Alamat email tidak ditemukan atau terjadi kesalahan.');
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

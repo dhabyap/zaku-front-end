@@ -1,8 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-@include('components.toast-notification')
-
 <div class="min-h-dvh flex flex-col justify-center px-6 py-12" x-data="registerForm()">
     <div class="max-w-md w-full mx-auto space-y-8 bg-paper border-4 border-ink p-8 shadow-bs-lg">
         <div>
@@ -98,8 +96,9 @@
                     }, 2000);
                 } catch (error) {
                     console.error('Registration error:', error);
-                    const message = error.response?.data?.message || 'Gagal membuat akun. Silakan periksa kembali data Anda.';
-                    window.utils.showToast('error', message);
+                    const detailedMsg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');
+                    // Show persistent error toast so user can read details
+                    window.utils.showToast('error', detailedMsg, true);
                 } finally {
                     this.loading = false;
                 }

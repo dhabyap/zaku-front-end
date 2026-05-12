@@ -17,6 +17,9 @@
 </head>
 <body class="bg-paper text-ink font-display antialiased">
     <div class="shell mx-auto">
+        <!-- Toast Notification Component -->
+        @include('components.toast-notification')
+
         <main>
             @yield('content')
         </main>
