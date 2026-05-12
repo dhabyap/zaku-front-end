@@ -26,6 +26,11 @@ class PageController extends Controller
         return view('auth.process-verify');
     }
 
+    public function verifyManual()
+    {
+        return view('auth.manual-verify');
+    }
+
     public function forgotPassword()
     {
         return view('auth.forgot-password');

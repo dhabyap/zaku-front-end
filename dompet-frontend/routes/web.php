@@ -23,6 +23,7 @@ Route::get('/login', [PageController::class, 'login'])->name('login');
 Route::get('/register', [PageController::class, 'register'])->name('register');
 Route::get('/verify-email', [PageController::class, 'verifyEmail'])->name('verify-email');
 Route::get('/email/verify', [PageController::class, 'verifyEmailProcess'])->name('verify-email.process');
+Route::get('/verify-manual', [PageController::class, 'verifyManual'])->name('verify-manual');
 Route::get('/forgot-password', [PageController::class, 'forgotPassword'])->name('forgot-password');
 
 Route::get('/dashboard', [PageController::class, 'home'])->name('dashboard');
