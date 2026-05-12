@@ -21,6 +21,11 @@ class PageController extends Controller
         return view('auth.verify-email');
     }
 
+    public function verifyEmailProcess()
+    {
+        return view('auth.process-verify');
+    }
+
     public function forgotPassword()
     {
         return view('auth.forgot-password');
