@@ -1,18 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 use App\Http\Controllers\PageController;
 
 Route::get('/', function () {
@@ -29,6 +17,7 @@ Route::get('/forgot-password', [PageController::class, 'forgotPassword'])->name(
 Route::get('/dashboard', [PageController::class, 'home'])->name('dashboard');
 Route::get('/transactions', [PageController::class, 'transactions'])->name('transactions');
 Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
+Route::get('/chat', [PageController::class, 'chat'])->name('chat');
 Route::get('/profile', [PageController::class, 'profile'])->name('profile');
 
 Route::get('/wallet/topup', [PageController::class, 'topup'])->name('wallet.topup');

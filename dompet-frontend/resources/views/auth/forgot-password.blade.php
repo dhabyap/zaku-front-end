@@ -1,44 +1,35 @@
 @extends('layouts.guest')
 
 @section('content')
-<div class="min-h-dvh flex flex-col justify-center px-6 py-12" x-data="forgotPasswordForm()">
-    <div class="max-w-md w-full mx-auto space-y-8 bg-paper border-4 border-ink p-8 shadow-bs-lg relative overflow-hidden">
-        <!-- Abstract background element -->
-        <div class="absolute -top-10 -right-10 h-32 w-32 bg-punch opacity-10 rotate-12 pointer-events-none"></div>
-        
-        <div class="relative z-10">
-            <h2 class="text-4xl font-display font-black text-ink uppercase tracking-tighter leading-none mb-2">Atur Ulang Password</h2>
-            <p class="font-mono text-sm text-ink/60 italic leading-relaxed">Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda.</p>
+<div x-data="forgotPasswordForm()" style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
+    <div style="max-width:400px;width:100%;margin:0 auto;background:var(--paper);border:var(--border);box-shadow:var(--bs-xl);padding:28px 24px;">
+        <div style="text-align:center;margin-bottom:20px;">
+            <div style="width:64px;height:64px;background:var(--punch-2);border:var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.5">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+            </div>
+            <div class="reg-title" style="font-size:24px;color:var(--ink);margin-bottom:8px;">Atur Ulang Password</div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:rgba(17,16,16,.5);line-height:1.6;">
+                Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda.
+            </div>
         </div>
 
-        <form class="space-y-6 relative z-10" @submit.prevent="submit">
-            <div class="space-y-2">
-                <label for="email" class="block font-display font-bold uppercase text-ink text-xs tracking-[0.2em]">Registered Email</label>
-                <input id="email" x-model="email" type="email" required 
-                    class="w-full bg-cream border-4 border-ink p-4 font-mono text-ink placeholder:text-ink/30 focus:outline-none focus:bg-white transition-colors"
-                    placeholder="nama@email.com">
+        <form @submit.prevent="submit">
+            <div class="field">
+                <label>EMAIL</label>
+                <input type="email" x-model="email" placeholder="nama@email.com">
             </div>
-
-            <button type="submit" :disabled="loading"
-                class="w-full bg-punch text-paper border-4 border-ink p-4 font-display font-black uppercase text-xl shadow-bs hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all disabled:opacity-50">
-                <span x-show="!loading">Kirim Tautan Reset</span>
-                <span x-show="loading" x-cloak class="flex items-center justify-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Memproses...
-                </span>
+            <button type="submit" class="btn-main" :disabled="loading">
+                <span x-show="!loading">KIRIM TAUTAN RESET →</span>
+                <span x-show="loading" x-cloak>MEMPROSES...</span>
             </button>
         </form>
 
-        <div class="pt-6 border-t-4 border-ink text-center relative z-10">
-            <a href="/login" class="inline-flex items-center gap-2 font-mono text-sm text-ink hover:text-punch transition-colors group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Kembali ke Halaman Login</span>
-            </a>
+        <div style="margin-top:20px;padding-top:16px;border-top:var(--border);text-align:center;">
+            <div class="auth-link">
+                <a href="/login">Kembali ke Halaman Login</a>
+            </div>
         </div>
     </div>
 </div>
@@ -50,7 +41,6 @@
             loading: false,
             async submit() {
                 if (this.loading) return;
-                
                 this.loading = true;
                 try {
                     await window.apiClient.post('/auth/forgot-password', { email: this.email });
@@ -58,8 +48,7 @@
                     this.email = '';
                 } catch (error) {
                     console.error('Forgot password error:', error);
-                    const detailedMsg = window.utils.parseApiError(error, 'Alamat email tidak ditemukan atau terjadi kesalahan.');
-                    window.utils.showToast('error', detailedMsg, true);
+                    window.utils.showToast('error', window.utils.parseApiError(error, 'Alamat email tidak ditemukan.'), true);
                 } finally {
                     this.loading = false;
                 }

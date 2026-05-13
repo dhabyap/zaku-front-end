@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DOMPET</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+
+/* =====================================================
+   RESET & ROOT
+===================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #111010;
+  --paper:   #F5F0E8;
+  --cream:   #EDE8DC;
+  --punch:   #FF4D00;
+  --punch-2: #FFD600;
+  --mint:    #00E5A0;
+  --sky:     #C8F0FF;
+  --border:  3px solid var(--ink);
+  --bs:      4px 4px 0 var(--ink);
+  --bs-lg:   6px 6px 0 var(--ink);
+  --bs-xl:   8px 8px 0 var(--ink);
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+  --font-serif:   'Fraunces', serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================
+   MOBILE SHELL
+===================================================== */
+.shell {
+  width: 100%;
+  max-width: 420px;
+  height: 100dvh;
+  margin: 0 auto;
+  background: var(--paper);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =====================================================
+   SCREENS (pages)
+===================================================== */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease, transform .22s ease;
+  transform: translateY(12px);
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+  z-index: 10;
+}
+
+/* =====================================================
+   SCROLLABLE BODY inside screen
+===================================================== */
+.screen-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 90px;
+}
+
+.screen-body::-webkit-scrollbar { display: none; }
+
+/* =====================================================
+   ░░░ LOGIN SCREEN ░░░
+===================================================== */
+#s-login {
+  background: var(--punch);
+  justify-content: flex-end;
+}
+
+.login-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* grid texture */
+.login-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--ink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .08;
+}
+
+.login-hero {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 52px 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wordmark-icon {
+  width: 56px; height: 56px;
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: var(--bs-lg);
+}
+
+.wordmark-text {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -3px;
+  line-height: 1;
+}
+
+.login-tagline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(17,16,16,.55);
+  padding-left: 2px;
+}
+
+.login-big-number {
+  font-family: var(--font-serif);
+  font-size: 96px;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(17,16,16,.12);
+  line-height: 1;
+  letter-spacing: -4px;
+  position: absolute;
+  right: 20px;
+  top: 44px;
+  pointer-events: none;
+}
+
+.login-sheet {
+  position: relative;
+  z-index: 2;
+  background: var(--paper);
+  border-top: var(--border);
+  border-left: var(--border);
+  border-right: var(--border);
+  padding: 28px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sheet-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(17,16,16,.4);
+  margin-bottom: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  color: rgba(17,16,16,.5);
+}
+
+.field input {
+  border: var(--border);
+  background: var(--cream);
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+  transition: box-shadow .1s, background .1s;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+.field input:focus {
+  background: var(--punch-2);
+  box-shadow: var(--bs);
+}
+
+.field input::placeholder { font-weight: 400; color: rgba(17,16,16,.3); }
+
+.pw-row {
+  position: relative;
+}
+
+.pw-row input { padding-right: 70px; }
+
+.pw-eye {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  background: var(--ink);
+  color: var(--punch-2);
+  border: none;
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.btn-main {
+  width: 100%;
+  background: var(--ink);
+  color: var(--punch-2);
+  border: var(--border);
+  padding: 16px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: var(--bs-lg);
+  transition: transform .1s, box-shadow .1s;
+  margin-top: 6px;
+  border-radius: 0;
+}
+
+.btn-main:active {
+  transform: translate(3px,3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.btn-main.alt {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--bs);
+  margin-top: 10px;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+  color: rgba(17,16,16,.5);
+}
+
+.auth-link a {
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* =====================================================
+   ░░░ REGISTER SCREEN ░░░
+===================================================== */
+#s-register {
+  background: var(--ink);
+}
+
+.reg-top {
+  background: var(--ink);
+  padding: 52px 24px 28px;
+  flex-shrink: 0;
+}
+
+.reg-top-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.back-btn {
+  width: 40px; height: 40px;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,.2);
+  color: var(--paper);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.reg-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -1.5px;
+}
+
+.reg-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,.35);
+}
+
+.reg-body {
+  background: var(--paper);
+  border-top: var(--border);
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* =====================================================
+   ░░░ BOTTOM NAV ░░░
+===================================================== */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: var(--paper);
+  border-top: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+  padding: 0 8px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(17,16,16,.35);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  position: relative;
+  transition: color .15s;
+}
+
+.nav-item svg { transition: stroke .15s; }
+
+.nav-item.active {
+  color: var(--ink);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 3px;
+  background: var(--punch);
+}
+
+/* Chat FAB */
+.nav-item.chat-fab-btn {
+  color: var(--paper) !important;
+  position: relative;
+  top: -10px;
+}
+
+.chat-fab-inner {
+  width: 56px; height: 56px;
+  background: var(--ink);
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--punch-2);
+}
+
+.nav-item.chat-fab-btn span { color: var(--ink); margin-top: 5px; }
+
+/* =====================================================
+   ░░░ DASHBOARD ░░░
+===================================================== */
+.dash-header {
+  background: var(--ink);
+  padding: 52px 20px 20px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-header::after {
+  content: 'DOMPET';
+  position: absolute;
+  right: -10px; bottom: -14px;
+  font-size: 72px;
+  font-weight: 800;
+  color: rgba(255,255,255,.04);
+  letter-spacing: -4px;
+  pointer-events: none;
+}
+
+.dh-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dh-greet {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,.4);
+  margin-bottom: 4px;
+}
+
+.dh-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -1px;
+}
+
+.dh-avatar {
+  width: 46px; height: 46px;
+  background: var(--punch-2);
+  border: 3px solid var(--punch-2);
+  box-shadow: 3px 3px 0 rgba(255,214,0,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Balance Card */
+.balance-card {
+  margin: 16px 16px 0;
+  background: var(--punch);
+  border: var(--border);
+  box-shadow: var(--bs-xl);
+  padding: 20px;
+}
+
+.bc-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(17,16,16,.5);
+  margin-bottom: 6px;
+}
+
+.bc-amount {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: -2px;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+.bc-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 2px solid rgba(17,16,16,.15);
+}
+
+.bc-stat {
+  padding: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bc-stat:first-child {
+  border-right: 2px solid rgba(17,16,16,.15);
+  padding-right: 14px;
+}
+
+.bc-stat:last-child { padding-left: 14px; }
+
+.bc-stat-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: rgba(17,16,16,.5);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.bc-stat-label .dot {
+  width: 6px; height: 6px;
+  border: 1.5px solid var(--ink);
+}
+
+.bc-stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+/* Section */
+.section {
+  padding: 20px 16px 0;
+}
+
+.section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: rgba(17,16,16,.4);
+}
+
+.btn-tiny {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 5px 10px;
+  cursor: pointer;
+  box-shadow: var(--bs-sm, 2px 2px 0 var(--ink));
+}
+
+/* Transaction item */
+.tx-list { display: flex; flex-direction: column; gap: 8px; }
+
+.tx {
+  background: #fff;
+  border: var(--border);
+  box-shadow: var(--bs);
+  padding: 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: default;
+}
+
+.tx-cat-icon {
+  width: 42px; height: 42px;
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+  background: var(--cream);
+}
+
+.tx.income .tx-cat-icon { background: #E6FFF4; }
+.tx.expense .tx-cat-icon { background: #FFF0EA; }
+
+.tx-info { flex: 1; min-width: 0; }
+
+.tx-desc {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.tx-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(17,16,16,.4);
+  display: flex; gap: 6px;
+}
+
+.tx-meta-sep { color: rgba(17,16,16,.2); }
+
+.tx-amt {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.tx.income .tx-amt { color: #00A36B; }
+.tx.expense .tx-amt { color: var(--punch); }
+
+/* Category bar */
+.cat-bars { display: flex; flex-direction: column; gap: 10px; }
+
+.cat-bar {
+  background: #fff;
+  border: var(--border);
+  box-shadow: var(--bs);
+  padding: 12px 14px;
+}
+
+.cat-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cat-bar-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  display: flex; align-items: center; gap: 7px;
+}
+
+.cat-bar-name .emo { font-size: 14px; }
+
+.cat-bar-amount {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--punch);
+}
+
+.cat-bar-track {
+  height: 7px;
+  background: var(--cream);
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
+}
+
+.cat-bar-fill {
+  height: 100%;
+  background: var(--ink);
+}
+
+/* Insight strip */
+.insight-strip {
+  background: var(--punch-2);
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 16px 0;
+}
+
+.insight-icon {
+  width: 36px; height: 36px;
+  background: var(--ink);
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.insight-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.insight-text span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(17,16,16,.5);
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+/* =====================================================
+   ░░░ CHAT SCREEN ░░░
+===================================================== */
+#s-chat {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 72px; /* space for bottom nav */
+}
+
+.chat-top {
+  background: var(--ink);
+  padding: 52px 16px 16px;
+  border-bottom: var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-ai-dot {
+  width: 44px; height: 44px;
+  background: var(--punch-2);
+  border: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.chat-ai-info { flex: 1; }
+
+.chat-ai-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--paper);
+  font-weight: 500;
+}
+
+.chat-ai-online {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--mint);
+  margin-top: 2px;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.online-dot {
+  width: 6px; height: 6px;
+  background: var(--mint);
+  border-radius: 50%;
+}
+
+.chat-clear-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,.2);
+  color: rgba(245,240,232,.5);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.chat-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--cream);
+}
+
+.chat-msgs::-webkit-scrollbar { display: none; }
+
+.msg { display: flex; flex-direction: column; max-width: 82%; gap: 4px; }
+.msg.ai  { align-self: flex-start; }
+.msg.usr { align-self: flex-end; }
+
+.msg-bub {
+  padding: 12px 15px;
+  font-size: 14px;
+  line-height: 1.55;
+  border: 2px solid var(--ink);
+}
+
+.msg.ai  .msg-bub { background: #fff; box-shadow: var(--bs); }
+.msg.usr .msg-bub { background: var(--ink); color: var(--punch-2); box-shadow: var(--bs); }
+
+.msg-time {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(17,16,16,.35);
+  padding: 0 3px;
+}
+
+.msg.usr .msg-time { align-self: flex-end; }
+
+/* Confirm card inside msg */
+.confirm-card {
+  background: var(--cream);
+  border: 1.5px solid var(--ink);
+  padding: 10px 12px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.confirm-key { color: rgba(17,16,16,.4); }
+.confirm-val { font-weight: 500; color: var(--ink); }
+.confirm-val.inc { color: #00A36B; }
+.confirm-val.exp { color: var(--punch); }
+
+/* typing dots */
+.dots { display: flex; gap: 5px; padding: 3px 0; }
+.dots span {
+  width: 7px; height: 7px;
+  background: var(--ink);
+  border-radius: 50%;
+  animation: bop 1.2s infinite;
+}
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes bop {
+  0%,60%,100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* Suggest chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.chip {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform .1s, box-shadow .1s;
+  color: var(--ink);
+}
+
+.chip:active { transform: translate(1px,1px); box-shadow: none; }
+
+.chat-input-area {
+  background: var(--paper);
+  border-top: var(--border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-input-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 0;
+}
+
+.chat-input-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(17,16,16,.3);
+  flex: 1;
+}
+
+.chat-char-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(17,16,16,.28);
+  transition: color .2s;
+}
+
+.chat-char-count.warn { color: var(--punch); }
+
+.chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  padding: 8px 12px 10px;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  border: var(--border);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  background: var(--cream);
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  resize: none;
+  min-height: 48px;
+  max-height: 130px;
+  line-height: 1.5;
+  overflow-y: auto;
+  transition: box-shadow .15s, background .15s;
+  box-shadow: var(--bs);
+  display: block;
+  width: 100%;
+}
+
+.chat-input:focus {
+  background: #FFFDE8;
+  box-shadow: 4px 4px 0 var(--punch);
+}
+
+.chat-input::placeholder { font-weight: 400; color: rgba(17,16,16,.3); }
+
+.chat-input::-webkit-scrollbar { width: 4px; }
+.chat-input::-webkit-scrollbar-thumb { background: var(--ink); }
+
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border: var(--border);
+  background: var(--ink);
+  color: var(--punch-2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform .1s, box-shadow .1s;
+  box-shadow: var(--bs);
+}
+
+.send-btn:active {
+  transform: translate(2px,2px);
+  box-shadow: none;
+}
+
+.send-btn:disabled {
+  background: var(--cream);
+  color: rgba(17,16,16,.25);
+  border-color: rgba(17,16,16,.2);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* =====================================================
+   ░░░ HISTORY SCREEN ░░░
+===================================================== */
+.hist-top {
+  background: var(--ink);
+  padding: 52px 16px 20px;
+  flex-shrink: 0;
+}
+
+.hist-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -1.5px;
+  margin-bottom: 4px;
+}
+
+.hist-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,.35);
+}
+
+.filter-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 2px solid rgba(17,16,16,.08);
+}
+
+.filter-scroll::-webkit-scrollbar { display: none; }
+
+.filter-pill {
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 7px 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  flex-shrink: 0;
+  transition: transform .1s;
+  border-radius: 0;
+}
+
+.filter-pill.on {
+  background: var(--ink);
+  color: var(--punch-2);
+  box-shadow: none;
+}
+
+.filter-pill:active { transform: translate(1px,1px); }
+
+/* Month group */
+.month-group { margin-bottom: 4px; }
+
+.month-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(17,16,16,.35);
+  padding: 16px 16px 8px;
+}
+
+/* =====================================================
+   ░░░ PROFILE SCREEN ░░░
+===================================================== */
+.prof-hero {
+  background: var(--ink);
+  padding: 52px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.prof-hero::before {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  border: 3px solid rgba(255,255,255,.05);
+  border-radius: 50%;
+  top: -60px; right: -60px;
+}
+
+.prof-av {
+  width: 88px; height: 88px;
+  background: var(--punch-2);
+  border: 3px solid var(--punch-2);
+  box-shadow: 6px 6px 0 rgba(255,214,0,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--ink);
+  position: relative;
+  z-index: 1;
+}
+
+.prof-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -1px;
+  position: relative; z-index: 1;
+}
+
+.prof-email {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(245,240,232,.35);
+  position: relative; z-index: 1;
+}
+
+.prof-badge {
+  background: var(--punch);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 5px 14px;
+  border: 2px solid var(--punch);
+  position: relative; z-index: 1;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 16px 0;
+}
+
+.stat-box {
+  background: #fff;
+  border: var(--border);
+  box-shadow: var(--bs);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stat-box-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  color: rgba(17,16,16,.38);
+}
+
+.stat-box-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -1px;
+}
+
+.stat-box-val.big { font-size: 16px; letter-spacing: -0.5px; }
+
+/* Budget bar */
+.budget-box {
+  margin: 16px 16px 0;
+  background: var(--punch-2);
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  padding: 16px;
+}
+
+.budget-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.budget-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(17,16,16,.5);
+}
+
+.budget-amount { font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; margin-top: 3px; }
+
+.budget-pct {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.budget-track {
+  height: 10px;
+  background: rgba(17,16,16,.12);
+  border: 2px solid var(--ink);
+  overflow: hidden;
+}
+
+.budget-fill {
+  height: 100%;
+  background: var(--ink);
+  width: 67%;
+}
+
+.budget-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(17,16,16,.5);
+}
+
+/* Menu */
+.menu-block {
+  margin: 16px 16px 0;
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  overflow: hidden;
+}
+
+.menu-row {
+  background: #fff;
+  border-bottom: var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 16px;
+  cursor: pointer;
+  transition: background .1s;
+}
+
+.menu-row:last-child { border-bottom: none; }
+.menu-row:active { background: var(--cream); }
+
+.menu-ico {
+  width: 34px; height: 34px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.menu-row span {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.menu-arr {
+  font-size: 16px;
+  color: rgba(17,16,16,.25);
+  flex: 0;
+  font-weight: 700;
+}
+
+.menu-row.danger span { color: var(--punch); }
+.menu-row.danger .menu-ico { background: #FFF0EA; }
+
+/* =====================================================
+   ░░░ MODAL ░░░
+===================================================== */
+.modal-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(17,16,16,.65);
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+
+.modal-bg.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-sheet {
+  background: var(--paper);
+  border-top: var(--border);
+  border-left: var(--border);
+  border-right: var(--border);
+  padding: 24px 20px 40px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: translateY(30px);
+  transition: transform .22s ease;
+}
+
+.modal-bg.open .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-head-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(17,16,16,.5);
+}
+
+.modal-close {
+  width: 32px; height: 32px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* =====================================================
+   ░░░ TOAST ░░░
+===================================================== */
+.toast {
+  position: absolute;
+  top: 16px;
+  left: 16px; right: 16px;
+  background: var(--ink);
+  color: var(--punch-2);
+  border: 2px solid var(--punch-2);
+  padding: 12px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  box-shadow: var(--bs-lg);
+  z-index: 200;
+  transform: translateY(-90px);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.toast.show { transform: translateY(0); }
+
+/* =====================================================
+   ░░░ UTILITY ░░░
+===================================================== */
+.mt8  { margin-top: 8px; }
+.mt16 { margin-top: 16px; }
+
+/* page-header for inner screens using screen-body */
+.inner-top {
+  background: var(--ink);
+  padding: 52px 16px 20px;
+  flex-shrink: 0;
+}
+
+.inner-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -1.5px;
+}
+
+.inner-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,.35);
+  margin-top: 4px;
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============================================================
+       LOGIN
+  ============================================================ -->
+  <div class="screen active" id="s-login">
+    <div class="login-bg"></div>
+
+    <div class="login-hero">
+      <div class="login-wordmark">
+        <div class="wordmark-icon">💸</div>
+        <div class="wordmark-text">DOMPET</div>
+      </div>
+      <div class="login-tagline">TRACK · CONTROL · THRIVE</div>
+    </div>
+
+    <div class="login-big-number">Rp</div>
+
+    <div class="login-sheet">
+      <div class="sheet-label">// MASUK KE AKUN</div>
+
+      <div class="field">
+        <label>EMAIL</label>
+        <input type="email" placeholder="kamu@email.com" id="li-email">
+      </div>
+      <div class="field">
+        <label>PASSWORD</label>
+        <div class="pw-row">
+          <input type="password" placeholder="••••••••" id="li-pw">
+          <button class="pw-eye" onclick="togglePw('li-pw',this)">LIHAT</button>
+        </div>
+      </div>
+
+      <button class="btn-main" onclick="goScreen('s-dashboard')">MASUK SEKARANG →</button>
+      <button class="btn-main alt" onclick="goScreen('s-register')">BUAT AKUN BARU</button>
+
+      <div class="auth-link">Demo? <a onclick="goScreen('s-dashboard')">Langsung masuk →</a></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       REGISTER
+  ============================================================ -->
+  <div class="screen" id="s-register">
+    <div class="reg-top">
+      <div class="reg-top-row">
+        <button class="back-btn" onclick="goScreen('s-login')">←</button>
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(245,240,232,.4)">DOMPET / DAFTAR</div>
+      </div>
+      <div class="reg-title">Buat Akun.</div>
+      <div class="reg-sub">MULAI PERJALANAN FINANSIALMU</div>
+    </div>
+    <div class="reg-body">
+      <div class="field">
+        <label>NAMA LENGKAP</label>
+        <input type="text" placeholder="Nama kamu">
+      </div>
+      <div class="field">
+        <label>EMAIL</label>
+        <input type="email" placeholder="kamu@email.com">
+      </div>
+      <div class="field">
+        <label>PASSWORD</label>
+        <div class="pw-row">
+          <input type="password" placeholder="Min. 8 karakter" id="rg-pw">
+          <button class="pw-eye" onclick="togglePw('rg-pw',this)">LIHAT</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>KONFIRMASI PASSWORD</label>
+        <input type="password" placeholder="Ulangi password">
+      </div>
+      <button class="btn-main" onclick="goScreen('s-dashboard')" style="margin-top:4px">BUAT AKUN →</button>
+      <div class="auth-link" style="margin-top:18px">Sudah punya akun? <a onclick="goScreen('s-login')">Masuk</a></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       DASHBOARD
+  ============================================================ -->
+  <div class="screen" id="s-dashboard">
+
+    <!-- sticky header -->
+    <div class="dash-header">
+      <div class="dh-row">
+        <div>
+          <div class="dh-greet">SELAMAT PAGI ☀️</div>
+          <div class="dh-name">Budi Santoso</div>
+        </div>
+        <div class="dh-avatar" onclick="goTab('s-profile')">B</div>
+      </div>
+    </div>
+
+    <!-- scrollable content -->
+    <div class="screen-body">
+
+      <!-- Balance -->
+      <div class="balance-card">
+        <div class="bc-label">SALDO BULAN INI · MEI 2026</div>
+        <div class="bc-amount">Rp 3.250.000</div>
+        <div class="bc-stats">
+          <div class="bc-stat">
+            <div class="bc-stat-label"><div class="dot" style="background:#00A36B;border-color:#00A36B"></div>PEMASUKAN</div>
+            <div class="bc-stat-val">Rp 7.500.000</div>
+          </div>
+          <div class="bc-stat">
+            <div class="bc-stat-label"><div class="dot" style="background:var(--punch);border-color:var(--punch)"></div>PENGELUARAN</div>
+            <div class="bc-stat-val">Rp 4.250.000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insight -->
+      <div class="insight-strip">
+        <div class="insight-icon">💡</div>
+        <div class="insight-text">
+          Pengeluaran makanan minggu ini +23%
+          <span>Dibanding minggu lalu · Rp 385.000</span>
+        </div>
+      </div>
+
+      <!-- Recent TX -->
+      <div class="section">
+        <div class="section-row">
+          <div class="section-title">TRANSAKSI TERAKHIR</div>
+          <button class="btn-tiny" onclick="goTab('s-history')">LIHAT SEMUA</button>
+        </div>
+        <div class="tx-list">
+          <div class="tx expense">
+            <div class="tx-cat-icon">🍜</div>
+            <div class="tx-info">
+              <div class="tx-desc">Makan siang Warteg</div>
+              <div class="tx-meta">MAKANAN <span class="tx-meta-sep">·</span> Hari ini</div>
+            </div>
+            <div class="tx-amt">-Rp 25.000</div>
+          </div>
+          <div class="tx income">
+            <div class="tx-cat-icon">💰</div>
+            <div class="tx-info">
+              <div class="tx-desc">Gaji Mei 2026</div>
+              <div class="tx-meta">GAJI <span class="tx-meta-sep">·</span> 1 Mei</div>
+            </div>
+            <div class="tx-amt">+Rp 7.500.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">⚡</div>
+            <div class="tx-info">
+              <div class="tx-desc">Tagihan Listrik PLN</div>
+              <div class="tx-meta">TAGIHAN <span class="tx-meta-sep">·</span> 30 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 185.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">🚗</div>
+            <div class="tx-info">
+              <div class="tx-desc">Grab ke kantor</div>
+              <div class="tx-meta">TRANSPORTASI <span class="tx-meta-sep">·</span> 29 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 35.000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="section mt16">
+        <div class="section-row">
+          <div class="section-title">PENGELUARAN PER KATEGORI</div>
+        </div>
+        <div class="cat-bars">
+          <div class="cat-bar">
+            <div class="cat-bar-top">
+              <div class="cat-bar-name"><span class="emo">🍜</span> MAKANAN</div>
+              <div class="cat-bar-amount">Rp 1.250.000</div>
+            </div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:72%"></div></div>
+          </div>
+          <div class="cat-bar">
+            <div class="cat-bar-top">
+              <div class="cat-bar-name"><span class="emo">🚗</span> TRANSPORTASI</div>
+              <div class="cat-bar-amount">Rp 680.000</div>
+            </div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:39%"></div></div>
+          </div>
+          <div class="cat-bar">
+            <div class="cat-bar-top">
+              <div class="cat-bar-name"><span class="emo">⚡</span> TAGIHAN</div>
+              <div class="cat-bar-amount">Rp 485.000</div>
+            </div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:28%"></div></div>
+          </div>
+          <div class="cat-bar">
+            <div class="cat-bar-top">
+              <div class="cat-bar-name"><span class="emo">🛍️</span> BELANJA</div>
+              <div class="cat-bar-amount">Rp 320.000</div>
+            </div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:18%"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /screen-body -->
+
+    <!-- bottom nav rendered below -->
+  </div>
+
+  <!-- ============================================================
+       CHAT
+  ============================================================ -->
+  <div class="screen" id="s-chat">
+    <div class="chat-top">
+      <div class="chat-ai-dot">AI</div>
+      <div class="chat-ai-info">
+        <div class="chat-ai-name">DOMPET AI</div>
+        <div class="chat-ai-online"><div class="online-dot"></div>Online · siap mencatat</div>
+      </div>
+      <button class="chat-clear-btn" onclick="clearChat()">HAPUS</button>
+    </div>
+
+    <div class="chat-msgs" id="chat-msgs">
+
+      <!-- AI welcome -->
+      <div class="msg ai">
+        <div class="msg-bub">
+          Halo, <strong>Budi!</strong> 👋 Ceritain aja transaksimu ke saya.<br><br>
+          Misalnya:<br>
+          <em>"Tadi beli makan siang 35rb"</em><br>
+          <em>"Gajian bulan ini 5 juta"</em><br>
+          <em>"Bayar Grab ke kantor 28 ribu"</em>
+          <div class="chips">
+            <div class="chip" onclick="sendQuick('Beli makan siang 35rb')">🍜 Makan 35rb</div>
+            <div class="chip" onclick="sendQuick('Bayar Grab 28 ribu')">🚗 Grab 28rb</div>
+            <div class="chip" onclick="sendQuick('Terima gaji 7.5 juta')">💰 Gaji</div>
+          </div>
+        </div>
+        <div class="msg-time">09:00</div>
+      </div>
+
+      <!-- user msg example -->
+      <div class="msg usr">
+        <div class="msg-bub">Beli kopi di Starbucks 65 ribu</div>
+        <div class="msg-time">09:14</div>
+      </div>
+
+      <!-- AI confirm -->
+      <div class="msg ai">
+        <div class="msg-bub">
+          Sip, udah dicatat! ☕
+          <div class="confirm-card">
+            <div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">Kopi di Starbucks</span></div>
+            <div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val exp">−Rp 65.000</span></div>
+            <div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">☕ MAKANAN</span></div>
+            <div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val exp">↓ PENGELUARAN</span></div>
+          </div>
+        </div>
+        <div class="msg-time">09:14</div>
+      </div>
+
+      <!-- user -->
+      <div class="msg usr">
+        <div class="msg-bub">Freelance project selesai, dapat 2.5 juta</div>
+        <div class="msg-time">11:32</div>
+      </div>
+
+      <!-- AI confirm income -->
+      <div class="msg ai">
+        <div class="msg-bub">
+          Mantap, dompet makin tebal! 🤑
+          <div class="confirm-card">
+            <div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">Freelance project</span></div>
+            <div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val inc">+Rp 2.500.000</span></div>
+            <div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">💻 FREELANCE</span></div>
+            <div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val inc">↑ PEMASUKAN</span></div>
+          </div>
+        </div>
+        <div class="msg-time">11:32</div>
+      </div>
+
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-toolbar">
+        <div class="chat-input-label">// TULIS TRANSAKSIMU</div>
+        <div class="chat-char-count" id="char-count">0 / 300</div>
+      </div>
+      <div class="chat-input-row">
+        <textarea
+          class="chat-input"
+          id="chat-inp"
+          placeholder="Ceritain transaksimu di sini...&#10;Misal: &quot;Beli makan siang 35rb&quot;"
+          maxlength="300"
+          rows="2"
+          oninput="onChatInput(this)"
+          onkeydown="handleChatKey(event)"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       HISTORY
+  ============================================================ -->
+  <div class="screen" id="s-history">
+    <div class="hist-top">
+      <div class="hist-title">Riwayat.</div>
+      <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
+    </div>
+
+    <div class="filter-scroll">
+      <button class="filter-pill on" onclick="setFilter(this)">SEMUA</button>
+      <button class="filter-pill" onclick="setFilter(this)">PEMASUKAN</button>
+      <button class="filter-pill" onclick="setFilter(this)">PENGELUARAN</button>
+      <button class="filter-pill" onclick="setFilter(this)">MAKANAN</button>
+      <button class="filter-pill" onclick="setFilter(this)">TRANSPORTASI</button>
+      <button class="filter-pill" onclick="setFilter(this)">TAGIHAN</button>
+    </div>
+
+    <div class="screen-body" style="padding-bottom:90px;padding-top:0">
+
+      <div class="month-group">
+        <div class="month-label">MEI 2026</div>
+        <div class="tx-list" style="padding:0 16px;gap:8px">
+          <div class="tx expense">
+            <div class="tx-cat-icon">🍜</div>
+            <div class="tx-info">
+              <div class="tx-desc">Makan siang Warteg</div>
+              <div class="tx-meta">MAKANAN <span class="tx-meta-sep">·</span> 4 Mei</div>
+            </div>
+            <div class="tx-amt">-Rp 25.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">☕</div>
+            <div class="tx-info">
+              <div class="tx-desc">Kopi di Starbucks</div>
+              <div class="tx-meta">MAKANAN <span class="tx-meta-sep">·</span> 4 Mei</div>
+            </div>
+            <div class="tx-amt">-Rp 65.000</div>
+          </div>
+          <div class="tx income">
+            <div class="tx-cat-icon">💻</div>
+            <div class="tx-info">
+              <div class="tx-desc">Freelance project</div>
+              <div class="tx-meta">FREELANCE <span class="tx-meta-sep">·</span> 4 Mei</div>
+            </div>
+            <div class="tx-amt">+Rp 2.500.000</div>
+          </div>
+          <div class="tx income">
+            <div class="tx-cat-icon">💰</div>
+            <div class="tx-info">
+              <div class="tx-desc">Gaji Mei 2026</div>
+              <div class="tx-meta">GAJI <span class="tx-meta-sep">·</span> 1 Mei</div>
+            </div>
+            <div class="tx-amt">+Rp 7.500.000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="month-group">
+        <div class="month-label">APRIL 2026</div>
+        <div class="tx-list" style="padding:0 16px;gap:8px">
+          <div class="tx expense">
+            <div class="tx-cat-icon">⚡</div>
+            <div class="tx-info">
+              <div class="tx-desc">Tagihan Listrik PLN</div>
+              <div class="tx-meta">TAGIHAN <span class="tx-meta-sep">·</span> 30 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 185.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">🚗</div>
+            <div class="tx-info">
+              <div class="tx-desc">Grab ke kantor</div>
+              <div class="tx-meta">TRANSPORTASI <span class="tx-meta-sep">·</span> 29 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 35.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">🛍️</div>
+            <div class="tx-info">
+              <div class="tx-desc">Belanja Shopee</div>
+              <div class="tx-meta">BELANJA <span class="tx-meta-sep">·</span> 27 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 320.000</div>
+          </div>
+          <div class="tx expense">
+            <div class="tx-cat-icon">💊</div>
+            <div class="tx-info">
+              <div class="tx-desc">Beli obat Apotek</div>
+              <div class="tx-meta">KESEHATAN <span class="tx-meta-sep">·</span> 25 Apr</div>
+            </div>
+            <div class="tx-amt">-Rp 87.000</div>
+          </div>
+          <div class="tx income">
+            <div class="tx-cat-icon">💰</div>
+            <div class="tx-info">
+              <div class="tx-desc">Gaji April 2026</div>
+              <div class="tx-meta">GAJI <span class="tx-meta-sep">·</span> 1 Apr</div>
+            </div>
+            <div class="tx-amt">+Rp 7.500.000</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PROFILE
+  ============================================================ -->
+  <div class="screen" id="s-profile">
+    <div class="screen-body" style="padding-top:0;padding-bottom:90px">
+
+      <div class="prof-hero">
+        <div class="prof-av">B</div>
+        <div class="prof-name">Budi Santoso</div>
+        <div class="prof-email">budi@email.com</div>
+        <div class="prof-badge">MEMBER AKTIF</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">TOTAL TRANSAKSI</div>
+          <div class="stat-box-val">47</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">BULAN INI</div>
+          <div class="stat-box-val">12</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">TERBESAR</div>
+          <div class="stat-box-val big">Rp 7,5jt</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">KATEGORI</div>
+          <div class="stat-box-val">8</div>
+        </div>
+      </div>
+
+      <!-- Budget -->
+      <div class="budget-box">
+        <div class="budget-top">
+          <div>
+            <div class="budget-label">BUDGET BULANAN</div>
+            <div class="budget-amount">Rp 6.000.000</div>
+          </div>
+          <div class="budget-pct">67%</div>
+        </div>
+        <div class="budget-track">
+          <div class="budget-fill"></div>
+        </div>
+        <div class="budget-foot">
+          <span>TERPAKAI Rp 4.025.000</span>
+          <span>SISA Rp 1.975.000</span>
+        </div>
+      </div>
+
+      <div class="menu-block mt16">
+        <div class="menu-row" onclick="openModal('m-edit')">
+          <div class="menu-ico">✎</div>
+          <span>Edit Profil</span>
+          <div class="menu-arr">→</div>
+        </div>
+        <div class="menu-row" onclick="openModal('m-budget')">
+          <div class="menu-ico">💰</div>
+          <span>Atur Budget</span>
+          <div class="menu-arr">→</div>
+        </div>
+        <div class="menu-row" onclick="toast('Data berhasil diexport! ↓')">
+          <div class="menu-ico">↓</div>
+          <span>Export Data CSV</span>
+          <div class="menu-arr">→</div>
+        </div>
+        <div class="menu-row" onclick="toast('Fitur segera hadir! 🔔')">
+          <div class="menu-ico">🔔</div>
+          <span>Notifikasi</span>
+          <div class="menu-arr">→</div>
+        </div>
+        <div class="menu-row" onclick="toast('Fitur segera hadir! 📊')">
+          <div class="menu-ico">📊</div>
+          <span>Laporan Bulanan</span>
+          <div class="menu-arr">→</div>
+        </div>
+        <div class="menu-row danger" onclick="goScreen('s-login')">
+          <div class="menu-ico">↩</div>
+          <span>Keluar</span>
+          <div class="menu-arr">→</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       BOTTOM NAV (shared, shown on app screens)
+  ============================================================ -->
+  <nav class="bottom-nav" id="bottom-nav" style="display:none">
+    <button class="nav-item active" id="nav-dashboard" onclick="goTab('s-dashboard')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>BERANDA</span>
+    </button>
+    <button class="nav-item" id="nav-history" onclick="goTab('s-history')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>RIWAYAT</span>
+    </button>
+    <button class="nav-item chat-fab-btn" id="nav-chat" onclick="goTab('s-chat')">
+      <div class="chat-fab-inner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <span>AI CHAT</span>
+    </button>
+    <button class="nav-item" id="nav-profile" onclick="goTab('s-profile')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>PROFIL</span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       MODALS
+  ============================================================ -->
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-bg" id="m-edit" onclick="bgClose(event,'m-edit')">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div class="modal-head-title">// EDIT PROFIL</div>
+        <button class="modal-close" onclick="closeModal('m-edit')">✕</button>
+      </div>
+      <div class="field">
+        <label>NAMA LENGKAP</label>
+        <input type="text" value="Budi Santoso">
+      </div>
+      <div class="field">
+        <label>EMAIL</label>
+        <input type="email" value="budi@email.com">
+      </div>
+      <button class="btn-main" onclick="closeModal('m-edit');toast('Profil disimpan! ✓')">SIMPAN PERUBAHAN →</button>
+    </div>
+  </div>
+
+  <!-- Budget Modal -->
+  <div class="modal-bg" id="m-budget" onclick="bgClose(event,'m-budget')">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div class="modal-head-title">// ATUR BUDGET</div>
+        <button class="modal-close" onclick="closeModal('m-budget')">✕</button>
+      </div>
+      <div class="field">
+        <label>BUDGET BULANAN (RP)</label>
+        <input type="number" placeholder="Contoh: 6000000" value="6000000">
+      </div>
+      <button class="btn-main" onclick="closeModal('m-budget');toast('Budget disimpan! ✓')">SIMPAN BUDGET →</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast-el"></div>
+
+</div><!-- /shell -->
+
+<script>
+// ===== SCREEN SYSTEM =====
+const APP_SCREENS = ['s-dashboard','s-chat','s-history','s-profile'];
+
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const isApp = APP_SCREENS.includes(id);
+  document.getElementById('bottom-nav').style.display = isApp ? 'flex' : 'none';
+}
+
+function goTab(id) {
+  goScreen(id);
+  // update nav active
+  const map = {
+    's-dashboard':'nav-dashboard',
+    's-chat':'nav-chat',
+    's-history':'nav-history',
+    's-profile':'nav-profile'
+  };
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const btn = document.getElementById(map[id]);
+  if(btn) btn.classList.add('active');
+}
+
+// ===== FILTER PILLS =====
+function setFilter(el) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ===== PW TOGGLE =====
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if(inp.type === 'password') { inp.type = 'text'; btn.textContent = 'SEMBUNYIKAN'; }
+  else { inp.type = 'password'; btn.textContent = 'LIHAT'; }
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function bgClose(e, id) { if(e.target === document.getElementById(id)) closeModal(id); }
+
+// ===== TOAST =====
+function toast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ===== CHAT (dummy) =====
+const dummyReplies = [
+  { text: 'Oke, udah saya catat ya! 📝', tx: { desc:'Pengeluaran baru', amt:'-Rp 50.000', cat:'🛍️ BELANJA', type:'exp' } },
+  { text: 'Mantap, dompet makin tebal! 💰', tx: { desc:'Pemasukan baru', amt:'+Rp 200.000', cat:'💰 LAINNYA', type:'inc' } },
+  { text: 'Sip, dicatat! Hemat ya bulan ini 😄', tx: { desc:'Transaksi tercatat', amt:'-Rp 30.000', cat:'🍜 MAKANAN', type:'exp' } },
+];
+let replyIdx = 0;
+
+function onChatInput(el) {
+  // auto-grow
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+  // char count
+  const len = el.value.length;
+  const counter = document.getElementById('char-count');
+  counter.textContent = len + ' / 300';
+  counter.classList.toggle('warn', len > 250);
+  // enable/disable send
+  document.getElementById('send-btn').disabled = !el.value.trim();
+}
+
+function handleChatKey(e) {
+  // Shift+Enter = new line, Enter alone = send
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMsg();
+  }
+}
+
+function sendMsg() {
+  const inp = document.getElementById('chat-inp');
+  const val = inp.value.trim();
+  if(!val) return;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('char-count').textContent = '0 / 300';
+  document.getElementById('send-btn').disabled = true;
+
+  const msgs = document.getElementById('chat-msgs');
+  const now = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  // user msg
+  const u = document.createElement('div');
+  u.className = 'msg usr';
+  u.innerHTML = `<div class="msg-bub">${val}</div><div class="msg-time">${now}</div>`;
+  msgs.appendChild(u);
+
+  // typing
+  const t = document.createElement('div');
+  t.className = 'msg ai';
+  t.id = 'typing';
+  t.innerHTML = `<div class="msg-bub"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(t);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // dummy AI reply
+  setTimeout(() => {
+    t.remove();
+    const r = dummyReplies[replyIdx % dummyReplies.length]; replyIdx++;
+    const a = document.createElement('div');
+    a.className = 'msg ai';
+    a.innerHTML = `
+      <div class="msg-bub">
+        ${r.text}
+        <div class="confirm-card">
+          <div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">${r.tx.desc}</span></div>
+          <div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ${r.tx.type}">${r.tx.amt}</span></div>
+          <div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">${r.tx.cat}</span></div>
+        </div>
+      </div>
+      <div class="msg-time">${now}</div>`;
+    msgs.appendChild(a);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+function sendQuick(text) {
+  const inp = document.getElementById('chat-inp');
+  inp.value = text;
+  onChatInput(inp);
+  sendMsg();
+}
+
+function clearChat() {
+  if(!confirm('Hapus semua pesan?')) return;
+  document.getElementById('chat-msgs').innerHTML = `
+    <div class="msg ai">
+      <div class="msg-bub">Chat dibersihkan. Ada transaksi yang mau dicatat? 😊</div>
+      <div class="msg-time">Sekarang</div>
+    </div>`;
+}
+</script>
+</body>
+</html>

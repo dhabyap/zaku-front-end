@@ -1,35 +1,20 @@
-<nav class="fixed bottom-0 left-0 right-0 bg-ink text-paper z-50 border-t-4 border-ink">
-    <div class="max-w-md mx-auto flex justify-around items-center h-20 px-4">
-        <!-- Home -->
-        <a href="/dashboard" class="flex flex-col items-center justify-center flex-1 h-full transition-colors {{ request()->is('dashboard') ? 'text-punch' : 'text-paper hover:text-punch-2' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <span class="text-[10px] font-bold uppercase tracking-widest mt-1">Home</span>
-        </a>
-
-        <!-- Transaksi -->
-        <a href="/transactions" class="flex flex-col items-center justify-center flex-1 h-full transition-colors {{ request()->is('transactions*') ? 'text-punch' : 'text-paper hover:text-punch-2' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            <span class="text-[10px] font-bold uppercase tracking-widest mt-1">Transaksi</span>
-        </a>
-
-        <!-- Wallet -->
-        <a href="/wallet/topup" class="flex flex-col items-center justify-center flex-1 h-full transition-colors {{ request()->is('wallet*') ? 'text-punch' : 'text-paper hover:text-punch-2' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            <span class="text-[10px] font-bold uppercase tracking-widest mt-1">Wallet</span>
-        </a>
-
-        <!-- Profil -->
-        <a href="/profile" class="flex flex-col items-center justify-center flex-1 h-full transition-colors {{ request()->is('profile*') ? 'text-punch' : 'text-paper hover:text-punch-2' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span class="text-[10px] font-bold uppercase tracking-widest mt-1">Profil</span>
-        </a>
-    </div>
+<nav class="bottom-nav" id="bottom-nav">
+    <a href="/dashboard" class="nav-item {{ request()->is('dashboard') ? 'active' : '' }}" id="nav-dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>BERANDA</span>
+    </a>
+    <a href="/transactions" class="nav-item {{ request()->is('transactions*') ? 'active' : '' }}" id="nav-history">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>RIWAYAT</span>
+    </a>
+    <a href="/chat" class="nav-item chat-fab-btn {{ request()->is('chat') ? 'active' : '' }}" id="nav-chat">
+        <div class="chat-fab-inner">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <span>AI CHAT</span>
+    </a>
+    <a href="/profile" class="nav-item {{ request()->is('profile') ? 'active' : '' }}" id="nav-profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>PROFIL</span>
+    </a>
 </nav>

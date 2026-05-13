@@ -1,76 +1,57 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="transactionDetail('{{ $id }}')" class="space-y-8 p-6 pb-24 max-w-md mx-auto">
-    <div class="flex items-center gap-4">
-        <a href="/transactions" class="bg-paper border-4 border-ink p-2 shadow-bs active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-        </a>
-        <h1 class="text-3xl font-display font-black text-ink uppercase tracking-tighter">Detail Transaksi</h1>
+<div x-data="transactionDetail('{{ $id }}')" style="display:flex;flex-direction:column;height:100%;">
+    <div class="inner-top" style="display:flex;align-items:center;gap:12px;">
+        <a href="/transactions" class="back-btn" style="border-color:rgba(255,255,255,.2);color:var(--paper);text-decoration:none;">←</a>
+        <div>
+            <div class="inner-title" style="font-size:24px;">Detail Transaksi</div>
+            <div class="inner-sub">INFORMASI LENGKAP</div>
+        </div>
     </div>
 
-    <!-- Loading State -->
-    <template x-if="loading">
-        <div class="space-y-6">
-            <div class="h-40 bg-cream/20 border-4 border-ink animate-pulse"></div>
-            <div class="space-y-2">
-                <div class="h-4 w-1/2 bg-ink/10 animate-pulse"></div>
-                <div class="h-8 w-full bg-ink/10 animate-pulse"></div>
+    <div class="screen-body">
+        <template x-if="loading">
+            <div style="padding:20px 16px;">
+                <div class="balance-card" style="background:var(--cream);height:120px;"></div>
+                <div class="tx" style="margin-top:16px;background:var(--cream);height:200px;"></div>
             </div>
-        </div>
-    </template>
+        </template>
 
-    <!-- Data Content -->
-    <template x-if="!loading && transaction">
-        <div class="space-y-8">
-            <!-- Amount Card -->
-            <div :class="transaction.type === 'expense' ? 'bg-punch' : 'bg-mint'" class="border-4 border-ink p-8 shadow-bs-lg text-center relative overflow-hidden">
-                <p class="font-mono text-[10px] font-bold uppercase tracking-[0.3em] mb-2 opacity-70" :class="transaction.type === 'expense' ? 'text-paper' : 'text-ink'">
-                    Jumlah Transaksi
-                </p>
-                <h2 class="text-4xl font-display font-black leading-none tracking-tighter" :class="transaction.type === 'expense' ? 'text-paper' : 'text-ink'"
-                    x-text="(transaction.type === 'expense' ? '-' : '+') + window.utils.formatRupiah(transaction.amount)">
-                </h2>
-                
-                <!-- Decorative elements -->
-                <div class="absolute top-0 left-0 w-full h-1 opacity-20 bg-paper"></div>
-                <div class="absolute bottom-0 left-0 w-full h-1 opacity-20 bg-ink"></div>
-            </div>
-
-            <!-- Detail List -->
-            <div class="bg-paper border-4 border-ink p-6 shadow-bs space-y-6">
-                <div class="space-y-1">
-                    <p class="font-mono text-[10px] text-ink/40 font-bold uppercase tracking-widest">Deskripsi</p>
-                    <p class="font-display font-black text-xl text-ink uppercase" x-text="transaction.description"></p>
+        <template x-if="!loading && transaction">
+            <div>
+                <div class="balance-card" :style="{background: transaction.type === 'expense' ? 'var(--punch)' : 'var(--mint)'}">
+                    <div class="bc-label">JUMLAH TRANSAKSI</div>
+                    <div class="bc-amount" :style="{color: transaction.type === 'expense' ? 'var(--paper)' : 'var(--ink)'}" x-text="(transaction.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(transaction.amount)"></div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <p class="font-mono text-[10px] text-ink/40 font-bold uppercase tracking-widest">Tanggal</p>
-                        <p class="font-mono text-sm font-bold text-ink" x-text="window.utils.formatDate(transaction.created_at)"></p>
+                <div style="margin:16px;background:#fff;border:var(--border);box-shadow:var(--bs-lg);padding:20px;">
+                    <div style="margin-bottom:16px;">
+                        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">DESKRIPSI</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--ink);" x-text="transaction.description"></div>
                     </div>
-                    <div class="space-y-1">
-                        <p class="font-mono text-[10px] text-ink/40 font-bold uppercase tracking-widest">Status</p>
-                        <div class="inline-block bg-ink text-paper px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-tighter">SUCCESS</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div>
+                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">TANGGAL</div>
+                            <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="formatDate(transaction.created_at)"></div>
+                        </div>
+                        <div>
+                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">STATUS</div>
+                            <div style="display:inline-block;background:var(--ink);color:var(--punch-2);padding:4px 10px;font-family:var(--font-mono);font-size:9px;font-weight:500;">SUCCESS</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">KATEGORI</div>
+                        <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category || 'UMUM'"></div>
                     </div>
                 </div>
 
-                <div class="space-y-1">
-                    <p class="font-mono text-[10px] text-ink/40 font-bold uppercase tracking-widest">ID Transaksi</p>
-                    <p class="font-mono text-[10px] font-bold text-ink/60 break-all" x-text="transaction.id"></p>
+                <div style="padding:0 16px;">
+                    <button @click="window.print()" class="btn-main" style="background:var(--paper);color:var(--ink);margin-top:0;">CETAK STRUK →</button>
                 </div>
             </div>
-
-            <button @click="window.print()" class="w-full bg-paper border-4 border-ink p-4 font-display font-black text-ink uppercase tracking-widest shadow-bs hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all active:scale-95 flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Cetak Struk
-            </button>
-        </div>
-    </template>
+        </template>
+    </div>
 </div>
 
 <script>
@@ -82,9 +63,18 @@
             async init() {
                 this.fetchDetail();
             },
+            formatNumber(n) {
+                if (!n) return '0';
+                return Number(n).toLocaleString('id-ID');
+            },
+            formatDate(d) {
+                if (!d) return '';
+                const date = new Date(d);
+                return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            },
             async fetchDetail() {
                 try {
-                    const res = await window.apiClient.get(`/transactions/${this.id}`);
+                    const res = await window.apiClient.get('/transactions/' + this.id);
                     this.transaction = res.data.data;
                 } catch (e) {
                     console.error('Fetch transaction detail error:', e);

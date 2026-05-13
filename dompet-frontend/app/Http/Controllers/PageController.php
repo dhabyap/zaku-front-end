@@ -56,6 +56,11 @@ class PageController extends Controller
         return view('dashboard.profile');
     }
 
+    public function chat()
+    {
+        return view('chat.index');
+    }
+
     public function topup()
     {
         return view('wallet.topup');
