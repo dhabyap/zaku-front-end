@@ -125,7 +125,7 @@
             budgetInput: 6000000,
             async init() {
                 try {
-                    const res = await window.apiClient.get('/auth/me');
+                    const res = await window.apiClient.get('/user/profile');
                     this.user = res.data.data;
                     window.auth.setUser(this.user);
                 } catch (e) {
@@ -170,7 +170,7 @@
             },
             async saveProfile() {
                 try {
-                    await window.apiClient.put('/auth/me', this.editForm);
+                    await window.apiClient.put('/user/profile', this.editForm);
                     this.user = { ...this.user, ...this.editForm };
                     window.auth.setUser(this.user);
                     this.closeModal('m-edit');
@@ -181,7 +181,7 @@
             },
             async saveBudget() {
                 try {
-                    await window.apiClient.post('/budget', { amount: parseInt(this.budgetInput) });
+                    await window.apiClient.put('/user/budget', { amount: parseInt(this.budgetInput) });
                     this.budget.limit = parseInt(this.budgetInput);
                     this.closeModal('m-budget');
                     window.utils.showToast('success', 'Budget disimpan! ✓');
