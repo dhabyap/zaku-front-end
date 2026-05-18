@@ -3,7 +3,7 @@
 export const getToken = () => localStorage.getItem('access_token');
 export const getRefreshToken = () => localStorage.getItem('refresh_token');
 
-export const setToken = (access, refresh) => {
+export const setToken = (access, refresh = null) => {
     localStorage.setItem('access_token', access);
     if (refresh) {
         localStorage.setItem('refresh_token', refresh);
@@ -23,8 +23,6 @@ export const clearToken = () => {
 
 export const isLoggedIn = () => {
     const token = getToken();
-    // Basic check for presence of token
-    // In a real app, you might decode the JWT to check expiration
     return !!token;
 };
 
