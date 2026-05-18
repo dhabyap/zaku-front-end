@@ -91,15 +91,7 @@
 
                 this.loading = true;
                 try {
-                    const res = await window.fetch('/api/ai/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + (window.auth.getToken() || ''),
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        },
-                        body: JSON.stringify({ message: val }),
-                    }).then(r => r.json());
+                    const res = await window.apiClient.post('/transactions/chat', { message: val });
                     const data = res.data;
                     t.remove();
 

@@ -15,9 +15,7 @@ export const clearToken = () => {
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
 
-    // Only redirect if not already on login page
     if (window.location.pathname !== '/login') {
-        // Show session expired message via URL param
         const separator = window.location.search ? '&' : '?';
         window.location.href = `/login${separator}session=expired`;
     }
