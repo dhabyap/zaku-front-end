@@ -14,7 +14,11 @@ export const clearToken = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
-    window.location.href = '/login';
+
+    if (window.location.pathname !== '/login') {
+        const separator = window.location.search ? '&' : '?';
+        window.location.href = `/login${separator}session=expired`;
+    }
 };
 
 export const isLoggedIn = () => {

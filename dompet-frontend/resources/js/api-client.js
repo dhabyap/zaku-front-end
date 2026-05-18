@@ -47,15 +47,24 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    // If 401 and we haven't already retried
+
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const newAccessToken = await refreshAccessToken();
+
       if (newAccessToken) {
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return apiClient(originalRequest);
       }
+
+      return Promise.reject(error);
     }
+
+    if (error.response && error.response.status === 401 && originalRequest._retry) {
+      clearToken();
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );
