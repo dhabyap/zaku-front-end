@@ -59,6 +59,12 @@
                 remember: false
             },
             loading: false,
+            init() {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('session') === 'expired') {
+                    window.utils.showToast('error', 'Sesi Anda telah berakhir. Silakan login kembali.', true);
+                }
+            },
             async submit() {
                 if (this.loading) return;
                 this.loading = true;

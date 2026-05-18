@@ -1,202 +1,65 @@
-# Backend API Issues — Frontend Requirements
+# Issues Tracking
 
-> **Untuk:** Junior Backend Programmer
-> **Base URL:** `http://127.0.0.1:8001/api`
-> **Auth:** JWT Bearer Token (header `Authorization: Bearer <token>`)
-> **Response format:** `{ "status": "success", "data": { ... } }`
+## Issue: Auto Logout on Unauthorized / Session Expired
 
----
+**Priority:** High  
+**Assigned to:** Junior Programmer  
+**Status:** Pending
 
-## ✅ Sudah Tersedia
+### Description
+Ketika user melakukan request dan mendapatkan response unauthorized (HTTP 401) atau session/token sudah expired, aplikasi harus secara otomatis melakukan logout dan mengarahkan user ke halaman login.
 
-- Auth: register, login, refresh, verify-email, resend-verification, forgot-password, change-password, me, logout
-- User: `GET/PUT /user/profile`, `PUT /user/budget`
-- Dashboard: `GET /dashboard`
-- Transaksi: `GET /transactions`, `POST /transactions/chat`
+### Current Behavior
+- Ketika token expired atau unauthorized, user tetap berada di halaman saat ini
+- Tidak ada aksi otomatis logout
+- User mungkin masih bisa melihat halaman lama atau mengalami error yang tidak tertangani
 
----
+### Expected Behavior
+- Ketika API mengembalikan status 401 Unauthorized, aplikasi harus:
+  1. Membersihkan token/session dari storage (localStorage/sessionStorage)
+  2. Membersihkan state user/auth di aplikasi
+  3. Mengarahkan user ke halaman login
+  4. Menampilkan notifikasi bahwa session telah berakhir (opsional)
 
-## ❌ Belum Tersedia
+### Implementation Guide
 
----
+1. **HTTP Interceptor (axios/fetch wrapper)**
+   - Tambahkan interceptor untuk menangkap response dengan status 401
+   - Pada interceptor, panggil fungsi logout dan redirect ke halaman login
 
-### Transaksi Detail
+2. **Contoh implementasi (axios interceptor):**
+   ```javascript
+   axios.interceptors.response.use(
+     (response) => response,
+     (error) => {
+       if (error.response?.status === 401) {
+         // Clear auth data
+         localStorage.removeItem('token')
+         localStorage.removeItem('user')
+         
+         // Redirect to login
+         window.location.href = '/login'
+         
+         // Optional: show notification
+         // toast.error('Session expired, please login again')
+       }
+       return Promise.reject(error)
+     }
+   )
+   ```
 
-| | |
-|---|---|
-| **Method** | `GET` |
-| **Endpoint** | `/transactions/{id}` |
-| **Frontend** | `dashboard/transaction-detail.blade.php:77` |
-| **Auth** | Yes (JWT) |
+3. **Files to check/modify:**
+   - HTTP client configuration (e.g., `src/api/client.js`, `src/services/api.js`, or similar)
+   - Auth context/store (if using React Context, Redux, etc.)
+   - Route guards / protected routes
 
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "id": 1,
-    "type": "expense" | "income",
-    "amount": 35000,
-    "description": "Beli makan siang",
-    "category": "MAKANAN",
-    "created_at": "2025-01-15T12:00:00Z"
-  }
-}
-```
+### Acceptance Criteria
+- [ ] User otomatis logout ketika menerima response 401 dari API
+- [ ] Token dan data user dibersihkan dari storage
+- [ ] User diarahkan ke halaman login
+- [ ] Tidak ada error yang muncul di console setelah logout otomatis
+- [ ] User tidak bisa mengakses halaman protected setelah logout
 
----
-
-### Transaction Stats
-
-| | |
-|---|---|
-| **Method** | `GET` |
-| **Endpoint** | `/transactions/stats` |
-| **Frontend** | `dashboard/profile.blade.php:144` |
-| **Auth** | Yes (JWT) |
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "total": 47,
-    "this_month": 12,
-    "biggest": 7500000,
-    "categories": 8
-  }
-}
-```
-
----
-
-### Transaction Categories
-
-| | |
-|---|---|
-| **Method** | `GET` |
-| **Endpoint** | `/transactions/categories` |
-| **Frontend** | `dashboard/home.blade.php:177` |
-| **Auth** | Yes (JWT) |
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "name": "MAKANAN",
-      "amount": 1500000,
-      "pct": 35
-    }
-  ]
-}
-```
-
----
-
-### Wallet Balance
-
-| | |
-|---|---|
-| **Method** | `GET` |
-| **Endpoint** | `/wallet/balance` |
-| **Frontend** | `dashboard/home.blade.php:154`, `wallet/*.blade.php` |
-| **Auth** | Yes (JWT) |
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "balance": 3250000,
-    "total_income": 7500000,
-    "total_expense": 4250000
-  }
-}
-```
-
----
-
-### Top Up
-
-| | |
-|---|---|
-| **Method** | `POST` |
-| **Endpoint** | `/wallet/topup` |
-| **Frontend** | `wallet/topup.blade.php:62` |
-| **Auth** | Yes (JWT) |
-
-**Request:**
-```json
-{ "amount": 100000 }
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "balance": 3350000,
-    "message": "Top up berhasil."
-  }
-}
-```
-
----
-
-### Withdraw
-
-| | |
-|---|---|
-| **Method** | `POST` |
-| **Endpoint** | `/wallet/withdraw` |
-| **Frontend** | `wallet/withdraw.blade.php:59` |
-| **Auth** | Yes (JWT) |
-
-**Request:**
-```json
-{ "amount": 200000, "account_number": "1234567890" }
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "balance": 3050000,
-    "message": "Penarikan berhasil diproses."
-  }
-}
-```
-
----
-
-### Send Money
-
-| | |
-|---|---|
-| **Method** | `POST` |
-| **Endpoint** | `/wallet/send` |
-| **Frontend** | `wallet/send-money.blade.php:65` |
-| **Auth** | Yes (JWT) |
-
-**Request:**
-```json
-{
-  "recipient_email": "user@email.com",
-  "amount": 50000,
-  "note": "opsional"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "balance": 3000000,
-    "message": "Uang berhasil dikirim."
-  }
-}
-```
+### Notes
+- Pastikan semua API request dilindungi oleh interceptor yang sama
+- Test dengan cara manually menghapus/expiring token saat user sedang login
