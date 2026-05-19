@@ -78,7 +78,7 @@
                     this.loading = true;
                     try {
                         const response = await window.apiClient.post('/auth/login', this.formData);
-                        const { token, user } = response.data;
+                        const { token, user } = response.data.data;
                         window.auth.setToken(token);
                         window.auth.setUser(user);
                         window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
