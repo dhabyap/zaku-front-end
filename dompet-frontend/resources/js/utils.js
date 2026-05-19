@@ -45,3 +45,28 @@ export function showToast(type, message, persistent = false) {
         }, 3000);
     }
 }
+
+export function confirmDialog({ title = 'Yakin?', message = '', okLabel = 'YA, LANJUTKAN', danger = false } = {}) {
+    const titleEl = document.getElementById('confirm-modal-title');
+    const msgEl = document.getElementById('confirm-modal-message');
+    const okBtn = document.getElementById('confirm-modal-ok');
+
+    if (!titleEl || !msgEl || !okBtn) {
+        return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+    }
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    okBtn.textContent = okLabel;
+    okBtn.style.background = danger ? '#E53E3E' : 'var(--ink,#111010)';
+    okBtn.style.borderColor = danger ? '#E53E3E' : 'var(--ink,#111010)';
+    okBtn.style.color = 'var(--paper,#FFFDF7)';
+
+    if (typeof window.__openConfirmModal === 'function') {
+        window.__openConfirmModal();
+    }
+
+    return new Promise(resolve => {
+        window.__confirmResolve = resolve;
+    });
+}
