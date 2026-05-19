@@ -66,11 +66,11 @@
                         <a :href="'/transactions/' + trx.id" class="tx"
                             :class="trx.type === 'income' ? 'income' : 'expense'"
                             style="text-decoration:none;cursor:pointer;">
-                            <div class="tx-cat-icon" x-text="getEmoji(trx.category)">📄</div>
+                            <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
                             <div class="tx-info">
                                 <div class="tx-desc" x-text="trx.description"></div>
                                 <div class="tx-meta">
-                                    <span x-text="trx.category || 'UMUM'"></span>
+                                    <span x-text="trx.category_name || 'UMUM'"></span>
                                     <span class="tx-meta-sep">·</span>
                                     <span x-text="formatDate(trx.created_at)"></span>
                                 </div>
@@ -177,7 +177,19 @@
                 async fetchTransactions() {
                     try {
                         const res = await window.apiClient.get('/transactions?limit=5');
-                        this.transactions = res.data.data || [];
+                        const rawData = res.data.data || [];
+                        let flatTx = [];
+                        if (Array.isArray(rawData)) {
+                            rawData.forEach(group => {
+                                if (group.transactions) {
+                                    flatTx = flatTx.concat(group.transactions);
+                                } else {
+                                    // Fallback if backend returns flat list
+                                    flatTx.push(group);
+                                }
+                            });
+                        }
+                        this.transactions = flatTx;
                     } catch (e) {
                         console.error('Fetch transactions error:', e);
                     } finally {
