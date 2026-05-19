@@ -27,10 +27,18 @@ export const isLoggedIn = () => {
 };
 
 export const setUser = (user) => {
+    if (!user) {
+        sessionStorage.removeItem('user');
+        return;
+    }
     sessionStorage.setItem('user', JSON.stringify(user));
 };
 
 export const getUser = () => {
-    const user = sessionStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    try {
+        const user = sessionStorage.getItem('user');
+        return user && user !== 'undefined' ? JSON.parse(user) : null;
+    } catch (e) {
+        return null; // Fallback jika format JSON rusak
+    }
 };
