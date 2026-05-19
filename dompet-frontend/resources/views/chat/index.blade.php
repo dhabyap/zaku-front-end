@@ -91,8 +91,8 @@
 
                 this.loading = true;
                 try {
-                    const res = await window.apiClient.post('/transactions/chat', { message: val });
-                    const data = res.data;
+                    const res = await window.apiClient.post('/ai/chat', { message: val });
+                    const data = res.data.data || res.data;
                     t.remove();
 
                     let bubbleHtml = this.escapeHtml(data.response);

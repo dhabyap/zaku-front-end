@@ -113,7 +113,6 @@
     </div>
 
     <script>
-        console.log('test');
         function greeting() {
             const h = new Date().getHours();
             let g = 'SELAMAT MALAM 🌙';
