@@ -6,7 +6,7 @@ import Alpine from 'alpinejs';
 
 window.apiClient = apiClient;
 window.auth = auth;
-window.utils = utils;
+window.utils = { ...window.utils, ...utils };
 window.Alpine = Alpine;
 
 Alpine.start();
