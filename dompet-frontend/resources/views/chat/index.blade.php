@@ -128,8 +128,14 @@
                 this.charCount = text.length;
                 this.sendMsg();
             },
-            clearChat() {
-                if (!confirm('Hapus semua pesan?')) return;
+            async clearChat() {
+                const ok = await window.utils.confirmDialog({
+                    title: 'Hapus Pesan?',
+                    message: 'Semua riwayat chat akan dibersihkan.',
+                    okLabel: 'YA, HAPUS',
+                    danger: false
+                });
+                if (!ok) return;
                 this.$refs.msgs.innerHTML = '<div class="msg ai"><div class="msg-bub">Chat dibersihkan. Ada transaksi yang mau dicatat? 😊</div><div class="msg-time">Sekarang</div></div>';
             },
             escapeHtml(text) {

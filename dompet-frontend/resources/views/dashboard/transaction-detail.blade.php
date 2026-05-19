@@ -85,7 +85,13 @@
                 }
             },
             async deleteTransaction() {
-                if (!confirm('Apakah kamu yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) return;
+                const ok = await window.utils.confirmDialog({
+                    title: 'Hapus Transaksi?',
+                    message: 'Semua data transaksi ini akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.',
+                    okLabel: 'YA, HAPUS',
+                    danger: true
+                });
+                if (!ok) return;
                 try {
                     await window.apiClient.delete('/transactions/' + this.id);
                     window.utils.showToast('success', 'Transaksi berhasil dihapus!');
