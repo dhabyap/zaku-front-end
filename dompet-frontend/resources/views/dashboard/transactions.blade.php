@@ -38,11 +38,11 @@
                             <a :href="'/transactions/' + trx.id" class="tx"
                                 :class="trx.type === 'income' ? 'income' : 'expense'"
                                 style="text-decoration:none;cursor:pointer;">
-                                <div class="tx-cat-icon" x-text="getEmoji(trx.category)">📄</div>
+                                <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
                                 <div class="tx-info">
                                     <div class="tx-desc" x-text="trx.description"></div>
                                     <div class="tx-meta">
-                                        <span x-text="trx.category || 'UMUM'"></span>
+                                        <span x-text="trx.category_name || 'UMUM'"></span>
                                         <span class="tx-meta-sep">·</span>
                                         <span x-text="formatDay(trx.created_at)"></span>
                                     </div>
@@ -58,7 +58,6 @@
     </div>
 
     <script>
-        console.log('test')
         function transactionList() {
             return {
                 transactions: [],
@@ -94,14 +93,21 @@
                 extractCategories() {
                     const set = new Set();
                     this.transactions.forEach(t => {
-                        if (t.category) set.add(t.category.toUpperCase());
+                        if (t.category_name) set.add(t.category_name.toUpperCase());
                     });
                     this.categories = Array.from(set);
                 },
                 async fetchTransactions() {
                     try {
                         const res = await window.apiClient.get('/transactions');
-                        this.transactions = res.data.data || [];
+                        const rawData = res.data.data || [];
+                        let flatTx = [];
+                        rawData.forEach(group => {
+                            if (group.transactions) {
+                                flatTx = flatTx.concat(group.transactions);
+                            }
+                        });
+                        this.transactions = flatTx;
                     } catch (e) {
                         console.error('Fetch transactions error:', e);
                         window.utils.showToast('error', 'Gagal memuat riwayat transaksi');
@@ -118,7 +124,7 @@
                     if (this.filter === 'all') return this.transactions;
                     return this.transactions.filter(t => {
                         if (this.filter === 'income' || this.filter === 'expense') return t.type === this.filter;
-                        return t.category?.toUpperCase() === this.filter;
+                        return t.category_name?.toUpperCase() === this.filter;
                     });
                 },
                 grouped() {
