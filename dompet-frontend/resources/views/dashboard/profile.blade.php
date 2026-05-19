@@ -153,8 +153,14 @@
                     console.error('Fetch stats error:', e);
                 }
             },
-            logout() {
-                if (confirm('Apakah Anda yakin ingin keluar?')) {
+            async logout() {
+                const ok = await window.utils.confirmDialog({
+                    title: 'Keluar dari Akun?',
+                    message: 'Semua sesi aktif akan diakhiri. Kamu perlu login kembali untuk melanjutkan.',
+                    okLabel: 'YA, KELUAR',
+                    danger: false
+                });
+                if (ok) {
                     window.auth.clearToken();
                     window.location.href = '/login';
                 }
