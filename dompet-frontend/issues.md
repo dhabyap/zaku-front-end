@@ -1,65 +1,46 @@
-# Issue: Sinkronisasi dan API Contract untuk Fitur AI Chat
+# Issue: Fitur Hapus Transaksi (DELETE /transactions/{id})
 
-## Deskripsi Masalah (Kenapa AI Chat tidak ada respon?)
+## Deskripsi Masalah
 
-Saat ini fitur AI Chat tidak merespon dengan benar. Terdapat *mismatch* (ketidakcocokan) antara Frontend (Blade), Laravel Route, Laravel Controller, dan ekspektasi untuk layanan Backend AI utama. 
+Saat ini, aplikasi belum memiliki antarmuka untuk menghapus transaksi, padahal backend Laravel sudah menyediakan API `DELETE /transactions/{id}`. 
 
-Ada tiga akar permasalahan yang menyebabkan ini:
-1. **Route Tidak Cocok:** Frontend memanggil endpoint `POST /api/transactions/chat`, tetapi di `routes/api.php` didaftarkan sebagai `POST /api/ai/chat`. Hasilnya adalah 404 Not Found.
-2. **Format Response (Data Unwrapping):** Kode frontend mengekspektasikan data langsung di *root* objek (memanggil `res.data.response`), namun standardisasi Laravel API mengembalikan data berbalut objek `data` (`['success' => true, 'data' => [...]]`). Sehingga data bernilai `undefined`.
-3. **Backend AI Belum Standar:** Belum ada kesepakatan (*API Contract*) yang jelas tentang apa yang harus di-return oleh servis AI *External* agar kompatibel dengan yang diharapkan frontend.
+Fitur hapus transaksi ini sangat penting untuk memberikan kontrol penuh bagi pengguna untuk membatalkan atau membetulkan catatan keuangan yang salah.
+
+Untuk kemudahan dan keamanan pengguna, tombol hapus akan ditempatkan di halaman **Detail Transaksi** (`transaction-detail.blade.php`) lengkap dengan konfirmasi sebelum proses penghapusan dilakukan.
 
 ## Tasks for Junior Programmer
 
-Tolong selesaikan task berikut secara berurutan:
+Tolong selesaikan tugas-tugas di bawah ini:
 
-- [ ] **1. Perbaiki Route Mismatch**
-  - Ubah kode di `resources/views/chat/index.blade.php` baris ke-94.
-  - **Dari:** `const res = await window.apiClient.post('/transactions/chat', { message: val });`
-  - **Menjadi:** `const res = await window.apiClient.post('/ai/chat', { message: val });`
+- [ ] **1. Tambahkan Tombol Hapus pada Halaman Detail Transaksi**
+  - Buka file `resources/views/dashboard/transaction-detail.blade.php`.
+  - Di bawah tombol cetak struk (~baris 50), tambahkan tombol "HAPUS TRANSAKSI 🗑️" dengan estetika Brutalist berwarna merah (`var(--punch)`).
+  - **Ubah bagian HTML tombol:**
+    ```html
+    <div style="padding:0 16px; display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+        <button @click="window.print()" class="btn-main" style="background:var(--paper);color:var(--ink);margin-top:0;">CETAK STRUK →</button>
+        <button @click="deleteTransaction()" class="btn-main" style="background:var(--punch);color:var(--paper);margin-top:0;border:var(--border);box-shadow:var(--bs);">HAPUS TRANSAKSI 🗑️</button>
+    </div>
+    ```
 
-- [ ] **2. Perbaiki Data Unwrapping di Frontend**
-  - Masih di file `resources/views/chat/index.blade.php`, ubah cara membaca variabel data.
-  - **Dari:** `const data = res.data;`
-  - **Menjadi:** `const data = res.data.data || res.data;` (Tujuannya agar tahan banting jika suatu saat interceptor berubah).
+- [ ] **2. Implementasikan Fungsi `deleteTransaction()` di Alpine.js**
+  - Pada bagian `<script>` di `transaction-detail.blade.php`, tambahkan method `deleteTransaction()`.
+  - Fungsi ini harus memunculkan konfirmasi dialog browser (`confirm`). Jika disetujui, kirimkan request `DELETE` menggunakan `window.apiClient.delete('/transactions/' + this.id)`.
+  - Setelah berhasil dihapus, tampilkan toast sukses dan arahkan pengguna kembali ke halaman daftar riwayat transaksi (`/transactions`).
+  - **Contoh Fungsi:**
+    ```javascript
+    async deleteTransaction() {
+        if (!confirm('Apakah kamu yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) return;
+        try {
+            await window.apiClient.delete('/transactions/' + this.id);
+            window.utils.showToast('success', 'Transaksi berhasil dihapus!');
+            window.location.href = '/transactions';
+        } catch (e) {
+            console.error('Delete transaction error:', e);
+            window.utils.showToast('error', 'Gagal menghapus transaksi. Coba lagi!');
+        }
+    }
+    ```
 
-## Dokumentasi API Contract (Untuk Tim Backend AI)
-
-Sampaikan dokumen kontrak API di bawah ini kepada tim Backend AI (Python/Node/Go) yang akan membangun servis `/ai/chat`:
-
-**Endpoint:** `POST /ai/chat`  
-**Content-Type:** `application/json`
-
-**Request Payload:**
-```json
-{
-  "message": "Beli makan siang 35rb"
-}
-```
-
-**Expected Response Schema (Status 200 OK):**
-Backend AI *harus* mengembalikan JSON persis seperti format berikut agar frontend bisa menampilkan *Card Transaksi* dengan rapi:
-
-```json
-{
-  "success": true,
-  "data": {
-    "response": "🍜 Oke, Beli makan siang udah dicatat ya! 📝",
-    "description": "Beli makan siang",
-    "amount": 35000,
-    "amount_formatted": "-Rp 35.000",
-    "category": "🍜 Makanan & Minuman",
-    "type": "expense" 
-  }
-}
-```
-
-**Keterangan Field Response:**
-- `response` *(string)*: Teks santai/kasual balasan dari AI.
-- `description` *(string|null)*: Nama/catatan transaksi hasil ekstrak (contoh: "Beli makan siang").
-- `amount` *(integer|null)*: Angka mentah nominal transaksi (contoh: 35000).
-- `amount_formatted` *(string|null)*: Nominal yang sudah diformat ke Rupiah, diberi prefix `+` untuk pemasukan dan `-` untuk pengeluaran.
-- `category` *(string|null)*: Nama kategori ditambah *emoji* di depannya (contoh: "💰 Pemasukan" atau "🚗 Transportasi").
-- `type` *(string|null)*: Wajib diisi dengan `"expense"` atau `"income"`.
-
-Jika AI tidak dapat menemukan angka pada *message*, kembalikan field di atas (selain `response`) dengan nilai `null`.
+- [ ] **3. Sesuaikan Key Kategori yang Baru**
+  - Ubah juga key pemanggilan kategori di halaman detail dari `transaction.category` menjadi `transaction.category_name || transaction.category || 'UMUM'` demi menyelaraskan perubahan API terbaru yang mengirimkan `category_name`.
