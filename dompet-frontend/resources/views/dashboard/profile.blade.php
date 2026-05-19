@@ -4,7 +4,7 @@
 <div x-data="profilePage()" style="display:flex;flex-direction:column;height:100%;">
     <div class="screen-body" style="padding-top:0;padding-bottom:90px">
         <div class="prof-hero">
-            <div class="prof-av" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></div>
+            <div class="prof-av" x-text="(user?.name?.charAt(0) || '?').toUpperCase()"></div>
             <div class="prof-name" x-text="user?.name || 'Teman'"></div>
             <div class="prof-email" x-text="user?.email || ''"></div>
             <div class="prof-badge">MEMBER AKTIF</div>
