@@ -42,12 +42,13 @@
                     </div>
                     <div>
                         <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">KATEGORI</div>
-                        <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category || 'UMUM'"></div>
+                        <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category_name || transaction.category || 'UMUM'"></div>
                     </div>
                 </div>
 
-                <div style="padding:0 16px;">
+                <div style="padding:0 16px; display:flex; flex-direction:column; gap:12px; margin-top:16px;">
                     <button @click="window.print()" class="btn-main" style="background:var(--paper);color:var(--ink);margin-top:0;">CETAK STRUK →</button>
+                    <button @click="deleteTransaction()" class="btn-main" style="background:var(--punch);color:var(--paper);margin-top:0;border:var(--border);box-shadow:var(--bs);">HAPUS TRANSAKSI 🗑️</button>
                 </div>
             </div>
         </template>
@@ -81,6 +82,17 @@
                     window.utils.showToast('error', 'Gagal memuat detail transaksi');
                 } finally {
                     this.loading = false;
+                }
+            },
+            async deleteTransaction() {
+                if (!confirm('Apakah kamu yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) return;
+                try {
+                    await window.apiClient.delete('/transactions/' + this.id);
+                    window.utils.showToast('success', 'Transaksi berhasil dihapus!');
+                    window.location.href = '/transactions';
+                } catch (e) {
+                    console.error('Delete transaction error:', e);
+                    window.utils.showToast('error', 'Gagal menghapus transaksi. Coba lagi!');
                 }
             }
         }
