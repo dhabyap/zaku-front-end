@@ -22,58 +22,14 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error),
 );
 
-// Helper to refresh token using refresh token stored in localStorage
-async function refreshAccessToken() {
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (!refreshToken) {
-        return null;
-    }
-    try {
-        const response = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL || "/api"}/auth/refresh`,
-            { refresh_token: refreshToken },
-        );
-        const { access_token, refresh_token } = response.data;
-        setToken(access_token, refresh_token);
-        return access_token;
-    } catch (err) {
-        clearToken();
-        return null;
-    }
-}
-
-// Response interceptor to handle 401 errors and attempt token refresh
+// Response interceptor to handle 401 errors - clear token and redirect to login
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
-
-        if (
-            error.response &&
-            error.response.status === 401 &&
-            !originalRequest._retry
-        ) {
-            originalRequest._retry = true;
-            const newAccessToken = await refreshAccessToken();
-
-            if (newAccessToken) {
-                originalRequest.headers["Authorization"] =
-                    `Bearer ${newAccessToken}`;
-                return apiClient(originalRequest);
-            }
-
-            return Promise.reject(error);
-        }
-
-        if (
-            error.response &&
-            error.response.status === 401 &&
-            originalRequest._retry
-        ) {
+        if (error.response && error.response.status === 401) {
             clearToken();
             return Promise.reject(error);
         }
-
         return Promise.reject(error);
     },
 );

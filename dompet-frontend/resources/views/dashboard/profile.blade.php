@@ -187,7 +187,7 @@
             },
             async saveBudget() {
                 try {
-                    await window.apiClient.put('/user/budget', { amount: parseInt(this.budgetInput) });
+                    await window.apiClient.put('/user/budget', { monthly_budget: parseInt(this.budgetInput) });
                     this.budget.limit = parseInt(this.budgetInput);
                     this.closeModal('m-budget');
                     window.utils.showToast('success', 'Budget disimpan! ✓');
