@@ -19,7 +19,3 @@ Route::get('/transactions', [PageController::class, 'transactions'])->name('tran
 Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
 Route::get('/chat', [PageController::class, 'chat'])->name('chat');
 Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-
-Route::get('/wallet/topup', [PageController::class, 'topup'])->name('wallet.topup');
-Route::get('/wallet/withdraw', [PageController::class, 'withdraw'])->name('wallet.withdraw');
-Route::get('/wallet/send', [PageController::class, 'sendMoney'])->name('wallet.send');

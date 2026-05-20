@@ -5,7 +5,7 @@
     <div class="chat-top">
         <div class="chat-ai-dot">AI</div>
         <div class="chat-ai-info">
-            <div class="chat-ai-name">DOMPET AI</div>
+            <div class="chat-ai-name">ZAKU AI</div>
             <div class="chat-ai-online"><div class="online-dot"></div>Online · siap mencatat</div>
         </div>
         <button class="chat-clear-btn" @click="clearChat()">HAPUS</button>
@@ -91,7 +91,7 @@
 
                 this.loading = true;
                 try {
-                    const res = await window.apiClient.post('/ai/chat', { message: val });
+                    const res = await window.apiClient.post('/transactions/chat', { message: val });
                     const data = res.data.data || res.data;
                     t.remove();
 
@@ -114,9 +114,10 @@
                     msgs.appendChild(a);
                 } catch (e) {
                     t.remove();
+                    const errorMsg = window.utils.parseApiError(e, 'Maaf, lagi ada gangguan. Coba lagi ya!');
                     const a = document.createElement('div');
                     a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">Maaf, lagi ada gangguan. Coba lagi ya! 😅</div><div class="msg-time">' + now + '</div>';
+                    a.innerHTML = '<div class="msg-bub">' + errorMsg + '</div><div class="msg-time">' + now + '</div>';
                     msgs.appendChild(a);
                 } finally {
                     this.loading = false;

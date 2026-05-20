@@ -5,7 +5,7 @@
     <div class="reg-top">
         <div class="reg-top-row">
             <button class="back-btn" onclick="window.location.href='/login'">←</button>
-            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(245,240,232,.4)">DOMPET / DAFTAR</div>
+            <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(245,240,232,.4)">ZAKU / DAFTAR</div>
         </div>
         <div class="reg-title">Buat Akun.</div>
         <div class="reg-sub">MULAI PERJALANAN FINANSIALMU</div>

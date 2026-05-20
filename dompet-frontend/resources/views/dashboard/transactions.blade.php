@@ -25,8 +25,10 @@
 
             <template x-if="!loading && filtered().length === 0">
                 <div style="padding:40px 16px;text-align:center;">
+                    <div style="font-size:48px;margin-bottom:12px;">📭</div>
                     <span style="font-family:var(--font-mono);font-size:10px;color:rgba(17,16,16,.4);">TIDAK ADA
                         TRANSAKSI</span>
+                    <div style="margin-top:8px;font-size:12px;color:rgba(17,16,16,.3);">Mulai catat pemasukan atau pengeluaran via AI Chat</div>
                 </div>
             </template>
 

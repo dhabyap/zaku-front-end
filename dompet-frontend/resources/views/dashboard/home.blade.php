@@ -14,7 +14,7 @@
 
         <div class="screen-body">
             <div class="balance-card">
-                <div class="bc-label">SALDO BULAN INI</div>
+                <div class="bc-label">SELISIH BULAN INI</div>
                 <template x-if="loading.balance">
                     <div class="bc-amount" style="background:rgba(17,16,16,.1);height:44px;width:60%;"></div>
                 </template>
@@ -135,9 +135,7 @@
                     categories: true
                 },
                 async init() {
-                    this.fetchBalance();
-                    this.fetchTransactions();
-                    this.fetchCategories();
+                    this.fetchDashboard();
                 },
                 formatNumber(n) {
                     if (!n) return '0';
@@ -161,57 +159,33 @@
                     };
                     return map[cat?.toUpperCase()] || '📄';
                 },
-                async fetchBalance() {
+                async fetchDashboard() {
                     try {
-                        const res = await window.apiClient.get('/wallet/balance');
+                        const res = await window.apiClient.get('/dashboard');
                         const data = res.data.data;
-                        this.balance = data.balance || 0;
-                        this.income = data.total_income || data.income || 0;
-                        this.expense = data.total_expense || data.expense || 0;
+                        this.balance = data.current_month_balance || 0;
+                        this.income = data.total_income || 0;
+                        this.expense = data.total_expense || 0;
+                        if (data.recent_transactions) {
+                            this.transactions = data.recent_transactions;
+                        }
+                        if (data.expense_by_category) {
+                            const total = data.expense_by_category.reduce((s, c) => s + (c.amount || 0), 0);
+                            this.categories = data.expense_by_category.map(c => ({
+                                ...c,
+                                pct: total > 0 ? Math.round((c.amount / total) * 100) : 0,
+                                emoji: this.getEmoji(c.name)
+                            }));
+                        }
                     } catch (e) {
-                        console.error('Fetch balance error:', e);
+                        console.error('Fetch dashboard error:', e);
+                        window.utils.showToast('error', 'Gagal memuat data dashboard');
                     } finally {
                         this.loading.balance = false;
-                    }
-                },
-                async fetchTransactions() {
-                    try {
-                        const res = await window.apiClient.get('/transactions?limit=5');
-                        const rawData = res.data.data || [];
-                        let flatTx = [];
-                        if (Array.isArray(rawData)) {
-                            rawData.forEach(group => {
-                                if (group.transactions) {
-                                    flatTx = flatTx.concat(group.transactions);
-                                } else {
-                                    // Fallback if backend returns flat list
-                                    flatTx.push(group);
-                                }
-                            });
-                        }
-                        this.transactions = flatTx;
-                    } catch (e) {
-                        console.error('Fetch transactions error:', e);
-                    } finally {
                         this.loading.transactions = false;
-                    }
-                },
-                async fetchCategories() {
-                    try {
-                        const res = await window.apiClient.get('/transactions/categories');
-                        const cats = res.data.data || [];
-                        const total = cats.reduce((s, c) => s + (c.amount || 0), 0);
-                        this.categories = cats.map(c => ({
-                            ...c,
-                            pct: total > 0 ? Math.round((c.amount / total) * 100) : 0,
-                            emoji: this.getEmoji(c.name)
-                        }));
-                    } catch (e) {
-                        console.error('Fetch categories error:', e);
-                    } finally {
                         this.loading.categories = false;
                     }
-                }
+                },
             }
         }
     </script>

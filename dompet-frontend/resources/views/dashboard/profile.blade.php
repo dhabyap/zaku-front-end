@@ -130,6 +130,7 @@
                     window.auth.setUser(this.user);
                 } catch (e) {
                     console.error('Fetch profile error:', e);
+                    window.utils.showToast('error', 'Gagal memuat data profil');
                 }
                 this.editForm = { name: this.user?.name || '', email: this.user?.email || '' };
                 this.budgetInput = this.budget.limit;
@@ -151,6 +152,7 @@
                     };
                 } catch (e) {
                     console.error('Fetch stats error:', e);
+                    window.utils.showToast('error', 'Gagal memuat statistik');
                 }
             },
             async logout() {
@@ -187,7 +189,7 @@
             },
             async saveBudget() {
                 try {
-                    await window.apiClient.put('/user/budget', { amount: parseInt(this.budgetInput) });
+                    await window.apiClient.put('/user/budget', { monthly_budget: parseInt(this.budgetInput) });
                     this.budget.limit = parseInt(this.budgetInput);
                     this.closeModal('m-budget');
                     window.utils.showToast('success', 'Budget disimpan! ✓');

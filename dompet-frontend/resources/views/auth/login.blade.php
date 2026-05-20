@@ -13,7 +13,7 @@
             style="position:absolute;top:0;left:0;right:0;padding:52px 28px 0;display:flex;flex-direction:column;gap:10px;">
             <div style="display:flex;align-items:center;gap:14px;">
                 <div class="wordmark-icon">💸</div>
-                <div class="wordmark-text">DOMPET</div>
+                <div class="wordmark-text">ZAKU</div>
             </div>
             <div
                 style="font-family:var(--font-mono);font-size:12px;letter-spacing:2px;color:rgba(17,16,16,.55);padding-left:2px;">

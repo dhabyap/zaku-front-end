@@ -54,7 +54,7 @@
                     return;
                 }
                 try {
-                    await window.apiClient.post('/auth/verify-email', { token: token });
+                    await window.apiClient.post('/auth/verify-email', { email: '', code: token });
                     this.status = 'success';
                     window.utils.showToast('success', 'Email berhasil diverifikasi!');
                     setTimeout(() => {
