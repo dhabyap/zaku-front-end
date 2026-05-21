@@ -14,11 +14,11 @@
     <div class="chat-msgs" id="chat-msgs" x-ref="msgs">
         <div class="msg ai">
             <div class="msg-bub">
-                Halo, <strong x-text="user?.name?.split(' ')[0] || 'Teman'"></strong>! 👋 Ceritain aja transaksimu ke saya.<br><br>
-                Misalnya:<br>
-                <em>"Tadi beli makan siang 35rb"</em><br>
-                <em>"Gajian bulan ini 5 juta"</em><br>
-                <em>"Bayar Grab ke kantor 28 ribu"</em>
+                Halo, <strong x-text="user?.name?.split(' ')[0] || 'Teman'"></strong>! 👋 Saya bisa bantu catat <strong>pemasukan</strong> dan <strong>pengeluaran</strong> kamu.<br><br>
+                Ketik aja transaksinya, misalnya:<br>
+                <em>"Tadi beli makan siang 35rb"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span><br>
+                <em>"Gajian bulan ini 5 juta"</em> <span style="color:rgba(17,16,16,.4)">← pemasukan</span><br>
+                <em>"Bayar Grab ke kantor 28 ribu"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span>
                 <div class="chips">
                     <div class="chip" @click="sendQuick('Beli makan siang 35rb')">🍜 Makan 35rb</div>
                     <div class="chip" @click="sendQuick('Bayar Grab 28 ribu')">🚗 Grab 28rb</div>
@@ -112,6 +112,8 @@
                             }
                             bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (inner.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>';
                             bubbleHtml += '</div>';
+                        } else if (inner.message) {
+                            bubbleHtml = this.escapeHtml(inner.message);
                         }
                     } else if (data.response) {
                         bubbleHtml = this.escapeHtml(data.response);
