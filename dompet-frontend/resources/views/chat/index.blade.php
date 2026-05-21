@@ -92,20 +92,33 @@
                 this.loading = true;
                 try {
                     const res = await window.apiClient.post('/transactions/chat', { message: val });
-                    const data = res.data.data || res.data;
                     t.remove();
 
-                    let bubbleHtml = this.escapeHtml(data.response);
-                    if (data.amount && data.description) {
-                        const sign = data.type === 'income' ? 'inc' : 'exp';
-                        bubbleHtml += '<div class="confirm-card">' +
-                            '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(data.description) + '</span></div>' +
-                            '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.escapeHtml(data.amount_formatted) + '</span></div>';
-                        if (data.category) {
-                            bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(data.category) + '</span></div>';
+                    const data = res.data;
+                    let bubbleHtml = '';
+
+                    if (data.data) {
+                        const inner = data.data;
+                        if (inner.response) {
+                            bubbleHtml = this.escapeHtml(inner.response);
                         }
-                        bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (data.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>';
-                        bubbleHtml += '</div>';
+                        if (inner.amount && inner.description) {
+                            const sign = inner.type === 'income' ? 'inc' : 'exp';
+                            bubbleHtml += '<div class="confirm-card">' +
+                                '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(inner.description) + '</span></div>' +
+                                '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.escapeHtml(inner.amount_formatted || inner.amount) + '</span></div>';
+                            if (inner.category) {
+                                bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(inner.category) + '</span></div>';
+                            }
+                            bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (inner.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>';
+                            bubbleHtml += '</div>';
+                        }
+                    } else if (data.response) {
+                        bubbleHtml = this.escapeHtml(data.response);
+                    } else if (data.message) {
+                        bubbleHtml = this.escapeHtml(data.message);
+                    } else {
+                        bubbleHtml = this.escapeHtml(JSON.stringify(data));
                     }
 
                     const a = document.createElement('div');
@@ -117,7 +130,7 @@
                     const errorMsg = window.utils.parseApiError(e, 'Maaf, lagi ada gangguan. Coba lagi ya!');
                     const a = document.createElement('div');
                     a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">' + errorMsg + '</div><div class="msg-time">' + now + '</div>';
+                    a.innerHTML = '<div class="msg-bub">' + this.escapeHtml(errorMsg) + '</div><div class="msg-time">' + now + '</div>';
                     msgs.appendChild(a);
                 } finally {
                     this.loading = false;
