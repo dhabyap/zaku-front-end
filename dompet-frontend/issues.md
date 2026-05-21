@@ -128,3 +128,93 @@ Acceptance criteria:
 - [ ] No visible Withdraw menu.
 - [ ] No visible Send Money menu.
 - [ ] Main flow points users to record income or expense.
+
+## FE-008 - Deploy ke Shared Hosting (tanpa Node.js/NPM)
+
+Priority: High
+Status: Todo
+
+Problem:
+Shared hosting tidak memiliki Node.js atau NPM. Frontend ini menggunakan Laravel + Vite yang membutuhkan build step untuk mengompilasi assets (CSS/JS).
+
+Solution:
+Build assets secara lokal di mesin development (yang punya Node.js), lalu upload hanya file yang diperlukan ke shared hosting.
+
+### Step-by-Step Deployment:
+
+#### Step 1: Build Assets di Lokal
+Di mesin development yang memiliki Node.js:
+```bash
+cd dompet-frontend
+npm install
+npm run build
+```
+Ini akan menghasilkan folder `public/build/` dengan file CSS dan JS yang sudah ter-kompilasi.
+
+#### Step 2: Siapkan File untuk Upload
+Upload folder/file berikut ke shared hosting:
+```
+dompet-frontend/
+├── app/
+├── bootstrap/
+├── config/
+├── database/
+├── public/          ← Termasuk public/build/ (hasil build)
+├── resources/       ← Blade views saja (views/)
+├── routes/
+├── storage/         ← Pastikan writable (chmod 755/775)
+├── vendor/
+├── .env             ← Sesuaikan konfigurasi untuk production
+├── artisan
+└── composer.json
+```
+
+**JANGAN upload:**
+- `node_modules/`
+- `package.json`
+- `package-lock.json`
+- `vite.config.js`
+- `.git/`
+- `tests/`
+
+#### Step 3: Upload ke Shared Hosting
+1. Zip semua file yang diperlukan di lokal
+2. Upload via FTP/cPanel File Manager ke folder `public_html` atau folder domain
+3. Extract di server
+
+#### Step 4: Konfigurasi Server
+1. **Set document root** ke folder `public/`
+2. **Edit `.env`**:
+   ```env
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://yourdomain.com
+   VITE_API_BASE_URL=https://your-backend-api.com/api
+   ```
+3. **Jalankan migration** (jika ada akses SSH/terminal):
+   ```bash
+   php artisan migrate --force
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+4. **Jika tidak ada SSH**: Pastikan database sudah di-migrate dari lokal sebelum upload
+
+#### Step 5: Set Permissions
+Pastikan folder berikut writable:
+```bash
+chmod -R 775 storage/
+chmod -R 775 bootstrap/cache/
+```
+
+#### Step 6: Test
+- Akses domain
+- Cek apakah CSS/JS ter-load (inspect element)
+- Test login dan fitur utama
+
+### Acceptance criteria:
+- [ ] Assets (CSS/JS) ter-load dengan benar tanpa Node.js di server
+- [ ] Semua halaman berfungsi
+- [ ] Login/register bekerja
+- [ ] API calls ke backend berhasil
+- [ ] Tidak ada error di browser console

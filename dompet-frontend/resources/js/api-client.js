@@ -4,7 +4,7 @@ import { getToken, setToken, clearToken } from "./auth";
 
 // Create an axios instance with base URL and JSON headers
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+    baseURL: "https://api-zaku.abysoft.my.id/api",
     headers: {
         "Content-Type": "application/json",
     },
