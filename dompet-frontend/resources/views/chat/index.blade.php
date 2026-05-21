@@ -91,7 +91,7 @@
 
                 this.loading = true;
                 try {
-                    const res = await window.apiClient.post('/transactions/chat', { message: val });
+                    const res = await window.apiClient.post('/ai/chat', { message: val });
                     t.remove();
 
                     const data = res.data;
@@ -119,8 +119,11 @@
                         bubbleHtml = this.escapeHtml(data.response);
                     } else if (data.message) {
                         bubbleHtml = this.escapeHtml(data.message);
-                    } else {
-                        bubbleHtml = this.escapeHtml(JSON.stringify(data));
+                    }
+
+                    // Fallback if bubbleHtml is still empty
+                    if (!bubbleHtml) {
+                        bubbleHtml = '<em style="color: #999;">Maaf, tidak ada respons dari server. Coba lagi ya!</em>';
                     }
 
                     const a = document.createElement('div');
