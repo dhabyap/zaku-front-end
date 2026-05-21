@@ -157,6 +157,71 @@ Setelah build, cukup jalankan `php artisan serve` saja.
 
 ---
 
+## 🔄 Workflow Update & Deploy ke Shared Hosting
+
+### Apakah harus build ulang setiap ada perubahan?
+
+**YA.** Setiap kali ada perubahan pada file:
+- `resources/js/*.js`
+- `resources/css/*.css`
+- `resources/views/*.blade.php` (jika ada inline JS/CSS)
+
+Maka **harus build ulang** agar file di `public/build/` ter-update.
+
+### Step-by-Step Manual Update:
+
+#### 1. Setelah Pull Perubahan dari Git
+```bash
+git pull origin main
+```
+
+#### 2. Build Assets (WAJIB jika ada perubahan JS/CSS)
+```bash
+npm run build
+```
+
+Output akan ter-update di folder `public/build/`:
+```
+public/build/
+── manifest.json
+├── assets/app-XXXXX.js
+├── assets/app-XXXXX.css
+└── assets/custom-XXXXX.css
+```
+
+#### 3. Commit & Push ke Repository
+```bash
+git add public/build/
+git commit -m "chore: rebuild assets after changes"
+git push origin main
+```
+
+#### 4. Deploy ke Production Server
+Di server production (shared hosting):
+```bash
+git pull origin main
+```
+
+> ⚠️ **PENTING:** Jangan lupa upload folder `vendor/` via FTP/cPanel jika ada perubahan composer dependencies.
+
+### Quick Command (Semua dalam satu baris):
+```bash
+git pull origin main && npm run build && git add public/build/ && git commit -m "chore: rebuild assets" && git push origin main
+```
+
+### Kapan TIDAK perlu build?
+- Hanya perubahan PHP di folder `app/`, `routes/`, `config/`
+- Hanya perubahan Blade views tanpa inline JS/CSS
+- Perubahan `.env` atau konfigurasi server
+
+### Kapan HARUS build?
+- Perubahan file `.js` di `resources/js/`
+- Perubahan file `.css` di `resources/css/`
+- Perubahan `vite.config.js`
+- Update package (axios, alpinejs, dll) via `npm install`
+
+---
+
 ## 📁 Struktur Folder
 
 ```
