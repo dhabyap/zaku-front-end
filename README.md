@@ -222,6 +222,75 @@ git pull origin main && npm run build && git add public/build/ && git commit -m 
 
 ---
 
+## ⚠️ Checklist Setelah Pull Update Terbaru
+
+Setiap kali ada update dari repository, lakukan langkah berikut:
+
+### 1. Cek `.env.example` vs `.env`
+File `.env` **TIDAK** otomatis ter-update saat pull dari git karena `.env` ada di `.gitignore`.
+
+**Cara cek:**
+```bash
+diff .env.example .env
+```
+
+**Jika ada perubahan di `.env.example`:**
+- Buka `.env.example` dan lihat variabel baru apa yang ditambahkan
+- Tambahkan variabel tersebut ke `.env` dengan nilai yang sesuai
+- Contoh: jika `.env.example` punya `VITE_NEW_FEATURE=true`, tambahkan ke `.env`
+
+### 2. Clear Cache Laravel (WAJIB)
+Setiap kali ada perubahan konfigurasi, routes, atau views:
+```bash
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan cache:clear
+```
+
+**Atau satu command:**
+```bash
+php artisan optimize:clear
+```
+
+### 3. Cek Migration Baru
+Jika ada file migration baru di folder `database/migrations/`:
+```bash
+php artisan migrate --force
+```
+
+> ⚠️ **PENTING:** Pastikan backup database dulu sebelum migrate di production!
+
+### 4. Cek Composer Dependencies
+Jika ada perubahan di `composer.json` atau `composer.lock`:
+```bash
+composer install --no-dev --optimize-autoloader
+```
+
+### 5. Rebuild Assets (Jika Ada Perubahan JS/CSS)
+```bash
+npm run build
+```
+
+### 6. Restart Server (Jika Pakai PHP Built-in Server)
+Jika pakai `php artisan serve`, restart dengan:
+```bash
+# Tekan Ctrl+C di terminal yang running server
+php artisan serve
+```
+
+### Quick Checklist:
+```bash
+git pull origin main
+diff .env.example .env  # Cek apakah ada variabel baru
+php artisan optimize:clear
+php artisan migrate --force  # Jika ada migration baru
+composer install  # Jika composer.json berubah
+npm run build  # Jika JS/CSS berubah
+```
+
+---
+
 ## 📁 Struktur Folder
 
 ```
