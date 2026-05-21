@@ -218,3 +218,34 @@ chmod -R 775 bootstrap/cache/
 - [ ] Login/register bekerja
 - [ ] API calls ke backend berhasil
 - [ ] Tidak ada error di browser console
+
+## FE-009 - Chat AI Response Tidak Muncul di UI
+
+Priority: High
+Status: Todo
+
+Problem:
+User mengirim pesan chat (contoh: "makan bubur 20 ribu"), request terkirim ke backend dengan payload benar, response dari backend ada, namun balasan chat tidak muncul di UI frontend.
+
+Evidence:
+- Request payload: `{"message": "makan bubur 20 ribu"}` - benar
+- Backend response: ada (user konfirmasi)
+- UI: pesan user muncul, tapi balasan AI tidak muncul
+
+Possible causes:
+1. Frontend tidak mem-parse response dengan benar
+2. Response structure tidak sesuai dengan yang diharapkan frontend
+3. Alpine.js tidak update state setelah menerima response
+4. Error handling swallow response tanpa menampilkan
+
+Files to check:
+- `resources/views/chat/index.blade.php`
+- `resources/js/api-client.js`
+- `resources/js/chat.js` (jika ada)
+
+Acceptance criteria:
+- [ ] Response dari backend muncul sebagai balasan chat di UI
+- [ ] Format response sesuai (text/cards/transactions)
+- [ ] Tidak ada error di browser console
+- [ ] Loading state muncul saat menunggu response
+- [ ] Error state muncul jika request gagal
