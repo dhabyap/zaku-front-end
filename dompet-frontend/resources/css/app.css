@@ -596,6 +596,11 @@ html, body {
   padding: 12px 14px;
 }
 
+.cat-bar-highlighted {
+  background: rgba(217, 25, 53, 0.04);
+  border: 1.5px solid var(--punch);
+}
+
 .cat-bar-top {
   display: flex;
   justify-content: space-between;
@@ -613,10 +618,28 @@ html, body {
 
 .cat-bar-name .emo { font-size: 14px; }
 
+.cat-bar-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .cat-bar-amount {
   font-size: 13px;
   font-weight: 800;
   color: var(--punch);
+}
+
+.cat-bar-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--cream);
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 40px;
+  text-align: center;
 }
 
 .cat-bar-track {
@@ -629,6 +652,38 @@ html, body {
 .cat-bar-fill {
   height: 100%;
   background: var(--ink);
+}
+
+.cat-bar-fill.highlighted {
+  background: var(--punch);
+}
+
+.cat-insight {
+  background: var(--punch-2);
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.cat-insight-icon {
+  width: 32px; height: 32px;
+  background: var(--ink);
+  border: 1.5px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.cat-insight-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(17, 16, 16, 0.7);
+  font-weight: 500;
 }
 
 .insight-strip {
