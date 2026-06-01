@@ -37,6 +37,54 @@
                 </div>
             </div>
 
+            <div class="budget-box budget-health-box">
+                <template x-if="loading.budget">
+                    <div>
+                        <div class="budget-top">
+                            <div>
+                                <div class="budget-label">BUDGET HEALTH</div>
+                                <div class="budget-amount" style="background:rgba(17,16,16,.12);height:24px;width:150px;margin-top:6px;"></div>
+                            </div>
+                            <div class="budget-pct" style="background:rgba(17,16,16,.12);width:64px;height:44px;"></div>
+                        </div>
+                        <div class="budget-track">
+                            <div class="budget-fill" style="width:40%;opacity:.35;"></div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="!loading.budget && budget.limit > 0">
+                    <div>
+                        <div class="budget-top">
+                            <div>
+                                <div class="budget-label">BUDGET HEALTH</div>
+                                <div class="budget-amount" x-text="budget.status">AMAN</div>
+                            </div>
+                            <div class="budget-pct" x-text="budget.score">80</div>
+                        </div>
+                        <div class="budget-track">
+                            <div class="budget-fill" :class="budget.statusClass" :style="'width:' + budget.usedPct + '%'"></div>
+                        </div>
+                        <div class="budget-foot">
+                            <span x-text="'TERPAKAI Rp ' + formatNumber(budget.used)">TERPAKAI Rp 0</span>
+                            <span x-text="'SISA Rp ' + formatNumber(budget.left)">SISA Rp 0</span>
+                        </div>
+                        <div class="budget-health-note" x-text="budget.insight"></div>
+                    </div>
+                </template>
+
+                <template x-if="!loading.budget && budget.limit <= 0">
+                    <div class="budget-empty">
+                        <div>
+                            <div class="budget-label">BUDGET HEALTH</div>
+                            <div class="budget-amount">Budget belum diatur</div>
+                            <div class="budget-health-note">Atur budget bulanan agar Zaku bisa membaca kondisi pengeluaranmu.</div>
+                        </div>
+                        <a href="/profile" class="btn-tiny budget-setup-btn">ATUR</a>
+                    </div>
+                </template>
+            </div>
+
             <div class="insight-strip" style="cursor:pointer;">
                 <div class="insight-icon">💡</div>
                 <div class="insight-text">
@@ -129,10 +177,21 @@
                 expense: 0,
                 transactions: [],
                 categories: [],
+                budget: {
+                    limit: 0,
+                    used: 0,
+                    left: 0,
+                    usedPct: 0,
+                    score: 0,
+                    status: 'Budget belum diatur',
+                    statusClass: 'risk',
+                    insight: ''
+                },
                 loading: {
                     balance: true,
                     transactions: true,
-                    categories: true
+                    categories: true,
+                    budget: true
                 },
                 async init() {
                     this.fetchDashboard();
@@ -145,6 +204,77 @@
                     if (!d) return '';
                     const date = new Date(d);
                     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+                },
+                toNumber(value) {
+                    const number = Number(value);
+                    return Number.isFinite(number) ? number : 0;
+                },
+                clamp(value, min, max) {
+                    return Math.min(Math.max(value, min), max);
+                },
+                readBudgetLimit(data) {
+                    const user = window.auth.getUser() || {};
+                    return this.toNumber(
+                        data.monthly_budget
+                        || data.budget_limit
+                        || data.budget?.limit
+                        || data.budget?.monthly_budget
+                        || user.monthly_budget
+                        || user.budget?.limit
+                    );
+                },
+                updateBudget(data = {}) {
+                    const limit = this.readBudgetLimit(data);
+                    const used = this.toNumber(
+                        data.budget_used
+                        || data.used_budget
+                        || data.budget?.used
+                        || data.budget?.spent
+                        || data.total_expense
+                        || this.expense
+                    );
+                    const left = Math.max(0, this.toNumber(
+                        data.remaining_budget
+                        || data.budget_left
+                        || data.budget?.left
+                        || data.budget?.remaining
+                        || (limit - used)
+                    ));
+
+                    if (limit <= 0) {
+                        this.budget = {
+                            limit: 0,
+                            used,
+                            left: 0,
+                            usedPct: 0,
+                            score: 0,
+                            status: 'Budget belum diatur',
+                            statusClass: 'risk',
+                            insight: 'Atur budget bulanan agar Zaku bisa membaca kondisi pengeluaranmu.'
+                        };
+                        return;
+                    }
+
+                    const usedPct = this.clamp(Math.round((used / limit) * 100), 0, 100);
+                    const score = this.clamp(100 - usedPct, 0, 100);
+                    let status = 'RISIKO BOROS';
+                    let statusClass = 'risk';
+
+                    if (score >= 80) {
+                        status = 'AMAN';
+                        statusClass = 'safe';
+                    } else if (score >= 50) {
+                        status = 'PERLU DIJAGA';
+                        statusClass = 'watch';
+                    }
+
+                    const insight = score >= 80
+                        ? 'Budget masih aman. Pertahankan ritme pengeluaran bulan ini.'
+                        : score >= 50
+                            ? 'Pengeluaran mulai mendekati batas. Jaga transaksi besar berikutnya.'
+                            : 'Budget berisiko habis. Prioritaskan kebutuhan utama dulu.';
+
+                    this.budget = { limit, used, left, usedPct, score, status, statusClass, insight };
                 },
                 getEmoji(cat) {
                     const map = {
@@ -166,6 +296,7 @@
                         this.balance = data.current_month_balance || 0;
                         this.income = data.total_income || 0;
                         this.expense = data.total_expense || 0;
+                        this.updateBudget(data);
                         if (data.recent_transactions) {
                             this.transactions = data.recent_transactions;
                         }
@@ -184,6 +315,7 @@
                         this.loading.balance = false;
                         this.loading.transactions = false;
                         this.loading.categories = false;
+                        this.loading.budget = false;
                     }
                 },
             }
