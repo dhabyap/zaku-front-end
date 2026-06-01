@@ -1132,6 +1132,18 @@ html, body {
   width: 67%;
 }
 
+.budget-health-box .budget-fill.safe {
+  background: #00A36B;
+}
+
+.budget-health-box .budget-fill.watch {
+  background: var(--punch-2);
+}
+
+.budget-health-box .budget-fill.risk {
+  background: var(--punch);
+}
+
 .budget-foot {
   display: flex;
   justify-content: space-between;
@@ -1139,6 +1151,26 @@ html, body {
   font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(17,16,16,.5);
+}
+
+.budget-health-note {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: rgba(17,16,16,.72);
+}
+
+.budget-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.budget-setup-btn {
+  flex-shrink: 0;
+  text-decoration: none;
 }
 
 .menu-block {
