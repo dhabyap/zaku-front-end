@@ -46,8 +46,8 @@
                                 <div class="tx-desc" x-text="trx.description"></div>
                                 <div class="tx-meta">
                                     <span x-text="trx.category_name || 'UMUM'"></span>
-                                    <span class="tx-meta-sep">·</span>
-                                    <span x-text="formatDay(trx.created_at)"></span>
+                                    <span class="tx-meta-sep" x-show="transactionDay(trx)">·</span>
+                                    <span x-text="transactionDay(trx)"></span>
                                 </div>
                             </div>
                             <div class="tx-amt"
@@ -78,7 +78,14 @@
                 formatDay(d) {
                     if (!d) return '';
                     const date = new Date(d);
+                    if (isNaN(date.getTime())) return '';
                     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                },
+                getTransactionDate(trx) {
+                    return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null;
+                },
+                transactionDay(trx) {
+                    return this.formatDay(this.getTransactionDate(trx));
                 },
                 getEmoji(cat) {
                     const map = {
@@ -109,7 +116,12 @@
 
                         groups.forEach(group => {
                             if (Array.isArray(group.transactions)) {
-                                flatTx = flatTx.concat(group.transactions);
+                                const transactions = group.transactions.map(trx => ({
+                                    ...trx,
+                                    month_label: trx.month_label || group.month_label,
+                                }));
+
+                                flatTx = flatTx.concat(transactions);
                             }
                         });
 
@@ -137,8 +149,13 @@
                     const groups = {};
                     const data = this.filtered();
                     data.forEach(t => {
-                        const d = new Date(t.created_at);
-                        const key = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
+                        const dateValue = this.getTransactionDate(t);
+                        const date = dateValue ? new Date(dateValue) : null;
+                        const key = t.month_label
+                            || (date && !isNaN(date.getTime())
+                                ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+                                : 'TANPA TANGGAL');
+
                         if (!groups[key]) groups[key] = [];
                         groups[key].push(t);
                     });
