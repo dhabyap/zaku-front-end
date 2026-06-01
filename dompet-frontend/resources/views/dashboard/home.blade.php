@@ -86,10 +86,17 @@
             </div>
 
             <div class="insight-strip" style="cursor:pointer;">
-                <div class="insight-icon">💡</div>
+                <div class="insight-icon" x-text="insightType === 'warning' ? '⚠️' : '💡'">💡</div>
                 <div class="insight-text">
-                    Pengeluaran makanan minggu ini +23%
-                    <span>Dibanding minggu lalu · Rp 385.000</span>
+                    <template x-if="loading.categories || loading.budget">
+                        <div style="opacity:.5">Memuat insight...</div>
+                    </template>
+                    <template x-if="!loading.categories && !loading.budget">
+                        <div x-text="insightText">Belum ada insight. Mulai catat transaksimu agar Zaku bisa memberikan insight.</div>
+                        <template x-if="insightDetail">
+                            <span x-text="insightDetail" style="display:block;margin-top:6px;font-size:12px;color:rgba(17,16,16,.6)"></span>
+                        </template>
+                    </template>
                 </div>
             </div>
 
@@ -191,6 +198,9 @@
                 maxCategory: null,
                 maxCategoryAmount: 0,
                 maxCategoryPct: 0,
+                insightText: '',
+                insightDetail: '',
+                insightType: 'info',
                 budget: {
                     limit: 0,
                     used: 0,
@@ -303,6 +313,29 @@
                     };
                     return map[cat?.toUpperCase()] || '📄';
                 },
+                updateInsight() {
+                    // Default friendly message
+                    this.insightType = 'info';
+                    this.insightText = 'Belum ada insight. Mulai catat transaksimu agar Zaku bisa memberikan insight.';
+                    this.insightDetail = '';
+
+                    // If budget exists and is at risk, show budget warning
+                    if (this.budget && this.budget.limit > 0 && this.budget.score <= 50) {
+                        this.insightType = 'warning';
+                        this.insightText = 'Pengeluaran mendekati batas budget.';
+                        this.insightDetail = 'Terpakai Rp ' + this.formatNumber(this.budget.used) + ' · Sisa Rp ' + this.formatNumber(this.budget.left);
+                        return;
+                    }
+
+                    // If there's a largest category, show category insight
+                    if (this.maxCategory && this.maxCategoryAmount > 0) {
+                        this.insightType = 'info';
+                        this.insightText = this.maxCategory.name + ' mengambil ' + this.maxCategoryPct + '% dari total pengeluaran bulan ini.';
+                        this.insightDetail = 'Total Rp ' + this.formatNumber(this.maxCategoryAmount);
+                        return;
+                    }
+                },
+
                 async fetchDashboard() {
                     try {
                         const res = await window.apiClient.get('/dashboard');
@@ -333,7 +366,11 @@
                                 this.maxCategoryAmount = maxCat.amount;
                                 this.maxCategoryPct = maxCat.pct;
                             }
+                            // Update insight after categories + budget processed
+                            this.updateInsight();
                         }
+                        // Ensure insight is updated even if there are no categories
+                        if (!data.expense_by_category) this.updateInsight();
                     } catch (e) {
                         console.error('Fetch dashboard error:', e);
                         window.utils.showToast('error', 'Gagal memuat data dashboard');
