@@ -135,19 +135,30 @@
                     <div class="section-title">PENGELUARAN PER KATEGORI</div>
                 </div>
                 <div class="cat-bars">
-                    <template x-if="!loading.categories">
+                    <template x-if="!loading.categories && categories.length > 0">
                         <template x-for="cat in categories" :key="cat.name">
-                            <div class="cat-bar">
+                            <div class="cat-bar" :class="cat.amount === maxCategoryAmount ? 'cat-bar-highlighted' : ''">
                                 <div class="cat-bar-top">
                                     <div class="cat-bar-name"><span class="emo" x-text="cat.emoji">🍜</span> <span
                                             x-text="cat.name">MAKANAN</span></div>
-                                    <div class="cat-bar-amount" x-text="'Rp ' + formatNumber(cat.amount)">Rp 0</div>
+                                    <div class="cat-bar-meta">
+                                        <div class="cat-bar-amount" x-text="'Rp ' + formatNumber(cat.amount)">Rp 0</div>
+                                        <div class="cat-bar-pct" x-text="cat.pct + '%'">42%</div>
+                                    </div>
                                 </div>
                                 <div class="cat-bar-track">
-                                    <div class="cat-bar-fill" :style="'width:' + cat.pct + '%'"></div>
+                                    <div class="cat-bar-fill" :class="cat.amount === maxCategoryAmount ? 'highlighted' : ''" :style="'width:' + cat.pct + '%'"></div>
                                 </div>
                             </div>
                         </template>
+                    </template>
+                    <template x-if="!loading.categories && categories.length > 0 && maxCategory">
+                        <div class="cat-insight">
+                            <div class="cat-insight-icon">💡</div>
+                            <div class="cat-insight-text" x-text="maxCategory.name + ' mengambil ' + maxCategoryPct + '% dari total pengeluaran bulan ini.'">
+                                Makanan mengambil 42% dari total pengeluaran bulan ini.
+                            </div>
+                        </div>
                     </template>
                     <template x-if="!categories || categories.length === 0">
                         <div class="cat-bar" style="justify-content:center;padding:24px;text-align:center;">
@@ -177,6 +188,9 @@
                 expense: 0,
                 transactions: [],
                 categories: [],
+                maxCategory: null,
+                maxCategoryAmount: 0,
+                maxCategoryPct: 0,
                 budget: {
                     limit: 0,
                     used: 0,
@@ -302,11 +316,23 @@
                         }
                         if (data.expense_by_category) {
                             const total = data.expense_by_category.reduce((s, c) => s + (c.amount || 0), 0);
-                            this.categories = data.expense_by_category.map(c => ({
-                                ...c,
-                                pct: total > 0 ? Math.round((c.amount / total) * 100) : 0,
-                                emoji: this.getEmoji(c.name)
-                            }));
+                            this.categories = data.expense_by_category
+                                .filter(c => (c.amount || 0) > 0)
+                                .map(c => ({
+                                    ...c,
+                                    pct: total > 0 ? Math.round((c.amount / total) * 100) : 0,
+                                    emoji: this.getEmoji(c.name)
+                                }));
+                            
+                            // Find max category
+                            if (this.categories.length > 0) {
+                                const maxCat = this.categories.reduce((max, cat) => 
+                                    cat.amount > max.amount ? cat : max
+                                );
+                                this.maxCategory = maxCat;
+                                this.maxCategoryAmount = maxCat.amount;
+                                this.maxCategoryPct = maxCat.pct;
+                            }
                         }
                     } catch (e) {
                         console.error('Fetch dashboard error:', e);
