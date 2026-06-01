@@ -1,66 +1,67 @@
 @extends('layouts.app')
 
 @section('content')
-    <div x-data="transactionList()" style="display:flex;flex-direction:column;height:100%;">
-        <div class="hist-top">
-            <div class="hist-title">Riwayat.</div>
-            <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
-        </div>
-
-        <div class="filter-scroll">
-            <button class="filter-pill on" @click="setFilter('all', $el)">SEMUA</button>
-            <button class="filter-pill" @click="setFilter('income', $el)">PEMASUKAN</button>
-            <button class="filter-pill" @click="setFilter('expense', $el)">PENGELUARAN</button>
-            <template x-for="cat in categories" :key="cat">
-                <button class="filter-pill" @click="setFilter(cat, $el)" x-text="cat"></button>
-            </template>
-        </div>
-
-        <div class="screen-body" style="padding-bottom:90px;padding-top:0">
-            <template x-if="loading">
-                <div style="padding:16px;">
-                    <x-loading-skeleton count="5" />
-                </div>
-            </template>
-
-            <template x-if="!loading && filtered().length === 0">
-                <div style="padding:40px 16px;text-align:center;">
-                    <div style="font-size:48px;margin-bottom:12px;">📭</div>
-                    <span style="font-family:var(--font-mono);font-size:10px;color:rgba(17,16,16,.4);">TIDAK ADA
-                        TRANSAKSI</span>
-                    <div style="margin-top:8px;font-size:12px;color:rgba(17,16,16,.3);">Mulai catat pemasukan atau pengeluaran via AI Chat</div>
-                </div>
-            </template>
-
-            <template x-for="(group, month) in grouped()" :key="month">
-                <div class="month-group">
-                    <div class="month-label" x-text="month"></div>
-                    <div class="tx-list" style="padding:0 16px;gap:8px">
-                        <template x-for="trx in group" :key="trx.id">
-                            <a :href="'/transactions/' + trx.id" class="tx"
-                                :class="trx.type === 'income' ? 'income' : 'expense'"
-                                style="text-decoration:none;cursor:pointer;">
-                                <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
-                                <div class="tx-info">
-                                    <div class="tx-desc" x-text="trx.description"></div>
-                                    <div class="tx-meta">
-                                        <span x-text="trx.category_name || 'UMUM'"></span>
-                                        <span class="tx-meta-sep">·</span>
-                                        <span x-text="formatDay(trx.created_at)"></span>
-                                    </div>
-                                </div>
-                                <div class="tx-amt"
-                                    x-text="(trx.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(trx.amount)"></div>
-                            </a>
-                        </template>
-                    </div>
-                </div>
-            </template>
-        </div>
+<div x-data="transactionList()" style="display:flex;flex-direction:column;height:100%;">
+    <div class="hist-top">
+        <div class="hist-title">Riwayat.</div>
+        <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
     </div>
 
-    <script>
-        function transactionList() {
+    <div class="filter-scroll">
+        <button class="filter-pill on" @click="setFilter('all', $el)">SEMUA</button>
+        <button class="filter-pill" @click="setFilter('income', $el)">PEMASUKAN</button>
+        <button class="filter-pill" @click="setFilter('expense', $el)">PENGELUARAN</button>
+        <template x-for="cat in categories" :key="cat">
+            <button class="filter-pill" @click="setFilter(cat, $el)" x-text="cat"></button>
+        </template>
+    </div>
+
+    <div class="screen-body" style="padding-bottom:90px;padding-top:0">
+        <template x-if="loading">
+            <div style="padding:16px;">
+                <x-loading-skeleton count="5" />
+            </div>
+        </template>
+
+        <template x-if="!loading && filtered().length === 0">
+            <div style="padding:40px 16px;text-align:center;">
+                <div style="font-size:48px;margin-bottom:12px;">📭</div>
+                <span style="font-family:var(--font-mono);font-size:10px;color:rgba(17,16,16,.4);">TIDAK ADA
+                    TRANSAKSI</span>
+                <div style="margin-top:8px;font-size:12px;color:rgba(17,16,16,.3);">Mulai catat pemasukan atau
+                    pengeluaran via AI Chat</div>
+            </div>
+        </template>
+
+        <template x-for="(group, month) in grouped()" :key="month">
+            <div class="month-group">
+                <div class="month-label" x-text="month"></div>
+                <div class="tx-list" style="padding:0 16px;gap:8px">
+                    <template x-for="trx in group" :key="trx.id">
+                        <a :href="'/transactions/' + trx.id" class="tx"
+                            :class="trx.type === 'income' ? 'income' : 'expense'"
+                            style="text-decoration:none;cursor:pointer;">
+                            <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
+                            <div class="tx-info">
+                                <div class="tx-desc" x-text="trx.description"></div>
+                                <div class="tx-meta">
+                                    <span x-text="trx.category_name || 'UMUM'"></span>
+                                    <span class="tx-meta-sep">·</span>
+                                    <span x-text="formatDay(trx.created_at)"></span>
+                                </div>
+                            </div>
+                            <div class="tx-amt"
+                                x-text="(trx.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(trx.amount)"></div>
+                        </a>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    function transactionList() {
             return {
                 transactions: [],
                 loading: true,
@@ -102,13 +103,16 @@
                 async fetchTransactions() {
                     try {
                         const res = await window.apiClient.get('/transactions');
-                        const rawData = res.data.data || [];
+                        const payload = res.data.data || {};
+                        const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                         let flatTx = [];
-                        rawData.forEach(group => {
-                            if (group.transactions) {
+
+                        groups.forEach(group => {
+                            if (Array.isArray(group.transactions)) {
                                 flatTx = flatTx.concat(group.transactions);
                             }
                         });
+
                         this.transactions = flatTx;
                     } catch (e) {
                         console.error('Fetch transactions error:', e);
@@ -142,5 +146,5 @@
                 }
             }
         }
-    </script>
+</script>
 @endsection
