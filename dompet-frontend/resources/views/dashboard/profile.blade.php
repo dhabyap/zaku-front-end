@@ -120,20 +120,29 @@
         return {
             user: window.auth.getUser(),
             stats: { total: 0, month: 0, biggest: 0, categories: 0 },
-            budget: { limit: 6000000, used: 4025000, pct: 67, left: 1975000 },
+            budget: { limit: 0, used: 0, pct: 0, left: 0 },
             editForm: { name: '', email: '' },
-            budgetInput: 6000000,
+            budgetInput: 0,
             async init() {
                 try {
                     const res = await window.apiClient.get('/user/profile');
-                    this.user = res.data.data;
+                    const data = res.data.data;
+                    this.user = data;
                     window.auth.setUser(this.user);
+                    if (data.budget) {
+                        this.budget = {
+                            limit: data.budget.monthly_budget || 0,
+                            used: data.budget.budget_used || 0,
+                            pct: data.budget.budget_percentage || 0,
+                            left: Math.max(0, (data.budget.monthly_budget || 0) - (data.budget.budget_used || 0))
+                        };
+                        this.budgetInput = this.budget.limit;
+                    }
                 } catch (e) {
                     console.error('Fetch profile error:', e);
                     window.utils.showToast('error', 'Gagal memuat data profil');
                 }
                 this.editForm = { name: this.user?.name || '', email: this.user?.email || '' };
-                this.budgetInput = this.budget.limit;
                 this.fetchStats();
             },
             formatNumber(n) {
@@ -189,8 +198,11 @@
             },
             async saveBudget() {
                 try {
-                    await window.apiClient.put('/user/budget', { monthly_budget: parseInt(this.budgetInput) });
-                    this.budget.limit = parseInt(this.budgetInput);
+                    const newLimit = parseInt(this.budgetInput);
+                    await window.apiClient.put('/user/budget', { monthly_budget: newLimit });
+                    this.budget.limit = newLimit;
+                    this.budget.pct = newLimit > 0 ? Math.min(100, Math.round((this.budget.used / newLimit) * 100)) : 0;
+                    this.budget.left = Math.max(0, newLimit - this.budget.used);
                     this.closeModal('m-budget');
                     window.utils.showToast('success', 'Budget disimpan! ✓');
                 } catch (e) {
