@@ -353,8 +353,10 @@
                                 .filter(c => (c.amount || 0) > 0)
                                 .map(c => ({
                                     ...c,
+                                    name: c.category_name || c.name || 'LAINNYA',
+                                    icon: c.category_icon || c.icon || '📌',
                                     pct: total > 0 ? Math.round((c.amount / total) * 100) : 0,
-                                    emoji: this.getEmoji(c.name)
+                                    emoji: this.getEmoji(c.category_name || c.name)
                                 }));
                             
                             // Find max category
