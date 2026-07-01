@@ -46,8 +46,8 @@
                                 <div class="tx-desc" x-text="trx.description"></div>
                                 <div class="tx-meta">
                                     <span x-text="trx.category_name || 'UMUM'"></span>
-                                    <span class="tx-meta-sep" x-show="transactionDay(trx)">·</span>
-                                    <span x-text="transactionDay(trx)"></span>
+                                    <span class="tx-meta-sep">·</span>
+                                    <span x-text="trx.date_formatted || transactionDay(trx)"></span>
                                 </div>
                             </div>
                             <div class="tx-amt"
