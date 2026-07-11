@@ -75,4 +75,9 @@ class PageController extends Controller
     {
         return view('wallet.send-money');
     }
+
+    public function changelogs()
+    {
+        return view('dashboard.changelogs');
+    }
 }

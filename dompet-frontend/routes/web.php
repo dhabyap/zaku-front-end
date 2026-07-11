@@ -19,3 +19,4 @@ Route::get('/transactions', [PageController::class, 'transactions'])->name('tran
 Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
 Route::get('/chat', [PageController::class, 'chat'])->name('chat');
 Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+Route::get('/changelogs', [PageController::class, 'changelogs'])->name('changelogs');

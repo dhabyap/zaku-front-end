@@ -42,8 +42,20 @@
                     </div>
                     <div>
                         <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">KATEGORI</div>
-                        <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category_name || transaction.category || 'UMUM'"></div>
-                    </div>
+                        <div x-show="!editing">
+                            <span style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category_name || transaction.category || 'UMUM'"></span>
+                            <button @click="startEdit()" style="background:none;border:none;cursor:pointer;font-size:14px;margin-left:8px;vertical-align:middle;">✏️</button>
+                        </div>
+                        <div x-show="editing" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <select x-model="editCategory" style="flex:1;padding:8px 12px;font-family:var(--font-mono);font-size:12px;border:var(--border);border-radius:4px;background:#fff;">
+                                <template x-for="cat in categories" :key="cat.name">
+                                    <option :value="cat.name" x-text="cat.name"></option>
+                                </template>
+                            </select>
+                            <button @click="saveEdit()" style="background:var(--ink, #111010);color:var(--paper);border:none;padding:8px 16px;font-family:var(--font-mono);font-size:10px;cursor:pointer;border-radius:4px;">SIMPAN</button>
+                            <button @click="editing = false" style="background:none;border:none;cursor:pointer;font-size:14px;">✕</button>
+                            <span x-show="saving" style="font-size:12px;color:rgba(17,16,16,.4);">Menyimpan...</span>
+                        </div>
                 </div>
 
                 <div style="padding:0 16px; display:flex; flex-direction:column; gap:12px; margin-top:16px;">
@@ -54,54 +66,4 @@
         </template>
     </div>
 </div>
-
-<script>
-    function transactionDetail(id) {
-        return {
-            id: id,
-            transaction: null,
-            loading: true,
-            async init() {
-                this.fetchDetail();
-            },
-            formatNumber(n) {
-                if (!n) return '0';
-                return Number(n).toLocaleString('id-ID');
-            },
-            formatDate(d) {
-                if (!d) return '';
-                const date = new Date(d);
-                return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            },
-            async fetchDetail() {
-                try {
-                    const res = await window.apiClient.get('/transactions/' + this.id);
-                    this.transaction = res.data.data;
-                } catch (e) {
-                    console.error('Fetch transaction detail error:', e);
-                    window.utils.showToast('error', 'Gagal memuat detail transaksi');
-                } finally {
-                    this.loading = false;
-                }
-            },
-            async deleteTransaction() {
-                const ok = await window.utils.confirmDialog({
-                    title: 'Hapus Transaksi?',
-                    message: 'Semua data transaksi ini akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.',
-                    okLabel: 'YA, HAPUS',
-                    danger: true
-                });
-                if (!ok) return;
-                try {
-                    await window.apiClient.delete('/transactions/' + this.id);
-                    window.utils.showToast('success', 'Transaksi berhasil dihapus!');
-                    window.location.href = '/transactions';
-                } catch (e) {
-                    console.error('Delete transaction error:', e);
-                    window.utils.showToast('error', 'Gagal menghapus transaksi. Coba lagi!');
-                }
-            }
-        }
-    }
-</script>
 @endsection
