@@ -30,6 +30,10 @@ export function parseApiError(error, fallback = 'Terjadi kesalahan. Silakan coba
     return fallback;
 }
 
+export function handleApiError(error, fallback = 'Terjadi kesalahan. Silakan coba lagi.') {
+    showToast('error', parseApiError(error, fallback));
+}
+
 export function showToast(type, message, persistent = false) {
     const el = document.getElementById('toast-el');
     if (!el) return;

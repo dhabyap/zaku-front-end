@@ -465,29 +465,71 @@ export default function (Alpine) {
     // ── Profile Page ──
     Alpine.data('profilePage', () => ({
         user: window.auth.getUser(),
-        budget: { monthly_budget: 0, budget_used: 0 },
+        stats: { total: 0, month: 0, biggest: 0, categories: 0 },
+        budget: { limit: 0, used: 0, left: 0, pct: 0 },
+        editForm: { name: '', email: '' },
+        budgetInput: 0,
         loading: true,
         async init() { await this.fetchProfile(); },
+        formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
         async fetchProfile() { this.loading = true; try {
             const res = await window.apiClient.get('/v1/user/profile');
             const data = res.data.data;
             this.user = { ...this.user, ...data };
             window.auth.setUser(this.user);
-            this.budget = data.budget || { monthly_budget: 0, budget_used: 0 };
+            this.editForm = { name: data.name || '', email: data.email || '' };
+            const s = data.stats || {};
+            this.stats = {
+                total: s.total_transactions || 0,
+                month: s.transactions_this_month || 0,
+                biggest: s.largest_transaction_amount || 0,
+                categories: s.unique_categories_used || 0,
+            };
+            const b = data.budget || {};
+            this.budget = {
+                limit: b.monthly_budget || 0,
+                used: b.budget_used || 0,
+                left: b.budget_remaining || 0,
+                pct: b.budget_percentage || 0,
+            };
+            this.budgetInput = this.budget.limit;
         } catch (e) { window.utils.showToast('error', 'Gagal memuat profil');
         } finally { this.loading = false; }},
-        async logout() {
-            try { await window.apiClient.post('/v1/auth/logout'); } catch (e) { /* ignore */ }
-            window.auth.clearToken();
-            window.location.href = '/login';
+        openModal(id) { document.getElementById(id)?.classList.add('show'); },
+        closeModal(id) { document.getElementById(id)?.classList.remove('show'); },
+        bgClose(e, id) { if (e.target === e.currentTarget) this.closeModal(id); },
+        async saveProfile() {
+            try {
+                const res = await window.apiClient.put('/v1/user/profile', {
+                    name: this.editForm.name,
+                    email: this.editForm.email,
+                });
+                const data = res.data.data;
+                this.user = { ...this.user, ...data };
+                window.auth.setUser(this.user);
+                this.closeModal('m-edit');
+                window.utils.showToast('success', 'Profil berhasil diperbarui');
+            } catch (e) {
+                window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menyimpan profil'));
+            }
         },
         async saveBudget() {
             try {
-                await window.apiClient.put('/v1/user/budget', { monthly_budget: this.budget.monthly_budget });
+                await window.apiClient.put('/v1/user/budget', { monthly_budget: this.budgetInput });
+                this.budget.limit = Number(this.budgetInput) || 0;
+                this.closeModal('m-budget');
                 window.utils.showToast('success', 'Budget berhasil diperbarui');
             } catch (e) {
                 window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menyimpan budget'));
             }
+        },
+        exportData() {
+            window.utils.showToast('info', 'Fitur segera hadir! 📊');
+        },
+        async logout() {
+            try { await window.apiClient.post('/v1/auth/logout'); } catch (e) { /* ignore */ }
+            window.auth.clearToken();
+            window.location.href = '/login';
         }
     }));
 
