@@ -17,7 +17,8 @@ export const clearToken = () => {
 
     if (window.location.pathname !== '/login') {
         const separator = window.location.search ? '&' : '?';
-        window.location.href = `/login${separator}session=expired`;
+        // Use replace() to avoid adding browser history entry
+        window.location.replace(`/login${separator}session=expired`);
     }
 };
 

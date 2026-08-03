@@ -1,32 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="chatPage()" style="display:flex;flex-direction:column;height:100%;">
+<div x-data="chatPage" style="display:flex;flex-direction:column;height:100%;">
     <div class="chat-top">
         <div class="chat-ai-dot">AI</div>
         <div class="chat-ai-info">
             <div class="chat-ai-name">ZAKU AI</div>
             <div class="chat-ai-online"><div class="online-dot"></div>Online · siap mencatat</div>
         </div>
-        <button class="chat-clear-btn" @click="clearChat()">HAPUS</button>
+        <button class="chat-clear-btn" @click="clearChat()" aria-label="Hapus riwayat chat">HAPUS</button>
     </div>
 
-    <div class="chat-msgs" id="chat-msgs" x-ref="msgs">
-        <div class="msg ai">
-            <div class="msg-bub">
-                Halo, <strong x-text="user?.name?.split(' ')[0] || 'Teman'"></strong>! 👋 Saya bisa bantu catat <strong>pemasukan</strong> dan <strong>pengeluaran</strong> kamu.<br><br>
-                Ketik aja transaksinya, misalnya:<br>
-                <em>"Tadi beli makan siang 35rb"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span><br>
-                <em>"Gajian bulan ini 5 juta"</em> <span style="color:rgba(17,16,16,.4)">← pemasukan</span><br>
-                <em>"Bayar Grab ke kantor 28 ribu"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span>
-                <div class="chips">
-                    <div class="chip" @click="sendQuick('Beli makan siang 35rb')">🍜 Makan 35rb</div>
-                    <div class="chip" @click="sendQuick('Bayar Grab 28 ribu')">🚗 Grab 28rb</div>
-                    <div class="chip" @click="sendQuick('Terima gaji 7.5 juta')">💰 Gaji</div>
-                </div>
+    <div class="chat-msgs" x-ref="msgs">
+        <template x-for="(msg, i) in messages" :key="i">
+            <div class="msg" :class="msg.role === 'usr' ? 'usr' : 'ai'">
+                <template x-if="msg.html">
+                    <div class="msg-bub" x-html="msg.content"></div>
+                </template>
+                <template x-if="!msg.html">
+                    <div class="msg-bub" x-text="msg.content"></div>
+                </template>
+                <div class="msg-time" x-text="msg.time"></div>
             </div>
-            <div class="msg-time">09:00</div>
-        </div>
+        </template>
+        <template x-if="typing">
+            <div class="msg ai">
+                <div class="msg-bub"><div class="dots"><span></span><span></span><span></span></div></div>
+            </div>
+        </template>
     </div>
 
     <div class="chat-input-area">
@@ -43,7 +44,7 @@
                 @input="updateCharCount()"
                 @keydown="handleKey($event)"
             ></textarea>
-            <button class="send-btn" @click="sendMsg()" :disabled="!message.trim() || loading">
+            <button class="send-btn" @click="sendMsg()" :disabled="!message.trim() || loading" aria-label="Kirim pesan">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
@@ -51,118 +52,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    function chatPage() {
-        return {
-            user: window.auth.getUser(),
-            loading: false,
-            message: '',
-            charCount: 0,
-            updateCharCount() {
-                this.charCount = this.message.length;
-            },
-            handleKey(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    this.sendMsg();
-                }
-            },
-            async sendMsg() {
-                const val = this.message.trim();
-                if (!val || this.loading) return;
-                this.message = '';
-                this.charCount = 0;
-
-                const msgs = this.$refs.msgs;
-                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-                const u = document.createElement('div');
-                u.className = 'msg usr';
-                u.innerHTML = '<div class="msg-bub">' + this.escapeHtml(val) + '</div><div class="msg-time">' + now + '</div>';
-                msgs.appendChild(u);
-
-                const t = document.createElement('div');
-                t.className = 'msg ai';
-                t.id = 'typing';
-                t.innerHTML = '<div class="msg-bub"><div class="dots"><span></span><span></span><span></span></div></div>';
-                msgs.appendChild(t);
-                msgs.scrollTop = msgs.scrollHeight;
-
-                this.loading = true;
-                try {
-                    const res = await window.apiClient.post('/ai/chat', { message: val });
-                    t.remove();
-
-                    const data = res.data;
-                    let bubbleHtml = '';
-
-                    if (data.data) {
-                        const inner = data.data;
-                        if (inner.response) {
-                            bubbleHtml = this.escapeHtml(inner.response);
-                        }
-                        if (inner.amount && inner.description) {
-                            const sign = inner.type === 'income' ? 'inc' : 'exp';
-                            bubbleHtml += '<div class="confirm-card">' +
-                                '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(inner.description) + '</span></div>' +
-                                '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.escapeHtml(inner.amount_formatted || inner.amount) + '</span></div>';
-                            if (inner.category) {
-                                bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(inner.category) + '</span></div>';
-                            }
-                            bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (inner.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>';
-                            bubbleHtml += '</div>';
-                        } else if (inner.message) {
-                            bubbleHtml = this.escapeHtml(inner.message);
-                        }
-                    } else if (data.response) {
-                        bubbleHtml = this.escapeHtml(data.response);
-                    } else if (data.message) {
-                        bubbleHtml = this.escapeHtml(data.message);
-                    }
-
-                    // Fallback if bubbleHtml is still empty
-                    if (!bubbleHtml) {
-                        bubbleHtml = '<em style="color: #999;">Maaf, tidak ada respons dari server. Coba lagi ya!</em>';
-                    }
-
-                    const a = document.createElement('div');
-                    a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">' + bubbleHtml + '</div><div class="msg-time">' + now + '</div>';
-                    msgs.appendChild(a);
-                } catch (e) {
-                    t.remove();
-                    const errorMsg = window.utils.parseApiError(e, 'Maaf, lagi ada gangguan. Coba lagi ya!');
-                    const a = document.createElement('div');
-                    a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">' + this.escapeHtml(errorMsg) + '</div><div class="msg-time">' + now + '</div>';
-                    msgs.appendChild(a);
-                } finally {
-                    this.loading = false;
-                    msgs.scrollTop = msgs.scrollHeight;
-                }
-            },
-            sendQuick(text) {
-                this.message = text;
-                this.charCount = text.length;
-                this.sendMsg();
-            },
-            async clearChat() {
-                const ok = await window.utils.confirmDialog({
-                    title: 'Hapus Pesan?',
-                    message: 'Semua riwayat chat akan dibersihkan.',
-                    okLabel: 'YA, HAPUS',
-                    danger: false
-                });
-                if (!ok) return;
-                this.$refs.msgs.innerHTML = '<div class="msg ai"><div class="msg-bub">Chat dibersihkan. Ada transaksi yang mau dicatat? 😊</div><div class="msg-time">Sekarang</div></div>';
-            },
-            escapeHtml(text) {
-                const d = document.createElement('div');
-                d.textContent = text;
-                return d.innerHTML;
-            }
-        }
-    }
-</script>
 @endsection

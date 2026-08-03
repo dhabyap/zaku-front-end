@@ -1,7 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
-<div x-data="verifyEmail()" style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
+<div x-data="verifyEmail" style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
     <div style="max-width:400px;width:100%;margin:0 auto;background:var(--paper);border:var(--border);box-shadow:var(--bs-xl);padding:28px 24px;">
         <div style="text-align:center;margin-bottom:20px;">
             <div style="width:64px;height:64px;background:var(--sky);border:var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
@@ -28,33 +28,4 @@
     </div>
 </div>
 
-<script>
-    function verifyEmail() {
-        return {
-            loading: false,
-            userEmail: new URLSearchParams(window.location.search).get('email') || window.auth.getUser()?.email,
-            async resend() {
-                if (this.loading) return;
-                if (!this.userEmail) {
-                    window.utils.showToast('error', 'Alamat email tidak ditemukan. Silakan login kembali.');
-                    return;
-                }
-                this.loading = true;
-                try {
-                    await window.apiClient.post('/auth/resend-verification', { email: this.userEmail });
-                    window.utils.showToast('success', 'Email verifikasi baru telah dikirim ke alamat Anda.');
-                } catch (error) {
-                    console.error('Resend error:', error);
-                    window.utils.showToast('error', window.utils.parseApiError(error, 'Gagal mengirim ulang email.'), true);
-                } finally {
-                    this.loading = false;
-                }
-            },
-            logout() {
-                window.auth.clearToken();
-                window.location.href = '/login';
-            }
-        }
-    }
-</script>
 @endsection

@@ -10,10 +10,50 @@
   --bs:      4px 4px 0 var(--ink);
   --bs-lg:   6px 6px 0 var(--ink);
   --bs-xl:   8px 8px 0 var(--ink);
+  --overlay: rgba(17,16,16,.5);
+  --card-bg: var(--cream);
+  --text-secondary: rgba(17,16,16,.55);
 
   --font-display: 'Syne', sans-serif;
   --font-mono:    'DM Mono', monospace;
   --font-serif:   'Fraunces', serif;
+}
+
+/* Dark mode via class (toggled by user) or system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --ink:     #F5F0E8;
+    --paper:   #1A1A1A;
+    --cream:   #2A2A2A;
+    --punch:   #FF6B35;
+    --punch-2: #FFD600;
+    --mint:    #00E5A0;
+    --sky:     #1A3A4A;
+    --border:  3px solid var(--ink);
+    --bs:      4px 4px 0 var(--ink);
+    --bs-lg:   6px 6px 0 var(--ink);
+    --bs-xl:   8px 8px 0 var(--ink);
+    --overlay: rgba(0,0,0,.7);
+    --card-bg: #2A2A2A;
+    --text-secondary: rgba(245,240,232,.55);
+  }
+}
+
+:root.dark {
+  --ink:     #F5F0E8;
+  --paper:   #1A1A1A;
+  --cream:   #2A2A2A;
+  --punch:   #FF6B35;
+  --punch-2: #FFD600;
+  --mint:    #00E5A0;
+  --sky:     #1A3A4A;
+  --border:  3px solid var(--ink);
+  --bs:      4px 4px 0 var(--ink);
+  --bs-lg:   6px 6px 0 var(--ink);
+  --bs-xl:   8px 8px 0 var(--ink);
+  --overlay: rgba(0,0,0,.7);
+  --card-bg: #2A2A2A;
+  --text-secondary: rgba(245,240,232,.55);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

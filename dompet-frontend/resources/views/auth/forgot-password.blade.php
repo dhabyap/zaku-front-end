@@ -1,7 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
-<div x-data="forgotPasswordForm()" style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
+<div x-data="forgotPasswordForm" style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
     <div style="max-width:400px;width:100%;margin:0 auto;background:var(--paper);border:var(--border);box-shadow:var(--bs-xl);padding:28px 24px;">
         <div style="text-align:center;margin-bottom:20px;">
             <div style="width:64px;height:64px;background:var(--punch-2);border:var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
@@ -34,26 +34,4 @@
     </div>
 </div>
 
-<script>
-    function forgotPasswordForm() {
-        return {
-            email: '',
-            loading: false,
-            async submit() {
-                if (this.loading) return;
-                this.loading = true;
-                try {
-                    await window.apiClient.post('/auth/forgot-password', { email: this.email });
-                    window.utils.showToast('success', 'Instruksi reset password telah dikirim ke email Anda.');
-                    this.email = '';
-                } catch (error) {
-                    console.error('Forgot password error:', error);
-                    window.utils.showToast('error', window.utils.parseApiError(error, 'Alamat email tidak ditemukan.'), true);
-                } finally {
-                    this.loading = false;
-                }
-            }
-        }
-    }
-</script>
 @endsection

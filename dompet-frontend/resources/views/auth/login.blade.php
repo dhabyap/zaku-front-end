@@ -1,7 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
-    <div x-data="loginForm()"
+    <div x-data="loginForm"
         style="height:100dvh;display:flex;flex-direction:column;background:var(--punch);justify-content:flex-end;position:relative;">
         <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
             <div
@@ -30,14 +30,16 @@
             <form @submit.prevent="submit">
                 <div class="field">
                     <label>EMAIL</label>
-                    <input type="email" placeholder="kamu@email.com" x-model="formData.email">
+                    <input type="email" placeholder="kamu@email.com" x-model="formData.email" :class="errors.email ? 'err' : ''">
+                    <div class="field-err" x-show="errors.email" x-text="errors.email" style="color:var(--punch);font-size:10px;font-family:var(--font-mono);margin-top:4px;"></div>
                 </div>
                 <div class="field">
                     <label>PASSWORD</label>
                     <div class="pw-row">
-                        <input type="password" placeholder="••••••••" id="li-pw" x-model="formData.password">
+                        <input type="password" placeholder="••••••••" id="li-pw" x-model="formData.password" :class="errors.password ? 'err' : ''">
                         <button type="button" class="pw-eye" onclick="togglePw('li-pw',this)">LIHAT</button>
                     </div>
+                    <div class="field-err" x-show="errors.password" x-text="errors.password" style="color:var(--punch);font-size:10px;font-family:var(--font-mono);margin-top:4px;"></div>
                 </div>
 
                 <button type="submit" class="btn-main" :disabled="loading">
@@ -52,48 +54,11 @@
         </div>
     </div>
 
-    <script>
+        <script>
         function togglePw(id, btn) {
             const inp = document.getElementById(id);
             if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'SEMBUNYIKAN'; }
             else { inp.type = 'password'; btn.textContent = 'LIHAT'; }
-        }
-
-        function loginForm() {
-            return {
-                formData: {
-                    email: '',
-                    password: '',
-                    remember: false
-                },
-                loading: false,
-                init() {
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.get('session') === 'expired') {
-                        window.utils.showToast('error', 'Sesi Anda telah berakhir. Silakan login kembali.', true);
-                    }
-                },
-                async submit() {
-                    if (this.loading) return;
-                    this.loading = true;
-                    try {
-                        const response = await window.apiClient.post('/auth/login', this.formData);
-                        const { token, user } = response.data.data;
-                        window.auth.setToken(token);
-                        window.auth.setUser(user);
-                        window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
-                        setTimeout(() => {
-                            window.location.href = '/dashboard';
-                        }, 1500);
-                    } catch (error) {
-                        console.error('Login error:', error);
-                        const detailedMsg = window.utils.parseApiError(error, 'Email atau password salah. Silakan coba lagi.');
-                        window.utils.showToast('error', detailedMsg, true);
-                    } finally {
-                        this.loading = false;
-                    }
-                }
-            }
         }
 
         function demoLogin() {
