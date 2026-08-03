@@ -59,4 +59,109 @@
         </template>
     </div>
 </div>
+
+<script>
+    function transactionList() {
+            return {
+                transactions: [],
+                loading: true,
+                filter: 'all',
+                categories: [],
+                async init() {
+                    await this.fetchTransactions();
+                    this.extractCategories();
+                },
+                formatNumber(n) {
+                    if (!n) return '0';
+                    return Number(n).toLocaleString('id-ID');
+                },
+                formatDay(d) {
+                    if (!d) return '';
+                    const date = new Date(d);
+                    if (isNaN(date.getTime())) return '';
+                    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                },
+                getTransactionDate(trx) {
+                    return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null;
+                },
+                transactionDay(trx) {
+                    return this.formatDay(this.getTransactionDate(trx));
+                },
+                getEmoji(cat) {
+                    const map = {
+                        'MAKANAN': '🍜', 'FOOD': '🍜', 'FOOD & BEVERAGE': '🍜',
+                        'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗',
+                        'TAGIHAN': '⚡', 'BILLS': '⚡', 'UTILITY': '⚡',
+                        'BELANJA': '🛍️', 'SHOPPING': '🛍️',
+                        'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰',
+                        'FREELANCE': '💻',
+                        'KESEHATAN': '💊', 'HEALTH': '💊',
+                        'MAKAN': '🍜'
+                    };
+                    return map[cat?.toUpperCase()] || '📄';
+                },
+                extractCategories() {
+                    const set = new Set();
+                    this.transactions.forEach(t => {
+                        if (t.category_name) set.add(t.category_name.toUpperCase());
+                    });
+                    this.categories = Array.from(set);
+                },
+                async fetchTransactions() {
+                    try {
+                        const res = await window.apiClient.get('/transactions');
+                        const payload = res.data.data || {};
+                        const groups = Array.isArray(payload) ? payload : (payload.groups || []);
+                        let flatTx = [];
+
+                        groups.forEach(group => {
+                            if (Array.isArray(group.transactions)) {
+                                const transactions = group.transactions.map(trx => ({
+                                    ...trx,
+                                    month_label: trx.month_label || group.month_label,
+                                }));
+
+                                flatTx = flatTx.concat(transactions);
+                            }
+                        });
+
+                        this.transactions = flatTx;
+                    } catch (e) {
+                        console.error('Fetch transactions error:', e);
+                        window.utils.showToast('error', 'Gagal memuat riwayat transaksi');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                setFilter(f, el) {
+                    this.filter = f;
+                    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on'));
+                    if (el) el.classList.add('on');
+                },
+                filtered() {
+                    if (this.filter === 'all') return this.transactions;
+                    return this.transactions.filter(t => {
+                        if (this.filter === 'income' || this.filter === 'expense') return t.type === this.filter;
+                        return t.category_name?.toUpperCase() === this.filter;
+                    });
+                },
+                grouped() {
+                    const groups = {};
+                    const data = this.filtered();
+                    data.forEach(t => {
+                        const dateValue = this.getTransactionDate(t);
+                        const date = dateValue ? new Date(dateValue) : null;
+                        const key = t.month_label
+                            || (date && !isNaN(date.getTime())
+                                ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase()
+                                : 'TANPA TANGGAL');
+
+                        if (!groups[key]) groups[key] = [];
+                        groups[key].push(t);
+                    });
+                    return groups;
+                }
+            }
+        }
+</script>
 @endsection

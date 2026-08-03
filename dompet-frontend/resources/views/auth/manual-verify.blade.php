@@ -1,7 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
-    <div x-data="manualVerifyForm"
+    <div x-data="manualVerifyForm()"
         style="height:100dvh;display:flex;flex-direction:column;background:var(--ink);justify-content:center;padding:24px;">
         <div
             style="max-width:400px;width:100%;margin:0 auto;background:var(--paper);border:var(--border);box-shadow:var(--bs-xl);padding:28px 24px;">
@@ -39,4 +39,76 @@
         </div>
     </div>
 
+    <script>
+        function manualVerifyForm() {
+            return {
+                formData: {
+                    email: new URLSearchParams(window.location.search).get('email') || window.auth.getUser()?.email || '',
+                    code: new URLSearchParams(window.location.search).get('code') || ''
+                },
+
+                loading: false,
+
+                async submit() {
+
+                    console.log('SUBMIT DATA:', this.formData);
+
+                    if (this.loading) return;
+
+                    if (!this.formData.email) {
+                        window.utils.showToast(
+                            'error',
+                            'Alamat email wajib diisi.'
+                        );
+                        return;
+                    }
+
+                    if (!this.formData.code) {
+                        window.utils.showToast(
+                            'error',
+                            'Kode verifikasi wajib diisi.'
+                        );
+                        return;
+                    }
+
+                    this.loading = true;
+
+                    try {
+
+                        const response = await window.apiClient.post(
+                            '/auth/verify-email',
+                            this.formData
+                        );
+
+                        console.log('SUCCESS:', response.data);
+
+                        window.utils.showToast(
+                            'success',
+                            'Email berhasil diverifikasi! Silakan login kembali.'
+                        );
+
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+
+                    } catch (error) {
+
+                        window.utils.showToast(
+                            'error',
+                            window.utils.parseApiError(
+                                error,
+                                'Gagal memverifikasi email.'
+                            ),
+                            true
+                        );
+
+                    } finally {
+
+                        this.loading = false;
+
+                    }
+                }
+            }
+        }
+    </script>
 @endsection
