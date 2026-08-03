@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="transactionList()" style="display:flex;flex-direction:column;height:100%;">
+<div x-data="transactionList" style="display:flex;flex-direction:column;height:100%;">
     <div class="hist-top">
         <div class="hist-title">Riwayat.</div>
         <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
