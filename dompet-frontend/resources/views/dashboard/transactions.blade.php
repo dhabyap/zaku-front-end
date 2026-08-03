@@ -23,7 +23,7 @@
             </div>
         </template>
 
-        <template x-if="!loading && filtered().length === 0">
+        <template x-if="!loading && transactionList.filtered().length === 0">
             <div style="padding:40px 16px;text-align:center;">
                 <div style="font-size:48px;margin-bottom:12px;">📭</div>
                 <span style="font-family:var(--font-mono);font-size:10px;color:rgba(17,16,16,.4);">TIDAK ADA
@@ -33,12 +33,12 @@
             </div>
         </template>
 
-        <template x-for="(group, month) in grouped()" :key="month">
+        <template x-for="(group, month) in transactionList.grouped()" :key="month">
             <div class="month-group">
                 <div class="month-label" x-text="month"></div>
                 <div class="tx-list" style="padding:0 16px;gap:8px">
                     <template x-for="trx in group" :key="trx.id">
-                        <a :href="'/v1/transactions/' + trx.id" class="tx"
+                        <a :href="'/api/v1/transactions/' + trx.id" class="tx"
                             :class="trx.type === 'income' ? 'income' : 'expense'"
                             style="text-decoration:none;cursor:pointer;">
                             <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
