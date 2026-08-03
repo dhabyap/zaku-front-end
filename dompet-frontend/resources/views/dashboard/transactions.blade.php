@@ -38,7 +38,7 @@
                 <div class="month-label" x-text="month"></div>
                 <div class="tx-list" style="padding:0 16px;gap:8px">
                     <template x-for="trx in group" :key="trx.id">
-                        <a :href="'/transactions/' + trx.id" class="tx"
+                        <a :href="'/v1/transactions/' + trx.id" class="tx"
                             :class="trx.type === 'income' ? 'income' : 'expense'"
                             style="text-decoration:none;cursor:pointer;">
                             <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
@@ -109,7 +109,7 @@
                 },
                 async fetchTransactions() {
                     try {
-                        const res = await window.apiClient.get('/transactions');
+                        const res = await window.apiClient.get('/v1/transactions');
                         const payload = res.data.data || {};
                         const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                         let flatTx = [];
