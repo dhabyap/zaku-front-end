@@ -360,6 +360,10 @@ export default function (Alpine) {
         loading: true,
         editing: false,
         editCategory: '',
+        editDescription: '',
+        editAmount: '',
+        editType: '',
+        editDate: '',
         categories: [],
         saving: false,
         async init() {
@@ -374,6 +378,11 @@ export default function (Alpine) {
             if (!d) return '';
             const date = new Date(d);
             return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        },
+        formatDateInput(d) {
+            if (!d) return '';
+            const date = new Date(d);
+            return date.toISOString().slice(0, 10);
         },
         async fetchDetail() {
             try {
@@ -404,21 +413,35 @@ export default function (Alpine) {
         },
         startEdit() {
             this.editCategory = this.transaction?.category_name || this.transaction?.category || 'LAINNYA';
+            this.editDescription = this.transaction?.description || '';
+            this.editAmount = this.transaction?.amount || '';
+            this.editType = this.transaction?.type || 'expense';
+            this.editDate = this.formatDateInput(this.transaction?.transaction_date || this.transaction?.created_at);
             this.editing = true;
         },
         async saveEdit() {
             if (!this.editCategory || this.saving) return;
             this.saving = true;
             try {
-                const res = await window.apiClient.put('/v1/transactions/' + this.id, { category: this.editCategory });
+                const payload = {
+                    category: this.editCategory,
+                    description: this.editDescription,
+                    amount: Number(this.editAmount),
+                    type: this.editType,
+                    transaction_date: this.editDate,
+                };
+                const res = await window.apiClient.put('/v1/transactions/' + this.id, payload);
                 const data = res.data.data;
                 this.transaction.category_name = data.category_name;
                 this.transaction.category = data.category_name;
                 this.transaction.category_icon = data.category_icon;
+                this.transaction.description = this.editDescription;
+                this.transaction.amount = Number(this.editAmount);
+                this.transaction.type = this.editType;
                 this.editing = false;
-                window.utils.showToast('success', 'Kategori berhasil diperbarui!');
+                window.utils.showToast('success', 'Transaksi berhasil diperbarui!');
             } catch (e) {
-                window.utils.handleApiError(e, 'Gagal memperbarui kategori');
+                window.utils.handleApiError(e, 'Gagal memperbarui transaksi');
             } finally {
                 this.saving = false;
             }

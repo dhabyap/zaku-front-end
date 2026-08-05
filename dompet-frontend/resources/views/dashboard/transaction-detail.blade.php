@@ -26,36 +26,75 @@
                 </div>
 
                 <div style="margin:16px;background:#fff;border:var(--border);box-shadow:var(--bs-lg);padding:20px;">
-                    <div style="margin-bottom:16px;">
-                        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">DESKRIPSI</div>
-                        <div style="font-size:20px;font-weight:800;color:var(--ink);" x-text="transaction.description"></div>
+
+                    {{-- VIEW MODE --}}
+                    <div x-show="!editing">
+                        <div style="margin-bottom:16px;">
+                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">DESKRIPSI</div>
+                            <div style="font-size:20px;font-weight:800;color:var(--ink);" x-text="transaction.description"></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">TANGGAL</div>
+                                <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="formatDate(transaction.created_at)"></div>
+                            </div>
+                            <div>
+                                <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">STATUS</div>
+                                <div style="display:inline-block;background:var(--ink);color:var(--punch-2);padding:4px 10px;font-family:var(--font-mono);font-size:9px;font-weight:500;">SUCCESS</div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">KATEGORI</div>
+                            <span style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="(transaction.category_icon || '') + ' ' + (transaction.category_name || transaction.category || 'UMUM')"></span>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">TIPE</div>
+                            <span :style="{color: transaction.type === 'income' ? 'var(--mint-2, #2d6a4f)' : 'var(--punch)'}" style="font-family:var(--font-mono);font-size:13px;font-weight:500;" x-text="transaction.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN'"></span>
+                        </div>
+                        <button @click="startEdit()" class="btn-main" style="background:var(--ink);color:var(--paper);margin-top:0;">✏️ EDIT TRANSAKSI</button>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-                        <div>
-                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">TANGGAL</div>
-                            <div style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="formatDate(transaction.created_at)"></div>
+
+                    {{-- EDIT MODE --}}
+                    <div x-show="editing">
+                        <div style="margin-bottom:16px;">
+                            <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;display:block;">DESKRIPSI</label>
+                            <input x-model="editDescription" type="text" style="width:100%;padding:8px 12px;font-size:14px;border:var(--border);border-radius:4px;background:#fff;font-family:var(--font-mono);">
                         </div>
-                        <div>
-                            <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">STATUS</div>
-                            <div style="display:inline-block;background:var(--ink);color:var(--punch-2);padding:4px 10px;font-family:var(--font-mono);font-size:9px;font-weight:500;">SUCCESS</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;display:block;">JUMLAH (Rp)</label>
+                                <input x-model="editAmount" type="number" style="width:100%;padding:8px 12px;font-size:14px;border:var(--border);border-radius:4px;background:#fff;font-family:var(--font-mono);">
+                            </div>
+                            <div>
+                                <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;display:block;">TANGGAL</label>
+                                <input x-model="editDate" type="date" style="width:100%;padding:8px 12px;font-size:14px;border:var(--border);border-radius:4px;background:#fff;font-family:var(--font-mono);">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;display:block;">TIPE</label>
+                                <select x-model="editType" style="width:100%;padding:8px 12px;font-size:13px;border:var(--border);border-radius:4px;background:#fff;font-family:var(--font-mono);">
+                                    <option value="expense">↓ PENGELUARAN</option>
+                                    <option value="income">↑ PEMASUKAN</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;display:block;">KATEGORI</label>
+                                <select x-model="editCategory" style="width:100%;padding:8px 12px;font-size:13px;border:var(--border);border-radius:4px;background:#fff;font-family:var(--font-mono);">
+                                    <template x-for="cat in categories" :key="cat.name">
+                                        <option :value="cat.name" x-text="(cat.icon || '') + ' ' + cat.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button @click="saveEdit()" class="btn-main" style="background:var(--ink);color:var(--paper);margin:0;flex:1;" :disabled="saving">
+                                <span x-show="!saving">SIMPAN PERUBAHAN</span>
+                                <span x-show="saving">Menyimpan...</span>
+                            </button>
+                            <button @click="editing = false" style="background:none;border:var(--border);padding:10px 16px;font-size:14px;cursor:pointer;border-radius:4px;">BATAL</button>
                         </div>
                     </div>
-                    <div>
-                        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2.5px;color:rgba(17,16,16,.4);margin-bottom:4px;">KATEGORI</div>
-                        <div x-show="!editing">
-                            <span style="font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink);" x-text="transaction.category_name || transaction.category || 'UMUM'"></span>
-                            <button @click="startEdit()" style="background:none;border:none;cursor:pointer;font-size:14px;margin-left:8px;vertical-align:middle;">✏️</button>
-                        </div>
-                        <div x-show="editing" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                            <select x-model="editCategory" style="flex:1;padding:8px 12px;font-family:var(--font-mono);font-size:12px;border:var(--border);border-radius:4px;background:#fff;">
-                                <template x-for="cat in categories" :key="cat.name">
-                                    <option :value="cat.name" x-text="cat.name"></option>
-                                </template>
-                            </select>
-                            <button @click="saveEdit()" style="background:var(--ink, #111010);color:var(--paper);border:none;padding:8px 16px;font-family:var(--font-mono);font-size:10px;cursor:pointer;border-radius:4px;">SIMPAN</button>
-                            <button @click="editing = false" style="background:none;border:none;cursor:pointer;font-size:14px;">✕</button>
-                            <span x-show="saving" style="font-size:12px;color:rgba(17,16,16,.4);">Menyimpan...</span>
-                        </div>
                 </div>
 
                 <div style="padding:0 16px; display:flex; flex-direction:column; gap:12px; margin-top:16px;">
