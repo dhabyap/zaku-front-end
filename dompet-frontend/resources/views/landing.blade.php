@@ -1845,7 +1845,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // Fetch public stats from API and update the page
-fetch('{{ url("/api/v1/stats/public") }}')
+fetch('https://api-zaku.abysoft.my.id/api/v1/stats/public')
   .then(res => res.json())
   .then(data => {
     const stats = data.data || data;
