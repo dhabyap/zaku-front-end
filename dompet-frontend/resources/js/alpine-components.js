@@ -519,8 +519,8 @@ export default function (Alpine) {
             this.budgetInput = this.budget.limit;
         } catch (e) { window.utils.showToast('error', 'Gagal memuat profil');
         } finally { this.loading = false; }},
-        openModal(id) { document.getElementById(id)?.classList.add('show'); },
-        closeModal(id) { document.getElementById(id)?.classList.remove('show'); },
+        openModal(id) { document.getElementById(id)?.classList.add('open'); },
+        closeModal(id) { document.getElementById(id)?.classList.remove('open'); },
         bgClose(e, id) { if (e.target === e.currentTarget) this.closeModal(id); },
         async saveProfile() {
             try {
@@ -545,6 +545,22 @@ export default function (Alpine) {
                 window.utils.showToast('success', 'Budget berhasil diperbarui');
             } catch (e) {
                 window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menyimpan budget'));
+            }
+        },
+        async exportData() {
+            try {
+                const res = await window.apiClient.get('/v1/transactions', { params: { per_page: 1000 } });
+                const txs = res.data.data || [];
+                if (!txs.length) { window.utils.showToast('info', 'Belum ada data untuk di-export'); return; }
+                const header = 'Tanggal,Deskripsi,Kategori,Tipe,Jumlah\n';
+                const rows = txs.map(t => `${t.transaction_date},${(t.description||'').replace(/,/g,';')},${t.category||''},${t.type||''},${t.amount||0}`).join('\n');
+                const blob = new Blob([header + rows], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'zaku-transaksi.csv'; a.click();
+                URL.revokeObjectURL(url);
+                window.utils.showToast('success', 'Export berhasil! 📥');
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal export data');
             }
         },
         async logout() {
