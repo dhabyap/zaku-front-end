@@ -1399,48 +1399,40 @@ body {
             <div class="mini-header">
               <div>
                 <div class="mini-greet">SELAMAT PAGI ☀️</div>
-                <div class="mini-name">dhaby</div>
+                <div class="mini-name">pengguna</div>
               </div>
-              <div class="mini-av">D</div>
+              <div class="mini-av">P</div>
             </div>
             <div class="mini-balance">
               <div class="mini-bal-label">SALDO BULAN INI</div>
-              <div class="mini-bal-amt">Rp 1.602.000</div>
+              <div class="mini-bal-amt">Rp 0</div>
               <div class="mini-bal-row">
                 <div class="mini-bal-stat" style="margin-right:2px">
                   <div class="mini-bal-stat-l">▲ PEMASUKAN</div>
-                  <div class="mini-bal-stat-v">Rp 4.000.000</div>
+                  <div class="mini-bal-stat-v">Rp 0</div>
                 </div>
                 <div class="mini-bal-stat">
                   <div class="mini-bal-stat-l">▼ PENGELUARAN</div>
-                  <div class="mini-bal-stat-v">Rp 2.398.000</div>
+                  <div class="mini-bal-stat-v">Rp 0</div>
                 </div>
               </div>
             </div>
             <div class="mini-tx-label">TRANSAKSI TERAKHIR</div>
-            <div class="mini-tx exp">
-              <div class="mini-tx-ico">🚗</div>
-              <div class="mini-tx-d">
-                <div class="mini-tx-n">Bensin</div>
-                <div class="mini-tx-c">TRANSPORT</div>
-              </div>
-              <div class="mini-tx-a">-Rp 20.000</div>
-            </div>
-            <div class="mini-tx inc">
-              <div class="mini-tx-ico">💰</div>
-              <div class="mini-tx-d">
-                <div class="mini-tx-n">Gaji Mei</div>
-                <div class="mini-tx-c">PEMASUKAN</div>
-              </div>
-              <div class="mini-tx-a">+Rp 4.000.000</div>
-            </div>
             <div class="mini-tx exp">
               <div class="mini-tx-ico">🍜</div>
               <div class="mini-tx-d">
                 <div class="mini-tx-n">Makan siang</div>
                 <div class="mini-tx-c">MAKANAN</div>
               </div>
-              <div class="mini-tx-a">-Rp 35.000</div>
+              <div class="mini-tx-a">-Rp 25.000</div>
+            </div>
+            <div class="mini-tx inc">
+              <div class="mini-tx-ico">💰</div>
+              <div class="mini-tx-d">
+                <div class="mini-tx-n">Gaji bulanan</div>
+                <div class="mini-tx-c">PEMASUKAN</div>
+              </div>
+              <div class="mini-tx-a">+Rp 0</div>
             </div>
           </div>
         </div>
@@ -1450,11 +1442,11 @@ body {
 
   <div class="hero-stats">
     <div class="hero-stat reveal">
-      <div class="hs-num" id="stat-users">2.000+</div>
+      <div class="hs-num" id="stat-users">—</div>
       <div class="hs-label">PENGGUNA AKTIF</div>
     </div>
     <div class="hero-stat reveal">
-      <div class="hs-num" id="stat-transactions">47jt</div>
+      <div class="hs-num" id="stat-transactions">—</div>
       <div class="hs-label">TRANSAKSI TERCATAT</div>
     </div>
     <div class="hero-stat reveal">
@@ -1703,15 +1695,15 @@ body {
         </div>
         <div class="quote-right reveal">
           <div class="q-stat">
-            <div class="q-stat-num">4.9/5</div>
+            <div class="q-stat-num">—</div>
             <div class="q-stat-label">RATING PENGGUNA</div>
           </div>
           <div class="q-stat">
-            <div class="q-stat-num">3 menit</div>
+            <div class="q-stat-num">—</div>
             <div class="q-stat-label">RATA-RATA ONBOARDING</div>
           </div>
           <div class="q-stat">
-            <div class="q-stat-num">92%</div>
+            <div class="q-stat-num">—</div>
             <div class="q-stat-label">RETENTION BULAN KE-3</div>
           </div>
         </div>
@@ -1886,7 +1878,9 @@ fetch('{{ url("/api/v1/stats/public") }}')
     }
   })
   .catch(() => {
-    // Fallback: keep the default hardcoded values already in the HTML
+    // API unreachable — keep "—" placeholders
+    if (usersEl) usersEl.textContent = '—';
+    if (txEl) txEl.textContent = '—';
   });
 </script>
 </body>
