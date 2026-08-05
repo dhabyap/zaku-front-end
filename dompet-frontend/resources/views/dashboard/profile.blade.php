@@ -67,7 +67,7 @@
                 <span>Notifikasi</span>
                 <div class="menu-arr">→</div>
             </div>
-            <a href="/changelogs" class="menu-row" style="text-decoration:none;display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(17,16,16,.06);color:var(--ink);cursor:pointer;">
+            <a href="/changelogs" class="menu-row" style="text-decoration:none;color:var(--ink);">
                 <div class="menu-ico">📋</div>
                 <span>Update Zaku</span>
                 <div class="menu-arr">→</div>
