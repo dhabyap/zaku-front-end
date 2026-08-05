@@ -1845,13 +1845,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // Fetch public stats from API and update the page
+const usersEl = document.getElementById('stat-users');
+const txEl = document.getElementById('stat-transactions');
+
 fetch('https://api-zaku.abysoft.my.id/api/v1/stats/public')
   .then(res => res.json())
   .then(data => {
     const stats = data.data || data;
-    const usersEl = document.getElementById('stat-users');
-    const txEl = document.getElementById('stat-transactions');
-
     if (usersEl && stats.active_users != null) {
       const count = Number(stats.active_users);
       if (count >= 1000) {
