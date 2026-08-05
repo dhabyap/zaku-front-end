@@ -574,3 +574,28 @@ export default function (Alpine) {
         }
     }));
 }
+
+function changelogPage() {
+    return {
+        logs: [],
+        loading: true,
+        async init() {
+            await this.fetchLogs();
+        },
+        formatDate(d) {
+            if (!d) return '';
+            return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        },
+        async fetchLogs() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/changelogs');
+                this.logs = res.data.data || [];
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat changelog');
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+}
