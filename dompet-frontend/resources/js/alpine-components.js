@@ -573,15 +573,12 @@ export default function (Alpine) {
             }
         }
     }));
-}
 
-function changelogPage() {
-    return {
+    // ===== CHANGELOG PAGE =====
+    Alpine.data('changelogPage', () => ({
         logs: [],
         loading: true,
-        async init() {
-            await this.fetchLogs();
-        },
+        async init() { await this.fetchLogs(); },
         formatDate(d) {
             if (!d) return '';
             return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -597,5 +594,8 @@ function changelogPage() {
                 this.loading = false;
             }
         }
-    };
+    }));
 }
+
+// Remove standalone changelogPage — now registered via Alpine.data above
+// function changelogPage() {} // DELETED
