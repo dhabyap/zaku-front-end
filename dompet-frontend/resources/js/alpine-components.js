@@ -597,5 +597,4 @@ export default function (Alpine) {
     }));
 }
 
-// Remove standalone changelogPage — now registered via Alpine.data above
-// function changelogPage() {} // DELETED
+// changelogPage registered via Alpine.data() above
