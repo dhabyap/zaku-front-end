@@ -1852,12 +1852,12 @@ fetch('{{ url("/api/v1/stats/public") }}')
     const usersEl = document.getElementById('stat-users');
     const txEl = document.getElementById('stat-transactions');
 
-    if (usersEl && stats.user_count != null) {
-      const count = Number(stats.user_count);
+    if (usersEl && stats.active_users != null) {
+      const count = Number(stats.active_users);
       if (count >= 1000) {
         const formatted = count.toLocaleString('id-ID');
         usersEl.textContent = formatted + '+';
-      } else {
+      } else if (count > 0) {
         usersEl.textContent = count + '+';
       }
     }
