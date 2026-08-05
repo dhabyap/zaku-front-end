@@ -76,7 +76,7 @@
                     try {
 
                         const response = await window.apiClient.post(
-                            '/auth/verify-email',
+                            '/v1/auth/verify-email',
                             this.formData
                         );
 

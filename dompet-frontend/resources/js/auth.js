@@ -14,6 +14,7 @@ export const clearToken = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
+    document.cookie = 'zaku_token=; path=/; max-age=0';
 
     if (window.location.pathname !== '/login') {
         const separator = window.location.search ? '&' : '?';

@@ -41,7 +41,7 @@
                 }
                 this.loading = true;
                 try {
-                    await window.apiClient.post('/auth/resend-verification', { email: this.userEmail });
+                    await window.apiClient.post('/v1/auth/resend-verification', { email: this.userEmail });
                     window.utils.showToast('success', 'Email verifikasi baru telah dikirim ke alamat Anda.');
                 } catch (error) {
                     console.error('Resend error:', error);

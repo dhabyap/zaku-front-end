@@ -31,6 +31,7 @@ export default function (Alpine) {
                 const { token, user } = response.data.data;
                 window.auth.setToken(token);
                 window.auth.setUser(user);
+                document.cookie = 'zaku_token=' + token + '; path=/; max-age=86400; SameSite=Lax';
                 window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                 setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
             } catch (error) {
@@ -55,8 +56,8 @@ export default function (Alpine) {
             this.loading = true;
             try {
                 await window.apiClient.post('/v1/auth/register', this.formData);
-                window.utils.showToast('success', 'Akun berhasil dibuat! Silakan cek email Anda.');
-                setTimeout(() => { window.location.href = '/verify-email'; }, 2000);
+                window.utils.showToast('success', 'Akun berhasil dibuat! Silakan masuk.');
+                setTimeout(() => { window.location.href = '/login'; }, 1500);
             } catch (error) {
                 const msg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');
                 window.utils.showToast('error', msg, true);
@@ -315,15 +316,17 @@ export default function (Alpine) {
                 let bubbleHtml = '';
                 if (data.data) {
                     const inner = data.data;
-                    if (inner.response) bubbleHtml = this.escapeHtml(inner.response);
-                    if (inner.amount && inner.description) {
-                        const sign = inner.type === 'income' ? 'inc' : 'exp';
+                    const parsed = inner.parsed_data || inner;
+                    if (inner.reply_message) bubbleHtml = this.escapeHtml(inner.reply_message);
+                    else if (inner.response) bubbleHtml = this.escapeHtml(inner.response);
+                    if (parsed.amount && parsed.description) {
+                        const sign = parsed.type === 'income' ? 'inc' : 'exp';
                         bubbleHtml += '<div class="confirm-card">'
-                            + '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(inner.description) + '</span></div>'
-                            + '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.escapeHtml(inner.amount_formatted || inner.amount) + '</span></div>';
-                        if (inner.category) bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(inner.category) + '</span></div>';
-                        bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (inner.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div></div>';
-                    } else if (inner.message) bubbleHtml = this.escapeHtml(inner.message);
+                            + '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(parsed.description) + '</span></div>'
+                            + '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.formatAmount(parsed.amount) + '</span></div>';
+                        if (parsed.category) bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(parsed.category) + '</span></div>';
+                        bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (parsed.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div></div>';
+                    } else if (parsed.message) bubbleHtml = this.escapeHtml(parsed.message);
                 } else if (data.response) bubbleHtml = this.escapeHtml(data.response);
                 else if (data.message) bubbleHtml = this.escapeHtml(data.message);
                 if (!bubbleHtml) bubbleHtml = '<em style="color: #999;">Maaf, tidak ada respons dari server. Coba lagi ya!</em>';
@@ -346,7 +349,8 @@ export default function (Alpine) {
             this.messages = [];
             this.messages.push({ role: 'ai', html: true, content: 'Chat dibersihkan. Ada transaksi yang mau dicatat? 😊', time: 'Sekarang' });
         },
-        escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+        escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; },
+        formatAmount(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); }
     }));
 
     // ── Transaction Detail ──
@@ -439,27 +443,24 @@ export default function (Alpine) {
 
     // ── Transactions List ──
     Alpine.data('transactionList', () => ({
-        transactions: [], loading: true, page: 1, hasMore: false, total: 0,
-        async init() { this.fetch(); },
-        async fetch() {
-            this.loading = true;
-            try {
-                const res = await window.apiClient.get('/v1/transactions?limit=20&page=' + this.page);
-                const data = res.data.data;
-                this.transactions = data.groups || [];
-                this.total = data.meta?.total || 0;
-                this.hasMore = data.meta?.has_more || false;
-            } catch (e) {
-                window.utils.showToast('error', 'Gagal memuat transaksi');
-            } finally { this.loading = false; }
+        transactions: [],
+        loading: true,
+        filter: 'all',
+        categories: [],
+        async init() {
+            await this.fetchTransactions();
+            this.extractCategories();
         },
-        loadMore() { if (!this.hasMore || this.loading) return; this.page++; this.fetch(); },
         formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
-        formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); },
-        getEmoji(cat) {
-            const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TAGIHAN': '⚡', 'BELANJA': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'MAKAN': '🍜' };
-            return map[cat?.toUpperCase()] || '📄';
-        }
+        formatDay(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return ''; return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); },
+        getTransactionDate(trx) { return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null; },
+        transactionDay(trx) { return this.formatDay(this.getTransactionDate(trx)); },
+        getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'FOOD & BEVERAGE': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'UTILITY': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'MAKAN': '🍜' }; return map[cat?.toUpperCase()] || '📄'; },
+        extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
+        async fetchTransactions() { try { const res = await window.apiClient.get('/v1/transactions'); const payload = res.data.data || {}; const groups = Array.isArray(payload) ? payload : (payload.groups || []); let flatTx = []; groups.forEach(group => { if (Array.isArray(group.transactions)) { const transactions = group.transactions.map(trx => ({ ...trx, month_label: trx.month_label || group.month_label })); flatTx = flatTx.concat(transactions); } }); this.transactions = flatTx; } catch (e) { console.error('Fetch transactions error:', e); window.utils.showToast('error', 'Gagal memuat riwayat transaksi'); } finally { this.loading = false; } },
+        setFilter(f, el) { this.filter = f; document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on')); if (el) el.classList.add('on'); },
+        filtered() { if (this.filter === 'all') return this.transactions; return this.transactions.filter(t => { if (this.filter === 'income' || this.filter === 'expense') return t.type === this.filter; return t.category_name?.toUpperCase() === this.filter; }); },
+        grouped() { const groups = {}; const data = this.filtered(); data.forEach(t => { const dateValue = this.getTransactionDate(t); const date = dateValue ? new Date(dateValue) : null; const key = t.month_label || (date && !isNaN(date.getTime()) ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase() : 'TANPA TANGGAL'); if (!groups[key]) groups[key] = []; groups[key].push(t); }); return groups; }
     }));
 
     // ── Profile Page ──
@@ -523,30 +524,14 @@ export default function (Alpine) {
                 window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menyimpan budget'));
             }
         },
-        exportData() {
-            window.utils.showToast('info', 'Fitur segera hadir! 📊');
-        },
         async logout() {
-            try { await window.apiClient.post('/v1/auth/logout'); } catch (e) { /* ignore */ }
-            window.auth.clearToken();
-            window.location.href = '/login';
-        }
-    }));
-
-    // ── Changelog Page ──
-    Alpine.data('changelogPage', () => ({
-        logs: [],
-        loading: true,
-        async init() { await this.fetch(); },
-        formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }); },
-        async fetch() {
             try {
-                const res = await window.apiClient.get('/v1/changelogs');
-                this.logs = res.data.data || [];
-            } catch (e) {
-                window.utils.showToast('error', 'Gagal memuat changelog');
-            } finally { this.loading = false; }
+                await window.apiClient.post('/v1/auth/logout');
+            } catch { /* ignore */ } finally {
+                window.auth.clearToken();
+                window.auth.clearUser();
+                window.location.href = '/login';
+            }
         }
     }));
-
 }

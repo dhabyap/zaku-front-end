@@ -68,11 +68,11 @@
                 }
                 this.loading = true;
                 try {
-                    await window.apiClient.post('/auth/register', this.formData);
-                    window.utils.showToast('success', 'Akun berhasil dibuat! Silakan cek email Anda.');
+                    await window.apiClient.post('/v1/auth/register', this.formData);
+                    window.utils.showToast('success', 'Akun berhasil dibuat! Silakan masuk.');
                     setTimeout(() => {
-                        window.location.href = '/verify-email';
-                    }, 2000);
+                        window.location.href = '/login';
+                    }, 1500);
                 } catch (error) {
                     console.error('Registration error:', error);
                     const detailedMsg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');

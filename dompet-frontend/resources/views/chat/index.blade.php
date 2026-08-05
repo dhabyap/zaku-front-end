@@ -12,21 +12,15 @@
     </div>
 
     <div class="chat-msgs" id="chat-msgs" x-ref="msgs">
-        <div class="msg ai">
-            <div class="msg-bub">
-                Halo, <strong x-text="user?.name?.split(' ')[0] || 'Teman'"></strong>! 👋 Saya bisa bantu catat <strong>pemasukan</strong> dan <strong>pengeluaran</strong> kamu.<br><br>
-                Ketik aja transaksinya, misalnya:<br>
-                <em>"Tadi beli makan siang 35rb"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span><br>
-                <em>"Gajian bulan ini 5 juta"</em> <span style="color:rgba(17,16,16,.4)">← pemasukan</span><br>
-                <em>"Bayar Grab ke kantor 28 ribu"</em> <span style="color:rgba(17,16,16,.4)">← pengeluaran</span>
-                <div class="chips">
-                    <div class="chip" @click="sendQuick('Beli makan siang 35rb')">🍜 Makan 35rb</div>
-                    <div class="chip" @click="sendQuick('Bayar Grab 28 ribu')">🚗 Grab 28rb</div>
-                    <div class="chip" @click="sendQuick('Terima gaji 7.5 juta')">💰 Gaji</div>
+        <template x-for="(msg, idx) in messages" :key="idx">
+            <div :class="'msg ' + msg.role">
+                <div class="msg-bub">
+                    <template x-if="msg.html"><div x-html="msg.content"></div></template>
+                    <template x-if="!msg.html"><div x-text="msg.content"></div></template>
                 </div>
+                <div class="msg-time" x-text="msg.time"></div>
             </div>
-            <div class="msg-time">09:00</div>
-        </div>
+        </template>
     </div>
 
     <div class="chat-input-area">
@@ -91,7 +85,7 @@
 
                 this.loading = true;
                 try {
-                    const res = await window.apiClient.post('/ai/chat', { message: val });
+                    const res = await window.apiClient.post('/v1/ai/chat', { message: val });
                     t.remove();
 
                     const data = res.data;
@@ -99,21 +93,25 @@
 
                     if (data.data) {
                         const inner = data.data;
-                        if (inner.response) {
+                        // Backend returns reply_message + parsed_data
+                        const parsed = inner.parsed_data || inner;
+                        if (inner.reply_message) {
+                            bubbleHtml = this.escapeHtml(inner.reply_message);
+                        } else if (inner.response) {
                             bubbleHtml = this.escapeHtml(inner.response);
                         }
-                        if (inner.amount && inner.description) {
-                            const sign = inner.type === 'income' ? 'inc' : 'exp';
+                        if (parsed.amount && parsed.description) {
+                            const sign = parsed.type === 'income' ? 'inc' : 'exp';
                             bubbleHtml += '<div class="confirm-card">' +
-                                '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(inner.description) + '</span></div>' +
-                                '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.escapeHtml(inner.amount_formatted || inner.amount) + '</span></div>';
-                            if (inner.category) {
-                                bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(inner.category) + '</span></div>';
+                                '<div class="confirm-row"><span class="confirm-key">DESKRIPSI</span><span class="confirm-val">' + this.escapeHtml(parsed.description) + '</span></div>' +
+                                '<div class="confirm-row"><span class="confirm-key">JUMLAH</span><span class="confirm-val ' + sign + '">' + this.formatAmount(parsed.amount) + '</span></div>';
+                            if (parsed.category) {
+                                bubbleHtml += '<div class="confirm-row"><span class="confirm-key">KATEGORI</span><span class="confirm-val">' + this.escapeHtml(parsed.category) + '</span></div>';
                             }
-                            bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (inner.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>';
-                            bubbleHtml += '</div>';
-                        } else if (inner.message) {
-                            bubbleHtml = this.escapeHtml(inner.message);
+                            bubbleHtml += '<div class="confirm-row"><span class="confirm-key">TIPE</span><span class="confirm-val ' + sign + '">' + (parsed.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN') + '</span></div>' +
+                                '</div>';
+                        } else if (parsed.message) {
+                            bubbleHtml = this.escapeHtml(parsed.message);
                         }
                     } else if (data.response) {
                         bubbleHtml = this.escapeHtml(data.response);
@@ -156,6 +154,9 @@
                 });
                 if (!ok) return;
                 this.$refs.msgs.innerHTML = '<div class="msg ai"><div class="msg-bub">Chat dibersihkan. Ada transaksi yang mau dicatat? 😊</div><div class="msg-time">Sekarang</div></div>';
+            },
+            formatAmount(n) {
+                return 'Rp ' + Number(n).toLocaleString('id-ID');
             },
             escapeHtml(text) {
                 const d = document.createElement('div');

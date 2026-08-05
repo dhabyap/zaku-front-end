@@ -43,7 +43,7 @@
                 if (this.loading) return;
                 this.loading = true;
                 try {
-                    await window.apiClient.post('/auth/forgot-password', { email: this.email });
+                    await window.apiClient.post('/v1/auth/forgot-password', { email: this.email });
                     window.utils.showToast('success', 'Instruksi reset password telah dikirim ke email Anda.');
                     this.email = '';
                 } catch (error) {

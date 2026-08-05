@@ -338,7 +338,7 @@
 
                 async fetchDashboard() {
                     try {
-                        const res = await window.apiClient.get('/dashboard');
+                        const res = await window.apiClient.get('/v1/dashboard');
                         const data = res.data.data;
                         this.balance = data.current_month_balance || 0;
                         this.income = data.total_income || 0;

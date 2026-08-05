@@ -14,9 +14,11 @@ Route::get('/email/verify', [PageController::class, 'verifyEmailProcess'])->name
 Route::get('/verify-manual', [PageController::class, 'verifyManual'])->name('verify-manual');
 Route::get('/forgot-password', [PageController::class, 'forgotPassword'])->name('forgot-password');
 
-Route::get('/dashboard', [PageController::class, 'home'])->name('dashboard');
-Route::get('/transactions', [PageController::class, 'transactions'])->name('transactions');
-Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
-Route::get('/chat', [PageController::class, 'chat'])->name('chat');
-Route::get('/profile', [PageController::class, 'profile'])->name('profile');
-Route::get('/changelogs', [PageController::class, 'changelogs'])->name('changelogs');
+Route::middleware(['jwt.session'])->group(function () {
+    Route::get('/dashboard', [PageController::class, 'home'])->name('dashboard');
+    Route::get('/transactions', [PageController::class, 'transactions'])->name('transactions');
+    Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
+    Route::get('/chat', [PageController::class, 'chat'])->name('chat');
+    Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+    Route::get('/changelogs', [PageController::class, 'changelogs'])->name('changelogs');
+});

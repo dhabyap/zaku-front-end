@@ -77,10 +77,11 @@
                     if (this.loading) return;
                     this.loading = true;
                     try {
-                        const response = await window.apiClient.post('/auth/login', this.formData);
+                        const response = await window.apiClient.post('/v1/auth/login', this.formData);
                         const { token, user } = response.data.data;
                         window.auth.setToken(token);
                         window.auth.setUser(user);
+                        document.cookie = 'zaku_token=' + token + '; path=/; max-age=86400; SameSite=Lax';
                         window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                         setTimeout(() => {
                             window.location.href = '/dashboard';
@@ -99,6 +100,7 @@
         function demoLogin() {
             window.auth.setToken('demo-token', 'demo-refresh');
             window.auth.setUser({ name: 'Budi Santoso', email: 'budi@email.com' });
+            document.cookie = 'zaku_token=demo-token; path=/; max-age=86400; SameSite=Lax';
             window.location.href = '/dashboard';
         }
     </script>
