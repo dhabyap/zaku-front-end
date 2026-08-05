@@ -22,9 +22,21 @@ export const clearToken = () => {
     }
 };
 
+export const isTokenExpired = () => {
+    const token = getToken();
+    if (!token) return true;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // Exp is in seconds, add 60s buffer
+        return payload.exp ? Date.now() >= (payload.exp * 1000) + 60000 : true;
+    } catch {
+        return true;
+    }
+};
+
 export const isLoggedIn = () => {
     const token = getToken();
-    return !!token;
+    return !!token && !isTokenExpired();
 };
 
 export const setUser = (user) => {
@@ -40,6 +52,6 @@ export const getUser = () => {
         const user = sessionStorage.getItem('user');
         return user && user !== 'undefined' ? JSON.parse(user) : null;
     } catch (e) {
-        return null; // Fallback jika format JSON rusak
+        return null;
     }
 };

@@ -1,6 +1,6 @@
 // resources/js/api-client.js
 import axios from "axios";
-import { getToken, setToken, clearToken } from "./auth";
+import { getToken, isTokenExpired, clearToken } from "./auth";
 
 // Create an axios instance with base URL and JSON headers
 const apiClient = axios.create({
@@ -8,13 +8,18 @@ const apiClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
+    timeout: 15000,
 });
 
-// Request interceptor to attach JWT token if present
+// Request interceptor: attach JWT, check expiry before sending
 apiClient.interceptors.request.use(
     (config) => {
         const token = getToken();
         if (token) {
+            if (isTokenExpired()) {
+                clearToken();
+                return Promise.reject(new axios.Cancel('Session expired'));
+            }
             config.headers["Authorization"] = `Bearer ${token}`;
         }
         return config;
@@ -22,11 +27,11 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error),
 );
 
-// Response interceptor to handle 401 errors - clear token and redirect to login
+// Response interceptor: handle401 and network errors
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response?.status === 401) {
             clearToken();
             return Promise.reject(error);
         }
