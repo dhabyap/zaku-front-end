@@ -21,9 +21,19 @@ Frontend web aplikasi **Zaku** — pelacak keuangan pribadi dengan fitur AI chat
 | **AI Chat** | Chat dengan AI asisten keuangan |
 | **Profil** | Kelola data profil pengguna |
 | **Changelogs** | Catatan perubahan/rilis aplikasi |
-| **Cetak Struk** | Cetak bukti transaksi dalam format yang rapi |
+| **Print Struk** | Cetak struk thermal 80mm dengan format rapi untuk transaksi |
 
-## Setup Lokal
+## Screenshots
+
+### Landing Page
+
+**Desain landing page:** warna utama hitam, aksen oranye (#FF5C00), layout bold dengan hero section, mockup HP di kanan, marquee teks berjalan, navigasi sticky di atas. Headline besar: "Catat duit, ngobrol aja."
+
+### Login Page
+
+**Halaman login:** form login di tengah dengan background putih kekrem, toggler password "LIHAT", tombol "MASUK SEKARANG →" oranye, tombol "BUAT AKUN BARU" outlined, link demo access di bawah.
+
+## Setup Local
 
 ### Prasyarat
 
