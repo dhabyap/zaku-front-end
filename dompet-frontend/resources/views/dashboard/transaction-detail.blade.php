@@ -101,6 +101,37 @@
                     <button @click="window.print()" class="btn-main" style="background:var(--paper);color:var(--ink);margin-top:0;">CETAK STRUK →</button>
                     <button @click="deleteTransaction()" class="btn-main" style="background:var(--punch);color:var(--paper);margin-top:0;border:var(--border);box-shadow:var(--bs);">HAPUS TRANSAKSI 🗑️</button>
                 </div>
+
+                {{-- PRINT RECEIPT --}}
+                <div class="receipt-print">
+                    <div class="receipt-header">
+                        <div class="receipt-title">ZAKU</div>
+                        <div class="receipt-subtitle">Dompet Digital</div>
+                        <div class="receipt-subtitle" x-text="formatDate(transaction.created_at)"></div>
+                    </div>
+                    <div class="receipt-body">
+                        <div class="receipt-row">
+                            <span class="receipt-label">Deskripsi</span>
+                            <span class="receipt-value" x-text="transaction.description"></span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Kategori</span>
+                            <span class="receipt-value" x-text="(transaction.category_name || transaction.category || 'UMUM')"></span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Tipe</span>
+                            <span class="receipt-value" x-text="transaction.type === 'income' ? 'PEMASUKAN' : 'PENGELUARAN'"></span>
+                        </div>
+                    </div>
+                    <div class="receipt-total">
+                        <div class="receipt-amount" x-text="(transaction.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(transaction.amount)"></div>
+                        <div class="receipt-type-label" x-text="transaction.type === 'income' ? '↑ PEMASUKAN' : '↓ PENGELUARAN'"></div>
+                    </div>
+                    <div class="receipt-footer">
+                        Terima kasih telah menggunakan Zaku<br>
+                        #<span x-text="transaction.id"></span>
+                    </div>
+                </div>
             </div>
         </template>
     </div>
