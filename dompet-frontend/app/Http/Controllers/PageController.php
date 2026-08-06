@@ -85,4 +85,9 @@ class PageController extends Controller
     {
         return view('dashboard.changelogs');
     }
+
+    public function monthlyRecap()
+    {
+        return view('dashboard.monthly_recap');
+    }
 }

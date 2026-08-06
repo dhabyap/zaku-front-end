@@ -100,6 +100,13 @@
                 </div>
             </div>
 
+            <div class="section mt16">
+                <div class="section-row">
+                    <div class="section-title">REKAPAN</div>
+                    <button class="btn-tiny" onclick="window.location.href='/monthly-recap'">LIHAT REKAPAN BULANAN</button>
+                </div>
+            </div>
+
             <div class="section">
                 <div class="section-row">
                     <div class="section-title">TRANSAKSI TERAKHIR</div>
@@ -175,40 +182,7 @@
                     </template>
                 </div>
             </div>
-            <div class="section mt16">
-                <div class="section-row">
-                    <div class="section-title">REKAPAN BULAN LALU</div>
-                    <button class="btn-tiny" onclick="window.location.href='/transactions?filter=last_month'">LIHAT DETAIL</button>
-                </div>
-                <template x-if="loading.monthlyRecap">
-                    <div class="budget-box">
-                        <x-loading-skeleton count="3" />
-                    </div>
-                </template>
-                <template x-if="!loading.monthlyRecap">
-                    <div class="budget-box">
-                        <div class="bc-label" x-text="monthlyRecap.month"></div>
-                        <div class="bc-stats">
-                            <div class="bc-stat">
-                                <div class="bc-stat-label">
-                                    <div class="dot" style="background:#00A36B;border-color:#00A36B"></div>PEMASUKAN
-                                </div>
-                                <div class="bc-stat-val" x-text="'Rp ' + formatNumber(monthlyRecap.total_income)"></div>
-                            </div>
-                            <div class="bc-stat">
-                                <div class="bc-stat-label">
-                                    <div class="dot" style="background:var(--punch);border-color:var(--punch)"></div>PENGELUARAN
-                                </div>
-                                <div class="bc-stat-val" x-text="'Rp ' + formatNumber(monthlyRecap.total_expense)"></div>
-                            </div>
-                        </div>
-                        <div class="budget-foot" style="margin-top:10px;">
-                            <span>NET CASHFLOW</span>
-                            <span x-text="'Rp ' + formatNumber(monthlyRecap.net_cashflow)"></span>
-                        </div>
-                    </div>
-                </template>
-            </div>
+
 
 
     <script>
@@ -244,22 +218,14 @@
                     statusClass: 'risk',
                     insight: ''
                 },
-                monthlyRecap: {
-                    month: '',
-                    total_income: 0,
-                    total_expense: 0,
-                    net_cashflow: 0
-                },
                 loading: {
                     balance: true,
                     transactions: true,
                     categories: true,
-                    budget: true,
-                    monthlyRecap: true
+                    budget: true
                 },
                 async init() {
                     this.fetchDashboard();
-                    this.fetchMonthlyRecap();
                 },
                 formatNumber(n) {
                     if (!n) return '0';
@@ -424,23 +390,6 @@
                         this.loading.budget = false;
                     }
                 },
-                async fetchMonthlyRecap() {
-                    try {
-                        const res = await window.apiClient.get('/v1/dashboard/monthly-recap');
-                        const data = res.data.data;
-                        this.monthlyRecap = {
-                            month: data.month || '',
-                            total_income: data.total_income || 0,
-                            total_expense: data.total_expense || 0,
-                            net_cashflow: data.net_cashflow || 0
-                        };
-                    } catch (e) {
-                        console.error('Fetch monthly recap error:', e);
-                        window.utils.showToast('error', 'Gagal memuat rekap bulanan');
-                    } finally {
-                        this.loading.monthlyRecap = false;
-                    }
-                }
             }
         }
     </script>
