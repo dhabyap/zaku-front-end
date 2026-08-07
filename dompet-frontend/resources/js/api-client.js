@@ -11,9 +11,16 @@ const apiClient = axios.create({
     timeout: 15000,
 });
 
+// Auth endpoints that should NOT attach or validate existing tokens
+const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification'];
+
 // Request interceptor: attach JWT, check expiry before sending
 apiClient.interceptors.request.use(
     (config) => {
+        // Skip token logic for auth endpoints (login, register, etc.)
+        const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => config.url?.endsWith(ep));
+        if (isAuthEndpoint) return config;
+
         const token = getToken();
         if (token) {
             if (isTokenExpired()) {
@@ -27,12 +34,16 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error),
 );
 
-// Response interceptor: handle401 and network errors
+// Response interceptor: handle 401 and network errors
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            clearToken();
+            const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => error.config?.url?.endsWith(ep));
+            // Don't clear token on 401 from auth endpoints (invalid credentials is expected)
+            if (!isAuthEndpoint) {
+                clearToken();
+            }
             return Promise.reject(error);
         }
         return Promise.reject(error);
