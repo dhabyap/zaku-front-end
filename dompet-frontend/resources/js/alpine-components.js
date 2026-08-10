@@ -499,6 +499,8 @@ export default function (Alpine) {
             return hints[cat?.toUpperCase()] || 'Transaksi ini dicatat otomatis oleh ZAKU AI.';
         },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
+        totalIncome: 0,
+        totalExpense: 0,
         async fetchTransactions(page = 1) {
             this.loading = true;
             try {
@@ -506,6 +508,10 @@ export default function (Alpine) {
                 const payload = res.data.data || {};
                 const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                 const meta = payload.meta || {};
+                
+                // Fetch totals from meta if available, else fallback
+                this.totalIncome = meta.total_income || 0;
+                this.totalExpense = meta.total_expense || 0;
                 
                 let flatTx = [];
                 groups.forEach(group => {
@@ -533,6 +539,30 @@ export default function (Alpine) {
             if (p < 1 || (this.lastPage && p > this.lastPage)) return;
             await this.fetchTransactions(p);
             document.getElementById('tx-body').scrollTop = 0;
+        },
+        paginationNumbers() {
+            const total = this.lastPage;
+            const current = this.currentPage;
+            const delta = 1;
+            const range = [];
+            const rangeWithDots = [];
+            let l;
+
+            range.push(1);
+            for (let i = current - delta; i <= current + delta; i++) {
+                if (i < total && i > 1) range.push(i);
+            }
+            range.push(total);
+
+            for (let i of range) {
+                if (l) {
+                    if (i - l === 2) rangeWithDots.push(l + 1);
+                    else if (i - l !== 1) rangeWithDots.push('...');
+                }
+                rangeWithDots.push(i);
+                l = i;
+            }
+            return rangeWithDots;
         },
         setFilter(f, el) { 
             this.filter = f; 

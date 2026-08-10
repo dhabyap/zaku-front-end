@@ -285,7 +285,7 @@
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 1.5px;
-  color: var(--gray);
+  color: #555; /* Kontras lebih baik */
   display: flex;
   align-items: center;
   gap: 7px;
@@ -467,7 +467,7 @@
   font-family: var(--font-mono);
   font-size: 8px;
   letter-spacing: 1.5px;
-  color: var(--gray);
+  color: #555; /* Kontras lebih baik */
   background: var(--cream);
   border: 1.5px solid var(--gray-l);
   padding: 1px 6px;
