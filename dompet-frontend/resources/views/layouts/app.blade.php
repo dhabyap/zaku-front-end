@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Zaku') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('build/assets/zaku-favicon.svg') }}">
     <script>
         (function() {
             var token = localStorage.getItem('access_token');
