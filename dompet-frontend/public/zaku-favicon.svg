@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+
+  <!-- bg hitam -->
+  <rect width="64" height="64" fill="#0E0E0E"/>
+
+  <!-- border kuning offset (neobrutalism shadow) -->
+  <rect x="5" y="5" width="54" height="54" fill="none" stroke="#FFD600" stroke-width="2.5"/>
+
+  <!-- inner fill -->
+  <rect x="2" y="2" width="54" height="54" fill="#0E0E0E" stroke="#FFD600" stroke-width="2.5"/>
+
+  <!-- orange accent blok kiri atas -->
+  <rect x="2" y="2" width="14" height="5" fill="#FF4800"/>
+
+  <!-- orange accent blok kanan bawah -->
+  <rect x="42" y="51" width="14" height="5" fill="#FF4800"/>
+
+  <!-- huruf Z bold -->
+  <text
+    x="28"
+    y="45"
+    font-family="Arial Black, sans-serif"
+    font-size="38"
+    font-weight="900"
+    fill="#FFD600"
+    text-anchor="middle"
+    letter-spacing="-2"
+  >Z</text>
+
+  <!-- titik oranye pojok kanan atas -->
+  <rect x="48" y="6" width="6" height="6" fill="#FF4800"/>
+
+  <!-- titik kuning pojok kiri bawah -->
+  <rect x="10" y="50" width="6" height="6" fill="#FFD600" opacity="0.5"/>
+
+</svg>

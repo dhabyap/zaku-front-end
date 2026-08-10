@@ -1887,13 +1887,14 @@ html, body {
   border: 3px solid var(--ink);
   box-shadow: var(--bs);
   padding: 14px;
+  position: relative;
 }
 
 .week-chart {
   display: flex;
   align-items: flex-end;
   gap: 5px;
-  height: 90px;
+  height: 100px;
   border-bottom: 2px solid var(--ink);
   margin-bottom: 8px;
 }
@@ -1906,6 +1907,18 @@ html, body {
   gap: 4px;
   height: 100%;
   justify-content: flex-end;
+  cursor: pointer;
+  position: relative;
+}
+
+.wk-col:hover .wk-bar {
+  filter: brightness(1.15);
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+}
+
+.wk-col:active .wk-bar {
+  transform: scaleY(0.97);
 }
 
 .wk-bar-wrap {
@@ -1922,6 +1935,7 @@ html, body {
   border: 1.5px solid rgba(17,16,16,.15);
   border-bottom: none;
   min-height: 4px;
+  transition: transform .15s ease, filter .15s ease, background .2s;
 }
 
 .wk-bar.wk-active { background: var(--punch); border-color: var(--punch); }
@@ -1933,14 +1947,61 @@ html, body {
   letter-spacing: .5px;
   color: rgba(17,16,16,.3);
   flex-shrink: 0;
+  transition: color .15s;
 }
 
+.wk-col:hover .wk-lbl { color: var(--ink); font-weight: 600; }
 .wk-lbl.wk-active { color: var(--punch); font-weight: 500; }
+
+/* Week tooltip */
+.wk-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--white);
+  padding: 6px 10px;
+  border-radius: 0;
+  border: 2px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 10;
+  box-shadow: 2px 2px 0 rgba(17,16,16,.2);
+}
+
+.wk-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+
+.wk-col:hover .wk-tooltip { opacity: 1; }
 
 .week-legend {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+/* Bar entrance animation */
+@keyframes wk-grow {
+  from { height: 0; }
+  to { height: var(--h); }
+}
+
+.wk-bar.animated {
+  animation: wk-grow .5s cubic-bezier(.4,0,.2,1) forwards;
+  height: 0;
 }
 
 .wl-item {
