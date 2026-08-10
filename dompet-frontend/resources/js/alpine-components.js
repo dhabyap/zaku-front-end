@@ -578,6 +578,10 @@ export default function (Alpine) {
     Alpine.data('changelogPage', () => ({
         logs: [],
         loading: true,
+        loadingMore: false,
+        currentPage: 1,
+        lastPage: 1,
+        total: 0,
         async init() { await this.fetchLogs(); },
         formatDate(d) {
             if (!d) return '';
@@ -586,12 +590,31 @@ export default function (Alpine) {
         async fetchLogs() {
             this.loading = true;
             try {
-                const res = await window.apiClient.get('/v1/changelogs');
-                this.logs = res.data.data || [];
+                const res = await window.apiClient.get('/v1/changelogs?per_page=10&page=1');
+                const d = res.data.data;
+                this.logs = d.items || [];
+                this.currentPage = d.pagination.current_page;
+                this.lastPage = d.pagination.last_page;
+                this.total = d.pagination.total;
             } catch (e) {
                 window.utils.showToast('error', 'Gagal memuat changelog');
             } finally {
                 this.loading = false;
+            }
+        },
+        async loadMore() {
+            if (this.loadingMore || this.currentPage >= this.lastPage) return;
+            this.loadingMore = true;
+            try {
+                const res = await window.apiClient.get(`/v1/changelogs?per_page=10&page=${this.currentPage + 1}`);
+                const d = res.data.data;
+                this.logs = [...this.logs, ...(d.items || [])];
+                this.currentPage = d.pagination.current_page;
+                this.lastPage = d.pagination.last_page;
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat data lainnya');
+            } finally {
+                this.loadingMore = false;
             }
         }
     }));

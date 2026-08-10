@@ -25,6 +25,12 @@
             </div>
         </template>
 
+        <template x-if="!loading && logs.length > 0">
+            <div style="padding:8px 16px;font-family:var(--font-mono);font-size:9px;color:rgba(17,16,16,.35);letter-spacing:1px;">
+                MENAMPILKAN <span x-text="logs.length"></span> DARI <span x-text="total"></span> UPDATE
+            </div>
+        </template>
+
         <template x-for="log in logs" :key="log.id">
             <div style="margin:12px 16px;background:#fff;border:var(--border);box-shadow:var(--bs-lg);padding:16px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -49,6 +55,23 @@
                         </template>
                     </div>
                 </template>
+            </div>
+        </template>
+
+        <template x-if="!loading && currentPage < lastPage">
+            <div style="padding:16px;text-align:center;">
+                <button @click="loadMore()" :disabled="loadingMore"
+                    style="width:100%;background:var(--paper);color:var(--ink);border:var(--border);box-shadow:var(--bs);padding:14px;font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:transform .1s,box-shadow .1s;"
+                    :style="loadingMore ? 'opacity:.5;cursor:wait' : ''">
+                    <span x-show="!loadingMore">MUAT LAINNYA →</span>
+                    <span x-show="loadingMore">MEMUAT...</span>
+                </button>
+            </div>
+        </template>
+
+        <template x-if="!loading && currentPage >= lastPage && logs.length > 0">
+            <div style="padding:16px;text-align:center;font-family:var(--font-mono);font-size:9px;color:rgba(17,16,16,.3);letter-spacing:1px;">
+                SEMUA DATA SUDAH DIMUAT
             </div>
         </template>
     </div>

@@ -13,6 +13,7 @@
         </div>
         <a href="/profile" class="dh-avatar" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
     </div>
+    <link rel="icon" type="image/svg+xml" href="build/assets/zaku-favicon.svg">
 </header>
 
 <script>
