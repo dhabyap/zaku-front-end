@@ -60,8 +60,7 @@
 
         <template x-if="!loading && hasMore">
             <div style="padding:16px;text-align:center;">
-                <button @click="loadMore()" :disabled="loadingMore"
-                    style="width:100%;background:var(--paper);color:var(--ink);border:var(--border);box-shadow:var(--bs);padding:14px;font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:transform .1s,box-shadow .1s;"
+                <button @click="loadMore()" :disabled="loadingMore" class="btn-main alt"
                     :style="loadingMore ? 'opacity:.5;cursor:wait' : ''">
                     <span x-show="!loadingMore">MUAT LAINNYA →</span>
                     <span x-show="loadingMore">MEMUAT...</span>
