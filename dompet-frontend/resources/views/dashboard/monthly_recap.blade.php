@@ -25,8 +25,8 @@
 
             {{-- Loading State --}}
             <template x-if="loading">
-                <div style="padding:40px 16px;text-align:center;">
-                    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:rgba(17,16,16,.35);">MEMUAT DATA...</div>
+                <div style="padding:20px 16px;">
+                    <x-loading-skeleton count="5" />
                 </div>
             </template>
 
