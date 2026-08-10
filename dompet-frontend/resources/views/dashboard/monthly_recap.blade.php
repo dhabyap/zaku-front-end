@@ -78,9 +78,13 @@
                     <div class="rekap-sec">
                         <div class="rekap-sec-title">PENGELUARAN PER MINGGU</div>
                         <div class="week-chart-wrap">
-                            <div class="week-chart">
+                            <div class="week-chart" x-init="$nextTick(() => { $el.querySelectorAll('.wk-bar').forEach((b, i) => { b.style.setProperty('--h', b.style.height); b.classList.add('animated'); b.style.animationDelay = (i * 0.1) + 's'; }) })">
                                 <template x-for="week in recap.week_expenses" :key="week.week">
                                     <div class="wk-col">
+                                        <div class="wk-tooltip">
+                                            <div x-text="week.label + ': Rp ' + formatNumber(week.amount)"></div>
+                                            <div x-show="week.start" style="opacity:.6;font-size:8px" x-text="week.start + ' – ' + week.end"></div>
+                                        </div>
                                         <div class="wk-bar-wrap">
                                             <div class="wk-bar"
                                                  :class="{ 'wk-active': week.amount === recap.week_max, 'wk-high': week.amount === recap.week_max }"
