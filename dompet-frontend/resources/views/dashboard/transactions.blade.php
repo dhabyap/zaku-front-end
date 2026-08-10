@@ -9,8 +9,8 @@
         <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
       </div>
       <div class="hist-chips">
-        <div class="hchip inc"><div class="hchip-dot"></div><span x-text="rp(transactions.filter(t=>t.type=='income').reduce((s,t)=>s+t.amount,0))"></span></div>
-        <div class="hchip exp"><div class="hchip-dot"></div>−<span x-text="rp(transactions.filter(t=>t.type=='expense').reduce((s,t)=>s+t.amount,0))"></span></div>
+        <div class="hchip inc"><div class="hchip-dot"></div><span x-text="rp(totalIncome)"></span></div>
+        <div class="hchip exp"><div class="hchip-dot"></div>−<span x-text="rp(totalExpense)"></span></div>
       </div>
     </div>
     <div class="search-wrap">
@@ -28,11 +28,11 @@
   </div>
 
   <div class="sort-bar">
-    <div class="sort-left">TOTAL <span class="sort-num" id="total-count" x-text="filtered().length"></span> TRANSAKSI</div>
+    <div class="sort-left">TOTAL <span class="sort-num" id="total-count" x-text="total"></span> TRANSAKSI</div>
     <div class="sort-right">
       <span class="sort-label">URUTKAN</span>
-      <button class="sort-btn active" @click="setSort('date', $el)">↓ TERBARU</button>
-      <button class="sort-btn" @click="setSort('amount', $el)">↕ NOMINAL</button>
+      <button class="sort-btn" :class="{'active': sortKey === 'date'}" @click="setSort('date', $el)" x-text="sortKey === 'date' ? (sortAsc ? '↑ TERLAMA' : '↓ TERBARU') : '↓ TERBARU'"></button>
+      <button class="sort-btn" :class="{'active': sortKey === 'amount'}" @click="setSort('amount', $el)" x-text="sortKey === 'amount' ? (sortAsc ? '↑ TERKECIL' : '↓ TERBESAR') : '↕ NOMINAL'"></button>
     </div>
   </div>
 
@@ -70,10 +70,20 @@
   </div>
 
   <div class="pagination">
-    <div class="pag-info">HAL <strong x-text="currentPage"></strong> DARI <span x-text="lastPage || 1"></span></div>
+    <div class="pag-info">
+      HAL <strong x-text="currentPage"></strong> DARI <span x-text="lastPage || 1"></span>
+    </div>
     <div class="pag-controls">
       <button class="pag-btn arrow" @click="loadPage(currentPage-1)" :disabled="currentPage<=1">‹</button>
-      <button class="pag-btn arrow" @click="loadPage(currentPage+1)" :disabled="!hasMore">›</button>
+      <template x-for="p in paginationNumbers()" :key="p">
+        <template x-if="p === '...'">
+          <span class="pag-dots">···</span>
+        </template>
+        <template x-if="p !== '...'">
+          <button class="pag-btn" :class="{'on': p === currentPage}" @click="loadPage(p)" x-text="p"></button>
+        </template>
+      </template>
+      <button class="pag-btn arrow" @click="loadPage(currentPage+1)" :disabled="currentPage>=lastPage">›</button>
     </div>
   </div>
 
