@@ -28,11 +28,11 @@
   </div>
 
   <div class="sort-bar">
-    <div class="sort-left">TOTAL <span class="sort-num" id="total-count" x-text="filtered().length"></span> TRANSAKSI</div>
+    <div class="sort-left">TOTAL <span class="sort-num" id="total-count" x-text="total"></span> TRANSAKSI</div>
     <div class="sort-right">
       <span class="sort-label">URUTKAN</span>
-      <button class="sort-btn active" @click="setSort('date', $el)">↓ TERBARU</button>
-      <button class="sort-btn" @click="setSort('amount', $el)">↕ NOMINAL</button>
+      <button class="sort-btn" :class="{'active': sortKey === 'date'}" @click="setSort('date', $el)" x-text="sortKey === 'date' ? (sortAsc ? '↑ TERLAMA' : '↓ TERBARU') : '↓ TERBARU'"></button>
+      <button class="sort-btn" :class="{'active': sortKey === 'amount'}" @click="setSort('amount', $el)" x-text="sortKey === 'amount' ? (sortAsc ? '↑ TERKECIL' : '↓ TERBESAR') : '↕ NOMINAL'"></button>
     </div>
   </div>
 

@@ -238,6 +238,7 @@
   display: flex;
   overflow-x: auto;
   border-top: 1.5px solid rgba(255,255,255,.07);
+  padding: 0 16px; /* Tambahkan padding horizontal */
 }
 
 .filter-strip::-webkit-scrollbar { display: none; }
@@ -248,7 +249,7 @@
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 2px;
-  color: rgba(245,240,232,.3);
+  color: rgba(245,240,232,.5); /* Kontras lebih baik */
   background: transparent;
   border: none;
   border-right: 1px solid rgba(255,255,255,.07);
@@ -256,8 +257,10 @@
   position: relative;
   transition: color .15s, background .15s;
   white-space: nowrap;
+  margin-right: -1px; /* Overlap border */
 }
 
+.fpill:first-child { border-left: 1px solid rgba(255,255,255,.07); } /* Tambahkan border kiri */
 .fpill:last-child { border-right: none; }
 .fpill:hover { color: rgba(245,240,232,.65); }
 
