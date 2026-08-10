@@ -468,29 +468,45 @@ export default function (Alpine) {
     Alpine.data('transactionList', () => ({
         transactions: [],
         loading: true,
-        loadingMore: false,
         filter: 'all',
         categories: [],
         currentPage: 1,
+        lastPage: 1,
         hasMore: false,
         total: 0,
+        searchQuery: '',
+        sortKey: 'date',
+        sortAsc: false,
+        activeTrx: null,
         async init() {
             await this.fetchTransactions();
             this.extractCategories();
         },
         formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
+        rp(n) { return 'Rp ' + this.formatNumber(n); },
         formatDay(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return ''; return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); },
         getTransactionDate(trx) { return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null; },
         transactionDay(trx) { return this.formatDay(this.getTransactionDate(trx)); },
-        getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'FOOD & BEVERAGE': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'UTILITY': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'MAKAN': '🍜' }; return map[cat?.toUpperCase()] || '📄'; },
+        getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮' }; return map[cat?.toUpperCase()] || '📄'; },
+        getAiHint(cat) {
+            const hints = {
+                'MAKANAN': 'Pos makanan kamu bulan ini cukup tinggi. Coba masak sendiri untuk hemat lebih banyak.',
+                'TRANSPORTASI': 'Pengeluaran transportasi masih wajar bulan ini.',
+                'BELANJA': 'Hati-hati! Belanja bulan ini naik. Coba terapkan "48-hour rule" sebelum beli.',
+                'TAGIHAN': 'Ini tagihan rutin — ZAKU akan ingatkan kamu otomatis bulan depan.',
+                'GAJI': 'Pemasukan gaji diterima tepat waktu. Mantap!'
+            };
+            return hints[cat?.toUpperCase()] || 'Transaksi ini dicatat otomatis oleh ZAKU AI.';
+        },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
-        async fetchTransactions() {
+        async fetchTransactions(page = 1) {
             this.loading = true;
             try {
-                const res = await window.apiClient.get('/v1/transactions?limit=20&page=1');
+                const res = await window.apiClient.get(`/v1/transactions?limit=20&page=${page}`);
                 const payload = res.data.data || {};
                 const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                 const meta = payload.meta || {};
+                
                 let flatTx = [];
                 groups.forEach(group => {
                     if (Array.isArray(group.transactions)) {
@@ -501,48 +517,67 @@ export default function (Alpine) {
                         flatTx = flatTx.concat(transactions);
                     }
                 });
+                
                 this.transactions = flatTx;
                 this.currentPage = meta.page || 1;
+                this.lastPage = Math.ceil((meta.total || 0) / (meta.limit || 20));
                 this.hasMore = meta.has_more || false;
                 this.total = meta.total || 0;
             } catch (e) {
                 console.error('Fetch transactions error:', e);
-                window.utils.showToast('error', 'Gagal memuat riwayat transaksi');
             } finally {
                 this.loading = false;
             }
         },
-        async loadMore() {
-            if (this.loadingMore || !this.hasMore) return;
-            this.loadingMore = true;
-            try {
-                const res = await window.apiClient.get(`/v1/transactions?limit=20&page=${this.currentPage + 1}`);
-                const payload = res.data.data || {};
-                const groups = Array.isArray(payload) ? payload : (payload.groups || []);
-                const meta = payload.meta || {};
-                let flatTx = [];
-                groups.forEach(group => {
-                    if (Array.isArray(group.transactions)) {
-                        const transactions = group.transactions.map(trx => ({
-                            ...trx,
-                            month_label: trx.month_label || group.month_label
-                        }));
-                        flatTx = flatTx.concat(transactions);
-                    }
-                });
-                this.transactions = [...this.transactions, ...flatTx];
-                this.currentPage = meta.page || this.currentPage + 1;
-                this.hasMore = meta.has_more || false;
-                this.extractCategories();
-            } catch (e) {
-                window.utils.showToast('error', 'Gagal memuat data lainnya');
-            } finally {
-                this.loadingMore = false;
-            }
+        async loadPage(p) {
+            if (p < 1 || (this.lastPage && p > this.lastPage)) return;
+            await this.fetchTransactions(p);
+            document.getElementById('tx-body').scrollTop = 0;
         },
-        setFilter(f, el) { this.filter = f; document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('on')); if (el) el.classList.add('on'); },
-        filtered() { if (this.filter === 'all') return this.transactions; return this.transactions.filter(t => { if (this.filter === 'income' || this.filter === 'expense') return t.type === this.filter; return t.category_name?.toUpperCase() === this.filter; }); },
-        grouped() { const groups = {}; const data = this.filtered(); data.forEach(t => { const dateValue = this.getTransactionDate(t); const date = dateValue ? new Date(dateValue) : null; const key = t.month_label || (date && !isNaN(date.getTime()) ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase() : 'TANPA TANGGAL'); if (!groups[key]) groups[key] = []; groups[key].push(t); }); return groups; }
+        setFilter(f, el) { 
+            this.filter = f; 
+            document.querySelectorAll('.fpill').forEach(p => p.classList.remove('on')); 
+            if (el) el.classList.add('on'); 
+        },
+        setSort(key, btn) {
+            if (this.sortKey === key) this.sortAsc = !this.sortAsc;
+            else { this.sortKey = key; this.sortAsc = false; }
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            btn.textContent = key === 'date' ? (this.sortAsc ? '↑ TERLAMA' : '↓ TERBARU') : (this.sortAsc ? '↑ TERKECIL' : '↓ TERBESAR');
+        },
+        doSearch(v) { this.searchQuery = v; },
+        filtered() {
+            let d = [...this.transactions];
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                d = d.filter(t => (t.description || '').toLowerCase().includes(q) || (t.category_name || '').toLowerCase().includes(q));
+            }
+            if (this.filter !== 'all') {
+                if (this.filter === 'income' || this.filter === 'expense') d = d.filter(t => t.type === this.filter);
+                else d = d.filter(t => t.category_name?.toUpperCase() === this.filter);
+            }
+            d.sort((a, b) => {
+                const v = this.sortKey === 'date' ? new Date(this.getTransactionDate(a)) - new Date(this.getTransactionDate(b)) : a.amount - b.amount;
+                return this.sortAsc ? v : -v;
+            });
+            return d;
+        },
+        grouped() {
+            const groups = {};
+            const data = this.filtered();
+            data.forEach(t => {
+                const dateValue = this.getTransactionDate(t);
+                const date = dateValue ? new Date(dateValue) : null;
+                const key = t.month_label || (date && !isNaN(date.getTime()) ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase() : 'TANPA TANGGAL');
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(t);
+            });
+            return groups;
+        },
+        openDrw(trx) { this.activeTrx = trx; document.getElementById('drawer-bg').classList.add('open'); },
+        closeDrw() { document.getElementById('drawer-bg').classList.remove('open'); },
+        showToast(msg) { window.utils.showToast('info', msg); }
     }));
 
     // ── Profile Page ──

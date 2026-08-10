@@ -1,80 +1,106 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="transactionList" style="display:flex;flex-direction:column;height:100%;">
+<div x-data="transactionList()" class="shell">
+  <div class="hist-header">
     <div class="hist-top">
-        <div class="hist-title">Riwayat.</div>
+      <div>
+        <div class="hist-title"><strong>Riwayat</strong><span class="hist-title-dot">.</span></div>
         <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
+      </div>
+      <div class="hist-chips">
+        <div class="hchip inc"><div class="hchip-dot"></div><span x-text="rp(transactions.filter(t=>t.type=='income').reduce((s,t)=>s+t.amount,0))"></span></div>
+        <div class="hchip exp"><div class="hchip-dot"></div>−<span x-text="rp(transactions.filter(t=>t.type=='expense').reduce((s,t)=>s+t.amount,0))"></span></div>
+      </div>
     </div>
-
-    <div class="filter-scroll">
-        <button class="filter-pill on" @click="setFilter('all', $el)">SEMUA</button>
-        <button class="filter-pill" @click="setFilter('income', $el)">PEMASUKAN</button>
-        <button class="filter-pill" @click="setFilter('expense', $el)">PENGELUARAN</button>
-        <template x-for="cat in categories" :key="cat">
-            <button class="filter-pill" @click="setFilter(cat, $el)" x-text="cat"></button>
-        </template>
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Cari nama atau kategori..." @input.debounce="doSearch($event.target.value)">
+      <div class="search-ico">⌕</div>
     </div>
+    <div class="filter-strip">
+      <button class="fpill on" @click="setFilter('all', $el)">SEMUA</button>
+      <button class="fpill" @click="setFilter('income', $el)">↑ MASUK</button>
+      <button class="fpill" @click="setFilter('expense', $el)">↓ KELUAR</button>
+      <template x-for="cat in categories" :key="cat">
+        <button class="fpill" @click="setFilter(cat, $el)" x-text="cat"></button>
+      </template>
+    </div>
+  </div>
 
-    <div class="screen-body" style="padding-bottom:90px;padding-top:0">
-        <template x-if="loading">
-            <div style="padding:16px;">
-                <x-loading-skeleton count="5" />
-            </div>
-        </template>
+  <div class="sort-bar">
+    <div class="sort-left">TOTAL <span class="sort-num" id="total-count" x-text="filtered().length"></span> TRANSAKSI</div>
+    <div class="sort-right">
+      <span class="sort-label">URUTKAN</span>
+      <button class="sort-btn active" @click="setSort('date', $el)">↓ TERBARU</button>
+      <button class="sort-btn" @click="setSort('amount', $el)">↕ NOMINAL</button>
+    </div>
+  </div>
 
-        <template x-if="!loading && filtered().length === 0">
-            <div style="padding:40px 16px;text-align:center;">
-                <div style="font-size:48px;margin-bottom:12px;">📭</div>
-                <span style="font-family:var(--font-mono);font-size:10px;color:rgba(17,16,16,.4);">TIDAK ADA
-                    TRANSAKSI</span>
-                <div style="margin-top:8px;font-size:12px;color:rgba(17,16,16,.3);">Mulai catat pemasukan atau
-                    pengeluaran via AI Chat</div>
-            </div>
-        </template>
-
-        <template x-for="(group, month) in grouped()" :key="month">
-            <div class="month-group">
-                <div class="month-label" x-text="month"></div>
-                <div class="tx-list" style="padding:0 16px;gap:8px">
+  <div class="tx-body" id="tx-body">
+    <template x-if="loading">
+        <div style="padding:20px;">
+            <x-loading-skeleton count="5" />
+        </div>
+    </template>
+    <template x-if="!loading">
+        <div class="tx-rows">
+            <template x-for="(group, month) in grouped()" :key="month">
+                <div class="month-group">
+                    <div class="month-label-row">
+                        <div class="month-label-text" x-text="month"></div>
+                        <div class="month-total" x-text="'−Rp ' + formatNumber(group.reduce((s,t) => s + (t.type=='expense' ? t.amount : 0), 0))"></div>
+                    </div>
                     <template x-for="trx in group" :key="trx.id">
-                        <a :href="'/transactions/' + trx.id" class="tx"
-                            :class="trx.type === 'income' ? 'income' : 'expense'"
-                            style="text-decoration:none;cursor:pointer;">
-                            <div class="tx-cat-icon" x-text="getEmoji(trx.category_name)">📄</div>
+                        <div class="tx-row" :class="trx.type" @click="openDrw(trx)">
+                            <div class="tx-ico"><span x-text="getEmoji(trx.category_name)"></span><div class="tx-ico-dot"></div></div>
                             <div class="tx-info">
-                                <div class="tx-desc" x-text="trx.description"></div>
-                                <div class="tx-meta">
-                                    <span x-text="trx.category_name || 'UMUM'"></span>
-                                    <span class="tx-meta-sep">·</span>
-                                    <span x-text="trx.date_formatted || transactionDay(trx)"></span>
-                                </div>
+                                <div class="tx-name" x-text="trx.description"></div>
+                                <div class="tx-meta"><span class="tx-cat" x-text="trx.category_name"></span><span class="tx-sep">·</span><span class="tx-date" x-text="transactionDay(trx)"></span></div>
                             </div>
-                            <div class="tx-amt"
-                                x-text="(trx.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(trx.amount)"></div>
-                        </a>
+                            <div class="tx-right">
+                                <div class="tx-amount" x-text="(trx.type=='income'?'+':'−') + formatNumber(trx.amount)"></div>
+                                <template x-if="trx.tag"><span class="tx-tag" :class="trx.tag" x-text="trx.tag.toUpperCase()"></span></template>
+                            </div>
+                        </div>
                     </template>
                 </div>
-            </div>
-        </template>
+            </template>
+        </div>
+    </template>
+  </div>
 
-        <template x-if="!loading && hasMore">
-            <div style="padding:16px;text-align:center;">
-                <button @click="loadMore()" :disabled="loadingMore" class="btn-main alt"
-                    :style="loadingMore ? 'opacity:.5;cursor:wait' : ''">
-                    <span x-show="!loadingMore">MUAT LAINNYA →</span>
-                    <span x-show="loadingMore">MEMUAT...</span>
-                </button>
-            </div>
-        </template>
-
-        <template x-if="!loading && !hasMore && transactions.length > 0">
-            <div style="padding:16px;text-align:center;font-family:var(--font-mono);font-size:9px;color:rgba(17,16,16,.3);letter-spacing:1px;">
-                SEMUA DATA SUDAH DIMUAT
-            </div>
-        </template>
+  <div class="pagination">
+    <div class="pag-info">HAL <strong x-text="currentPage"></strong> DARI <span x-text="lastPage || 1"></span></div>
+    <div class="pag-controls">
+      <button class="pag-btn arrow" @click="loadPage(currentPage-1)" :disabled="currentPage<=1">‹</button>
+      <button class="pag-btn arrow" @click="loadPage(currentPage+1)" :disabled="!hasMore">›</button>
     </div>
+  </div>
+
+  <div class="drawer-bg" id="drawer-bg" @click="closeDrw()">
+    <div class="drawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-head" :class="activeTrx?.type" id="drawer-head">
+        <div class="drawer-ico" x-text="activeTrx?.category_icon || '📌'"></div>
+        <div>
+          <div class="drawer-name" x-text="activeTrx?.description"></div>
+          <div class="drawer-cat" x-text="(activeTrx?.category_name||'').toUpperCase() + ' · ' + (activeTrx?.type||'').toUpperCase()"></div>
+        </div>
+        <div class="drawer-amt" x-text="(activeTrx?.type=='income'?'+':'−') + formatNumber(activeTrx?.amount||0)"></div>
+      </div>
+      <div class="drawer-rows">
+        <div class="drow"><div class="drow-k">NOMINAL</div><div class="drow-v" x-text="(activeTrx?.type=='income'?'+':'−') + formatNumber(activeTrx?.amount||0)"></div></div>
+        <div class="drow"><div class="drow-k">TANGGAL</div><div class="drow-v" x-text="transactionDay(activeTrx)"></div></div>
+      </div>
+      <div class="drawer-ai">
+        <div class="dai-badge">AI</div>
+        <div class="dai-text" x-text="getAiHint(activeTrx?.category_name)"></div>
+      </div>
+      <div class="drawer-actions">
+        <button class="d-btn" @click="showToast('Edit segera hadir!')">✎ EDIT</button>
+        <button class="d-btn danger" @click="closeDrw()">✕ TUTUP</button>
+      </div>
+    </div>
+  </div>
 </div>
-
-
 @endsection
