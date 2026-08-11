@@ -728,7 +728,7 @@ html, body {
 #s-chat {
   display: flex;
   flex-direction: column;
-  padding-bottom: 72px;
+  /* Removed padding-bottom as it's now handled by chat-input-area */
 }
 
 .chat-top {
@@ -887,6 +887,7 @@ html, body {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  padding-bottom: 72px; /* Add padding for bottom nav */
 }
 
 .chat-input-toolbar {
