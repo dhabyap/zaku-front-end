@@ -8,10 +8,7 @@
         <div class="hist-title"><strong>Riwayat</strong><span class="hist-title-dot">.</span></div>
         <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
       </div>
-      <div class="hist-chips">
-        <div class="hchip inc"><div class="hchip-dot"></div><span x-text="rp(totalIncome)"></span></div>
-        <div class="hchip exp"><div class="hchip-dot"></div>−<span x-text="rp(totalExpense)"></span></div>
-      </div>
+      <!-- Removed hist-chips div -->
     </div>
     <div class="search-wrap">
       <input class="search-input" type="text" placeholder="Cari nama atau kategori..." @input.debounce="doSearch($event.target.value)">
@@ -51,11 +48,15 @@
                         <div class="month-total" x-text="'−Rp ' + formatNumber(group.reduce((s,t) => s + (t.type=='expense' ? t.amount : 0), 0))"></div>
                     </div>
                     <template x-for="trx in group" :key="trx.id">
-                        <div class="tx-row" :class="trx.type" @click="openDrw(trx)">
+                        <div class="tx-row" :class="trx.type" @click="window.location.href = '/transactions/' + trx.id">
                             <div class="tx-ico"><span x-text="getEmoji(trx.category_name)"></span><div class="tx-ico-dot"></div></div>
                             <div class="tx-info">
                                 <div class="tx-name" x-text="trx.description"></div>
-                                <div class="tx-meta"><span class="tx-cat" x-text="trx.category_name"></span><span class="tx-sep">·</span><span class="tx-date" x-text="transactionDay(trx)"></span></div>
+                                <div class="tx-meta">
+                                    <span class="tx-cat" x-text="trx.category_name"></span>
+                                    <span class="tx-sep">·</span>
+                                    <span class="tx-date" x-text="trx.date_formatted"></span>
+                                </div>
                             </div>
                             <div class="tx-right">
                                 <div class="tx-amount" x-text="(trx.type=='income'?'+':'−') + formatNumber(trx.amount)"></div>
@@ -67,6 +68,14 @@
             </template>
         </div>
     </template>
+    
+    <!-- Load more button, integrated -->
+    <div class="load-more-wrap" x-show="hasMore">
+        <button class="load-more-btn" @click="loadMore" :disabled="loading" :class="{'loading': loading}">
+        <span x-show="!loading">Muat Transaksi Lainnya</span>
+        <span x-show="loading">Memuat...</span>
+        </button>
+    </div>
   </div>
 
   <div class="pagination">
@@ -87,7 +96,7 @@
     </div>
   </div>
 
-  <div class="drawer-bg" id="drawer-bg" @click="closeDrw()">
+  <div class="drawer-bg" id="drawer-bg" @click="closeDrw()" style="display:none;">
     <div class="drawer">
       <div class="drawer-handle"></div>
       <div class="drawer-head" :class="activeTrx?.type" id="drawer-head">

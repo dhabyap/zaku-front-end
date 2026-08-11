@@ -478,11 +478,13 @@ export default function (Alpine) {
         sortKey: 'date',
         sortAsc: false,
         activeTrx: null,
+        totalIncome: 0,
+        totalExpense: 0,
         async init() {
             await this.fetchTransactions();
             this.extractCategories();
         },
-        formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
+        formatNumber(n) { if (n === undefined || n === null) return '0'; return Number(n).toLocaleString('id-ID'); },
         rp(n) { return 'Rp ' + this.formatNumber(n); },
         formatDay(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return ''; return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); },
         getTransactionDate(trx) { return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null; },
@@ -499,17 +501,14 @@ export default function (Alpine) {
             return hints[cat?.toUpperCase()] || 'Transaksi ini dicatat otomatis oleh ZAKU AI.';
         },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
-        totalIncome: 0,
-        totalExpense: 0,
-        async fetchTransactions(page = 1) {
-            this.loading = true;
+        async fetchTransactions(page = 1, append = false, isLoadMore = false) {
+            if (!isLoadMore) this.loading = true; // Hanya tampilkan loading penuh jika bukan loadMore
             try {
                 const res = await window.apiClient.get(`/v1/transactions?limit=20&page=${page}`);
                 const payload = res.data.data || {};
                 const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                 const meta = payload.meta || {};
                 
-                // Fetch totals from meta if available, else fallback
                 this.totalIncome = meta.total_income || 0;
                 this.totalExpense = meta.total_expense || 0;
                 
@@ -524,7 +523,12 @@ export default function (Alpine) {
                     }
                 });
                 
-                this.transactions = flatTx;
+                if (append) {
+                    this.transactions = [...this.transactions, ...flatTx];
+                } else {
+                    this.transactions = flatTx;
+                }
+                
                 this.currentPage = meta.page || 1;
                 this.lastPage = Math.ceil((meta.total || 0) / (meta.limit || 20));
                 this.hasMore = meta.has_more || false;
@@ -532,13 +536,23 @@ export default function (Alpine) {
             } catch (e) {
                 console.error('Fetch transactions error:', e);
             } finally {
-                this.loading = false;
+                if (!isLoadMore) this.loading = false; // Sembunyikan loading penuh jika bukan loadMore
             }
         },
         async loadPage(p) {
             if (p < 1 || (this.lastPage && p > this.lastPage)) return;
-            await this.fetchTransactions(p);
+            await this.fetchTransactions(p, false, false);
             document.getElementById('tx-body').scrollTop = 0;
+        },
+        async loadMore() {
+            if (!this.hasMore) return;
+            const body = document.getElementById('tx-body');
+            const scrollPos = body.scrollTop; 
+            // Tidak perlu loading spinner untuk loadMore, hanya append
+            await this.fetchTransactions(this.currentPage + 1, true, true); 
+            this.$nextTick(() => {
+                body.scrollTop = scrollPos;
+            });
         },
         paginationNumbers() {
             const total = this.lastPage;
@@ -605,8 +619,7 @@ export default function (Alpine) {
             });
             return groups;
         },
-        openDrw(trx) { this.activeTrx = trx; document.getElementById('drawer-bg').classList.add('open'); },
-        closeDrw() { document.getElementById('drawer-bg').classList.remove('open'); },
+        // Removed openDrw and closeDrw as they are no longer needed for redirect
         showToast(msg) { window.utils.showToast('info', msg); }
     }));
 

@@ -41,7 +41,7 @@
         @include('components.toast-notification')
         @include('components.confirm-modal')
 
-        <div style="flex:1;overflow:hidden;position:relative;padding-bottom:72px;">
+        <div style="flex:1;overflow:hidden;position:relative;">
             @yield('content')
         </div>
 
