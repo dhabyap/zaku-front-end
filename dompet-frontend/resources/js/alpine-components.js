@@ -755,6 +755,120 @@ export default function (Alpine) {
             }
         }
     }));
+
+    // ── Budget Management Page ──
+    Alpine.data('budgetPage', () => ({
+        budgets: [],
+        categories: [],
+        progressMap: {},
+        loading: true,
+        saving: false,
+        editMode: false,
+        editId: null,
+        form: { category: '', amount: 0, period: 'monthly', start_date: '', end_date: '' },
+        get totalBudget() { return this.budgets.reduce((s, b) => s + (b.amount || 0), 0); },
+        get totalSpent() { return Object.values(this.progressMap).reduce((s, p) => s + (p.spent || 0), 0); },
+        get summaryPct() { return this.totalBudget > 0 ? Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100)) : 0; },
+        get summaryStatusClass() {
+            if (this.summaryPct >= 80) return 'risk';
+            if (this.summaryPct >= 60) return 'watch';
+            return 'safe';
+        },
+        init() { this.fetchBudgets(); this.fetchCategories(); },
+        formatNumber(n) { if (!n && n !== 0) return '0'; return Number(n).toLocaleString('id-ID'); },
+        getEmoji(cat) {
+            const map = { 'MAKANAN':'🍜','FOOD':'🍜','TRANSPORTASI':'🚗','TRANSPORT':'🚗','TAGIHAN':'⚡','BILLS':'⚡','BELANJA':'🛍️','SHOPPING':'🛍️','GAJI':'💰','SALARY':'💰','FREELANCE':'💻','KESEHATAN':'💊','HEALTH':'💊' };
+            return map[(cat||'').toUpperCase()] || '📄';
+        },
+        periodLabel(p) {
+            return { daily: 'HARIAN', weekly: 'MINGGUAN', monthly: 'BULANAN' }[p] || p;
+        },
+        statusClass(status) {
+            return { aman: 'safe', waspada: 'watch', boros: 'risk', melebihi: 'risk' }[status] || '';
+        },
+        openForm(budget = null) {
+            if (budget) {
+                this.editMode = true;
+                this.editId = budget.id;
+                this.form = {
+                    category: budget.category?.name || '',
+                    amount: budget.amount || 0,
+                    period: budget.period || 'monthly',
+                    start_date: budget.start_date || new Date().toISOString().slice(0, 10),
+                    end_date: budget.end_date || '',
+                };
+            } else {
+                this.editMode = false;
+                this.editId = null;
+                this.form = { category: '', amount: 0, period: 'monthly', start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+            }
+            document.getElementById('m-budget-form')?.classList.add('open');
+        },
+        closeForm() {
+            document.getElementById('m-budget-form')?.classList.remove('open');
+            this.editMode = false;
+            this.editId = null;
+        },
+        bgClose(e, id) { if (e.target === e.currentTarget) { document.getElementById(id)?.classList.remove('open'); } },
+        async fetchBudgets() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/budgets');
+                this.budgets = res.data.data || [];
+                await this.fetchProgress();
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat budget');
+            } finally { this.loading = false; }
+        },
+        async fetchCategories() {
+            try {
+                const res = await window.apiClient.get('/v1/categories');
+                this.categories = res.data.data || [];
+            } catch { /* ignore */ }
+        },
+        async fetchProgress() {
+            for (const b of this.budgets) {
+                try {
+                    const res = await window.apiClient.get('/v1/budgets/' + b.id + '/progress');
+                    this.progressMap[b.id] = res.data.data;
+                } catch { /* ignore */ }
+            }
+        },
+        async saveBudget() {
+            if (!this.form.category) { window.utils.showToast('error', 'Pilih kategori dulu'); return; }
+            if (!this.form.amount || this.form.amount <= 0) { window.utils.showToast('error', 'Nominal harus lebih dari 0'); return; }
+            this.saving = true;
+            try {
+                if (this.editMode) {
+                    await window.apiClient.put('/v1/budgets/' + this.editId, { amount: this.form.amount });
+                    window.utils.showToast('success', 'Budget berhasil diperbarui');
+                } else {
+                    await window.apiClient.post('/v1/budgets', this.form);
+                    window.utils.showToast('success', 'Budget berhasil ditambahkan');
+                }
+                this.closeForm();
+                await this.fetchBudgets();
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menyimpan budget');
+                window.utils.showToast('error', msg);
+            } finally { this.saving = false; }
+        },
+        async confirmDelete(b) {
+            const confirmed = await window.utils.showConfirm(
+                'HAPUS BUDGET',
+                'Yakin hapus budget ' + (b.category?.name || '') + '?',
+                'HAPUS'
+            );
+            if (!confirmed) return;
+            try {
+                await window.apiClient.delete('/v1/budgets/' + b.id);
+                window.utils.showToast('success', 'Budget dihapus');
+                await this.fetchBudgets();
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal menghapus budget');
+            }
+        },
+    }));
 }
 
 // changelogPage registered via Alpine.data() above

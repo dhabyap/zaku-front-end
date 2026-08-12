@@ -39,7 +39,7 @@
             <x-loading-skeleton count="5" />
         </div>
     </template>
-    <template x-if="!loading">
+    <template x-if="!loading">  
         <div class="tx-rows">
             <template x-for="(group, month) in grouped()" :key="month">
                 <div class="month-group">
