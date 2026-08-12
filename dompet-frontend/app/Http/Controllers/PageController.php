@@ -90,4 +90,9 @@ class PageController extends Controller
     {
         return view('dashboard.monthly_recap');
     }
+
+    public function budgets()
+    {
+        return view('dashboard.budgets');
+    }
 }

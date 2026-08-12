@@ -810,3 +810,276 @@
   margin-left: 8px;
   animation: spin 1s linear infinite;
 }
+
+/* ── Budget Management Page ── */
+.budget-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.budget-summary-card {
+  margin: 0 16px 16px;
+  background: var(--punch-2);
+  border: var(--border);
+  box-shadow: var(--bs-lg);
+  padding: 16px;
+}
+
+.budget-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.budget-summary-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(17,16,16,.5);
+}
+
+.budget-summary-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-top: 3px;
+}
+
+.budget-card {
+  margin: 0 16px 12px;
+  background: var(--paper);
+  border: var(--border);
+  box-shadow: var(--bs-sm);
+  padding: 14px;
+}
+
+.budget-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.budget-card-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.budget-card-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(17,16,16,.05);
+  border: 1px solid rgba(17,16,16,.1);
+  border-radius: 10px;
+}
+
+.budget-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.budget-card-period {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: rgba(17,16,16,.4);
+  margin-top: 2px;
+}
+
+.budget-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.budget-card-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  background: transparent;
+  border: 1.5px solid rgba(17,16,16,.15);
+  cursor: pointer;
+  transition: all .1s;
+}
+
+.budget-card-btn:hover {
+  background: rgba(17,16,16,.05);
+  border-color: var(--ink);
+}
+
+.budget-card-btn.danger:hover {
+  background: var(--punch);
+  color: white;
+  border-color: var(--punch);
+}
+
+.budget-card-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+.budget-status-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  padding: 2px 8px;
+  border: 1.5px solid;
+}
+
+.budget-status-badge.safe {
+  color: #00A36B;
+  border-color: #00A36B;
+}
+
+.budget-status-badge.watch {
+  color: var(--punch-2);
+  border-color: var(--punch-2);
+  background: rgba(255,200,120,.15);
+}
+
+.budget-status-badge.risk {
+  color: var(--punch);
+  border-color: var(--punch);
+  background: rgba(255,80,80,.1);
+}
+
+/* Budget fill colors (outside health-box context) */
+.budget-card .budget-fill.safe { background: #00A36B; }
+.budget-card .budget-fill.watch { background: var(--punch-2); }
+.budget-card .budget-fill.risk { background: var(--punch); }
+
+.budget-summary-card .budget-fill.safe { background: #00A36B; }
+.budget-summary-card .budget-fill.watch { background: var(--punch-2); }
+.budget-summary-card .budget-fill.risk { background: var(--punch); }
+
+.btn-budget-add {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px;
+  padding: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink);
+  border: 2.5px dashed rgba(17,16,16,.2);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-budget-add:hover {
+  border-color: var(--ink);
+  background: rgba(17,16,16,.03);
+}
+
+.btn-budget-submit {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2.5px solid var(--ink);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 rgba(17,16,16,.15);
+  transition: transform .1s, box-shadow .1s;
+}
+
+.btn-budget-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 4px 5px 0 rgba(17,16,16,.2);
+}
+
+.btn-budget-submit:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.field-select,
+.field-input {
+  width: 100%;
+  padding: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid rgba(17,16,16,.15);
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+
+.field-select:focus,
+.field-input:focus {
+  border-color: var(--ink);
+}
+
+.period-select {
+  display: flex;
+  gap: 8px;
+}
+
+.period-btn {
+  flex: 1;
+  padding: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: transparent;
+  color: rgba(17,16,16,.4);
+  border: 2px solid rgba(17,16,16,.15);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.period-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.period-btn:hover:not(.active) {
+  border-color: rgba(17,16,16,.3);
+}
+
+.period-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.budget-card-skeleton {
+  margin: 0 16px 12px;
+  background: var(--paper);
+  border: var(--border);
+  padding: 14px;
+}
