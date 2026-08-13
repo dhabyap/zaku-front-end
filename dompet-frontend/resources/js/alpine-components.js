@@ -180,6 +180,13 @@ export default function (Alpine) {
         transactions: [], categories: [],
         maxCategory: null, maxCategoryAmount: 0, maxCategoryPct: 0,
         insightText: '', insightDetail: '', insightType: 'info',
+        showAmount: (() => {
+            try {
+                return localStorage.getItem('zaku_hide_amount') !== 'false';
+            } catch {
+                return true;
+            }
+        })(),
         budget: { limit: 0, used: 0, left: 0, usedPct: 0, score: 0, status: 'Budget belum diatur', statusClass: 'risk', insight: '' },
         loading: { balance: true, transactions: true, categories: true, budget: true },
         async init() { this.fetchDashboard(); },
