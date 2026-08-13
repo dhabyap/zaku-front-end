@@ -249,6 +249,7 @@
                 },
                 catBudgets: [],
                 catBudgetProgress: {},
+                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false',
                 loading: {
                     balance: true,
                     transactions: true,
