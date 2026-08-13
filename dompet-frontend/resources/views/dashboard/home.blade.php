@@ -2,13 +2,18 @@
 
 @section('content')
     <div x-data="dashboardHome()" style="display:flex;flex-direction:column;height:100%;">
-        <header class="dash-header" x-data="{ user: window.auth.getUser() }">
+        <header class="dash-header" x-data="{ user: window.auth.getUser(), showAmount: localStorage.getItem('zaku_hide_amount') !== 'false' }">
             <div class="dh-row">
                 <div>
                     <div class="dh-greet" x-text="greeting()"></div>
                     <div class="dh-name" x-text="user?.name || 'Teman'"></div>
                 </div>
-                <a href="/profile" class="dh-avatar" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button @click="showAmount = !showAmount; localStorage.setItem('zaku_hide_amount', showAmount)" style="background:none;border:none;cursor:pointer;font-size:20px;">
+                        <span x-text="showAmount ? '👁️' : '🙈'"></span>
+                    </button>
+                    <a href="/profile" class="dh-avatar" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
+                </div>
             </div>
         </header>
 
@@ -19,20 +24,20 @@
                     <div class="bc-amount" style="background:rgba(17,16,16,.1);height:44px;width:60%;"></div>
                 </template>
                 <template x-if="!loading.balance">
-                    <div class="bc-amount" x-text="'Rp ' + formatNumber(balance)">Rp 3.250.000</div>
+                    <div class="bc-amount" x-text="showAmount ? 'Rp ' + formatNumber(balance) : 'Rp ••••••'">Rp 3.250.000</div>
                 </template>
                 <div class="bc-stats">
                     <div class="bc-stat">
                         <div class="bc-stat-label">
                             <div class="dot" style="background:#00A36B;border-color:#00A36B"></div>PEMASUKAN
                         </div>
-                        <div class="bc-stat-val" x-text="'Rp ' + formatNumber(income)">Rp 7.500.000</div>
+                        <div class="bc-stat-val" x-text="showAmount ? 'Rp ' + formatNumber(income) : 'Rp ••••••'">Rp 7.500.000</div>
                     </div>
                     <div class="bc-stat">
                         <div class="bc-stat-label">
                             <div class="dot" style="background:var(--punch);border-color:var(--punch)"></div>PENGELUARAN
                         </div>
-                        <div class="bc-stat-val" x-text="'Rp ' + formatNumber(expense)">Rp 4.250.000</div>
+                        <div class="bc-stat-val" x-text="showAmount ? 'Rp ' + formatNumber(expense) : 'Rp ••••••'">Rp 4.250.000</div>
                     </div>
                 </div>
             </div>
@@ -161,7 +166,7 @@
                                 </div>
                             </div>
                             <div class="tx-amt"
-                                x-text="(trx.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(trx.amount)"></div>
+                                x-text="showAmount ? (trx.type === 'expense' ? '-' : '+') + 'Rp ' + formatNumber(trx.amount) : 'Rp ••••••'"></div>
                         </a>
                     </template>
                 </div>
@@ -179,7 +184,7 @@
                                     <div class="cat-bar-name"><span class="emo" x-text="cat.emoji">🍜</span> <span
                                             x-text="cat.name">MAKANAN</span></div>
                                     <div class="cat-bar-meta">
-                                        <div class="cat-bar-amount" x-text="'Rp ' + formatNumber(cat.amount)">Rp 0</div>
+                                        <div class="cat-bar-amount" x-text="showAmount ? 'Rp ' + formatNumber(cat.amount) : 'Rp ••••••'">Rp 0</div>
                                         <div class="cat-bar-pct" x-text="cat.pct + '%'">42%</div>
                                     </div>
                                 </div>

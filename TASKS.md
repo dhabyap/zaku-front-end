@@ -148,6 +148,16 @@
   - Bisa scroll infinite atau pagination
   - Panggil API `GET /api/transactions`
 
+- [ ] **TASK-20** · Fitur **Hide/Show Saldo & Nominal** (Privacy Mode)
+  - **Deskripsi:** Tambahkan fitur untuk menyembunyikan nominal Pemasukan, Pengeluaran, dan Selisih di halaman Home agar user nyaman saat membuka aplikasi di tempat umum.
+  - **Detail Teknis:**
+    - Gunakan Alpine.js `x-data` untuk menyimpan state `showBalance` (boolean).
+    - Simpan state ini di `localStorage` agar tetap bertahan saat page refresh.
+    - Tambahkan ikon mata (eye/eye-slash) di samping label "SELISIH BULAN INI".
+    - Jika `showBalance` false, ganti teks nominal dengan asteris `******` atau blur.
+    - Pastikan transisi halus saat toggle.
+  - **File Terkait:** `resources/views/dashboard/home.blade.php`
+
 - [x] **TASK-20** · Buat halaman **Detail Transaksi** (`dashboard/transaction-detail.blade.php`)
   - Route: `GET /transactions/{id}`
   - Tampilkan detail lengkap satu transaksi
