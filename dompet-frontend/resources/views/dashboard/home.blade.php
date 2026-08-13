@@ -458,7 +458,9 @@
                                 this.catBudgetProgress[b.id] = pr.data.data;
                             } catch { /* ignore */ }
                         }
-                    } catch { /* no budgets yet */ }
+                    } catch { /* no budgets yet */ } finally {
+                        this.loading.budget = false;
+                    }
                 },
             }
         }
