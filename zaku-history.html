@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ZAKU — Riwayat Transaksi</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230E0E0E'/%3E%3Crect x='3' y='3' width='58' height='58' fill='none' stroke='%23FFD600' stroke-width='3'/%3E%3Ctext x='32' y='46' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%23FFD600' text-anchor='middle'%3EZ%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap" rel="stylesheet">
+<style>
+
+/* =====================================================
+   RESET & ROOT
+===================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #111010;
+  --paper:  #F5F0E8;
+  --cream:  #EDE8DC;
+  --punch:  #FF4800;
+  --yellow: #FFD600;
+  --mint:   #00C87A;
+  --white:  #FFFFFF;
+  --gray:   #9A9590;
+  --gray-l: #C8C3B8;
+  --b3: 3px solid var(--ink);
+  --b2: 2px solid var(--ink);
+  --bs:  4px 4px 0 var(--ink);
+  --bsl: 6px 6px 0 var(--ink);
+  --mono: 'DM Mono', monospace;
+  --disp: 'Syne', sans-serif;
+  --serif: 'Fraunces', serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  font-family: var(--disp);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================
+   SHELL
+===================================================== */
+.shell {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  margin: 0 auto;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+.hist-header {
+  background: var(--ink);
+  padding: 52px 16px 0;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.hist-header::after {
+  content: 'TRX';
+  position: absolute;
+  right: -8px; bottom: -22px;
+  font-size: 88px;
+  font-weight: 800;
+  color: rgba(255,255,255,.04);
+  letter-spacing: -5px;
+  pointer-events: none;
+}
+
+.hist-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.hist-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--paper);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.hist-title strong {
+  font-family: var(--disp);
+  font-style: normal;
+  font-weight: 800;
+  color: var(--yellow);
+}
+
+.hist-title-dot { color: var(--punch); font-style: normal; }
+
+.hist-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: rgba(245,240,232,.28);
+  margin-top: 6px;
+}
+
+/* income / expense summary chips */
+.hist-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+  padding-top: 4px;
+}
+
+.hchip {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hchip-dot {
+  width: 7px; height: 7px;
+  border: 1.5px solid;
+}
+
+.hchip.inc { color: var(--mint); }
+.hchip.inc .hchip-dot { border-color: var(--mint); background: var(--mint); }
+.hchip.exp { color: var(--punch); }
+.hchip.exp .hchip-dot { border-color: var(--punch); background: var(--punch); }
+
+/* ── Search ── */
+.search-wrap { position: relative; }
+
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 2px solid rgba(255,255,255,.1);
+  border-bottom: none;
+  padding: 11px 42px 11px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--paper);
+  outline: none;
+  border-radius: 0;
+  -webkit-appearance: none;
+  transition: background .15s, border-color .15s;
+}
+
+.search-input::placeholder { color: rgba(245,240,232,.18); }
+.search-input:focus { background: rgba(255,255,255,.1); border-color: var(--yellow); }
+
+.search-ico {
+  position: absolute;
+  right: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: rgba(245,240,232,.22);
+  pointer-events: none;
+  font-family: var(--mono);
+}
+
+/* ── Filter pills ── */
+.filter-strip {
+  display: flex;
+  overflow-x: auto;
+  border-top: 1.5px solid rgba(255,255,255,.07);
+}
+
+.filter-strip::-webkit-scrollbar { display: none; }
+
+.fpill {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(245,240,232,.3);
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.07);
+  cursor: pointer;
+  position: relative;
+  transition: color .15s, background .15s;
+  white-space: nowrap;
+}
+
+.fpill:last-child { border-right: none; }
+.fpill:hover { color: rgba(245,240,232,.65); }
+
+.fpill.on { color: var(--yellow); background: rgba(255,214,0,.06); }
+.fpill.on::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2.5px;
+  background: var(--yellow);
+}
+
+.fpill.punch-on { color: var(--punch); background: rgba(255,72,0,.06); }
+.fpill.punch-on::after { background: var(--punch); }
+.fpill.mint-on  { color: var(--mint);  background: rgba(0,200,122,.06); }
+.fpill.mint-on::after  { background: var(--mint); }
+
+/* =====================================================
+   SORT BAR
+===================================================== */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  background: var(--cream);
+  border-bottom: var(--b2);
+  flex-shrink: 0;
+}
+
+.sort-left {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sort-num {
+  background: var(--yellow);
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 7px;
+  line-height: 1.4;
+}
+
+.sort-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sort-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--gray);
+}
+
+.sort-btn {
+  border: 1.5px solid var(--ink);
+  background: var(--white);
+  color: var(--ink);
+  padding: 5px 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform .1s, box-shadow .1s;
+}
+
+.sort-btn:active { transform: translate(1px,1px); box-shadow: none; }
+.sort-btn.active { background: var(--ink); color: var(--yellow); box-shadow: none; }
+
+/* =====================================================
+   TRANSACTION BODY
+===================================================== */
+.tx-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--paper);
+}
+
+.tx-body::-webkit-scrollbar { width: 3px; }
+.tx-body::-webkit-scrollbar-thumb { background: var(--gray-l); }
+
+/* month group */
+.month-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px 8px;
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 5;
+  border-bottom: 1px solid rgba(17,16,16,.07);
+}
+
+.month-label-text {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-label-text::before {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 2px;
+  background: var(--punch);
+}
+
+.month-total {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--punch);
+}
+
+/* tx row */
+.tx-rows { display: flex; flex-direction: column; }
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--white);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 68px;
+  transition: background .12s;
+  animation: fadeUp .2s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tx-row:nth-child(2) { animation-delay: .03s; }
+.tx-row:nth-child(3) { animation-delay: .06s; }
+.tx-row:nth-child(4) { animation-delay: .09s; }
+.tx-row:nth-child(5) { animation-delay: .12s; }
+.tx-row:nth-child(6) { animation-delay: .15s; }
+.tx-row:nth-child(7) { animation-delay: .18s; }
+
+.tx-row:last-child { border-bottom: var(--b3); }
+.tx-row:hover { background: #FFFDF0; }
+
+/* left accent */
+.tx-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.tx-row.income::before  { background: var(--mint); }
+.tx-row.expense::before { background: var(--punch); }
+
+/* icon */
+.tx-ico {
+  width: 40px; height: 40px;
+  border: var(--b2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.tx-row.income  .tx-ico { background: #E6FFF4; }
+.tx-row.expense .tx-ico { background: #FFF0E8; }
+
+.tx-ico-dot {
+  position: absolute;
+  bottom: -3px; right: -3px;
+  width: 11px; height: 11px;
+  border: 2px solid var(--white);
+  border-radius: 50%;
+}
+
+.tx-row.income  .tx-ico-dot { background: var(--mint); }
+.tx-row.expense .tx-ico-dot { background: var(--punch); }
+
+/* info */
+.tx-info { flex: 1; min-width: 0; padding: 14px 0; }
+
+.tx-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.tx-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.tx-cat {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: var(--gray);
+  background: var(--cream);
+  border: 1.5px solid var(--gray-l);
+  padding: 1px 6px;
+  text-transform: uppercase;
+}
+
+.tx-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--gray-l);
+  letter-spacing: .3px;
+}
+
+.tx-sep { color: var(--gray-l); font-size: 9px; }
+
+/* right */
+.tx-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  padding: 14px 0;
+}
+
+.tx-amount {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -.3px;
+}
+
+.tx-row.income  .tx-amount { color: var(--mint); }
+.tx-row.expense .tx-amount { color: var(--punch); }
+
+.tx-tag {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  padding: 2px 6px;
+  border: 1.5px solid;
+}
+
+.tx-tag.new       { color: var(--punch); border-color: var(--punch); background: #FFF0E8; }
+.tx-tag.recurring { color: var(--gray);  border-color: var(--gray-l); }
+
+/* empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 14px;
+  text-align: center;
+}
+
+.empty-ico {
+  width: 64px; height: 64px;
+  border: var(--b3);
+  background: var(--cream);
+  box-shadow: var(--bs);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+
+.empty-title { font-size: 16px; font-weight: 800; letter-spacing: -.3px; }
+.empty-sub   { font-family: var(--mono); font-size: 11px; color: var(--gray); line-height: 1.7; }
+
+/* =====================================================
+   PAGINATION
+===================================================== */
+.pagination {
+  flex-shrink: 0;
+  background: var(--ink);
+  border-top: var(--b3);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pag-info {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: rgba(245,240,232,.28);
+  white-space: nowrap;
+}
+
+.pag-info strong { color: var(--yellow); font-weight: 500; }
+
+.pag-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pag-btn {
+  width: 32px; height: 32px;
+  border: 1.5px solid rgba(255,255,255,.12);
+  background: transparent;
+  color: rgba(245,240,232,.4);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.pag-btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); }
+.pag-btn:disabled { opacity: .2; cursor: default; }
+
+.pag-btn.on {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--ink);
+  font-weight: 800;
+  box-shadow: 2px 2px 0 rgba(255,214,0,.3);
+}
+
+.pag-btn.arrow {
+  background: rgba(255,255,255,.04);
+  font-size: 14px;
+}
+
+.pag-btn.arrow:hover:not(:disabled) {
+  background: var(--punch);
+  border-color: var(--punch);
+  color: var(--white);
+}
+
+.pag-dots {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(245,240,232,.18);
+  padding: 0 2px;
+  display: flex; align-items: center;
+}
+
+/* =====================================================
+   TX DETAIL DRAWER
+===================================================== */
+.drawer-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(17,16,16,.65);
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s;
+}
+
+.drawer-bg.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.drawer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--paper);
+  border-top: var(--b3);
+  box-shadow: 0 -6px 0 var(--ink);
+  transform: translateY(100%);
+  transition: transform .26s cubic-bezier(.34,1.1,.64,1);
+  z-index: 90;
+  padding-bottom: 12px;
+}
+
+.drawer-bg.open .drawer { transform: translateY(0); }
+
+.drawer-handle {
+  width: 36px; height: 4px;
+  background: var(--gray-l);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+/* drawer header */
+.drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  border-bottom: var(--b2);
+}
+
+.drawer-ico {
+  width: 46px; height: 46px;
+  border: var(--b3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.drawer-head.income  .drawer-ico { background: #E6FFF4; }
+.drawer-head.expense .drawer-ico { background: #FFF0E8; }
+
+.drawer-name { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+.drawer-cat  { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--gray); margin-top: 3px; }
+
+.drawer-amt {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.drawer-head.income  .drawer-amt { color: var(--mint); }
+.drawer-head.expense .drawer-amt { color: var(--punch); }
+
+/* rows */
+.drawer-rows {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: var(--b2);
+}
+
+.drow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1.5px solid var(--cream);
+}
+
+.drow:last-child { border-bottom: none; }
+
+.drow-k {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--gray);
+}
+
+.drow-v {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  font-family: var(--mono);
+  letter-spacing: .3px;
+}
+
+/* AI note */
+.drawer-ai {
+  margin: 12px 16px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  box-shadow: var(--bs);
+  padding: 11px 13px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.dai-badge {
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.dai-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(17,16,16,.5);
+  line-height: 1.7;
+  letter-spacing: .2px;
+}
+
+.dai-text strong { color: var(--ink); font-weight: 500; }
+
+/* actions */
+.drawer-actions {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px 0;
+}
+
+.d-btn {
+  flex: 1;
+  border: var(--b2);
+  padding: 11px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--bs);
+  background: var(--paper);
+  color: var(--ink);
+  transition: transform .1s, box-shadow .1s;
+}
+
+.d-btn:active { transform: translate(2px,2px); box-shadow: none; }
+.d-btn.danger { border-color: var(--punch); color: var(--punch); background: #FFF0E8; }
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: var(--paper);
+  border-top: var(--b3);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 50;
+  padding: 0 4px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(17,16,16,.3);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  position: relative;
+  transition: color .15s;
+}
+
+.nav-item.active { color: var(--ink); }
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 3px;
+  background: var(--punch);
+}
+
+.nav-fab {
+  color: var(--paper) !important;
+  position: relative;
+  top: -10px;
+}
+
+.nav-fab-inner {
+  width: 54px; height: 54px;
+  background: var(--ink);
+  border: var(--b3);
+  box-shadow: var(--bsl);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--yellow);
+}
+
+.nav-fab span { color: var(--ink); margin-top: 4px; }
+
+/* =====================================================
+   TOAST
+===================================================== */
+.toast {
+  position: absolute;
+  top: 16px; left: 16px; right: 16px;
+  background: var(--ink);
+  color: var(--yellow);
+  border: 2px solid var(--yellow);
+  padding: 11px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  box-shadow: var(--bsl);
+  z-index: 200;
+  transform: translateY(-90px);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.toast.show { transform: translateY(0); }
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- =====================================================
+       HEADER
+  ===================================================== -->
+  <div class="hist-header">
+    <div class="hist-top">
+      <div>
+        <div class="hist-title"><strong>Riwayat</strong><span class="hist-title-dot">.</span></div>
+        <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
+      </div>
+      <div class="hist-chips">
+        <div class="hchip inc"><div class="hchip-dot"></div>+Rp 10.000.000</div>
+        <div class="hchip exp"><div class="hchip-dot"></div>−Rp 6.649.000</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <input class="search-input" id="search-input" type="text"
+        placeholder="Cari nama atau kategori transaksi..."
+        oninput="doSearch(this.value)">
+      <div class="search-ico">⌕</div>
+    </div>
+
+    <!-- Filter pills -->
+    <div class="filter-strip">
+      <button class="fpill on"       data-filter="all"       onclick="setFilter(this)">SEMUA</button>
+      <button class="fpill"          data-filter="income"    onclick="setFilter(this)">↑ MASUK</button>
+      <button class="fpill"          data-filter="expense"   onclick="setFilter(this)">↓ KELUAR</button>
+      <button class="fpill"          data-filter="makanan"   onclick="setFilter(this)">🍜 MAKANAN</button>
+      <button class="fpill"          data-filter="transport" onclick="setFilter(this)">🚗 TRANSPORT</button>
+      <button class="fpill"          data-filter="belanja"   onclick="setFilter(this)">🛍️ BELANJA</button>
+      <button class="fpill"          data-filter="tagihan"   onclick="setFilter(this)">⚡ TAGIHAN</button>
+      <button class="fpill"          data-filter="hiburan"   onclick="setFilter(this)">🎮 HIBURAN</button>
+      <button class="fpill"          data-filter="gaji"      onclick="setFilter(this)">💰 GAJI</button>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       SORT BAR
+  ===================================================== -->
+  <div class="sort-bar">
+    <div class="sort-left">
+      TOTAL <span class="sort-num" id="total-count">18</span> TRANSAKSI
+    </div>
+    <div class="sort-right">
+      <span class="sort-label">URUTKAN</span>
+      <button class="sort-btn active" id="btn-date"   onclick="setSort('date',this)">↓ TERBARU</button>
+      <button class="sort-btn"        id="btn-amount" onclick="setSort('amount',this)">↕ NOMINAL</button>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       TX BODY
+  ===================================================== -->
+  <div class="tx-body" id="tx-body"></div>
+
+  <!-- =====================================================
+       PAGINATION
+  ===================================================== -->
+  <div class="pagination">
+    <div class="pag-info">
+      HAL <strong id="pag-cur">1</strong> DARI <span id="pag-tot">3</span>
+    </div>
+    <div class="pag-controls" id="pag-controls"></div>
+  </div>
+
+  <!-- =====================================================
+       BOTTOM NAV
+  ===================================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="showToast('Beranda')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>BERANDA</span>
+    </button>
+    <button class="nav-item active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>RIWAYAT</span>
+    </button>
+    <button class="nav-item nav-fab" onclick="showToast('AI Chat')">
+      <div class="nav-fab-inner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <span>AI CHAT</span>
+    </button>
+    <button class="nav-item" onclick="showToast('Profil')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>PROFIL</span>
+    </button>
+  </nav>
+
+  <!-- =====================================================
+       DETAIL DRAWER
+  ===================================================== -->
+  <div class="drawer-bg" id="drawer-bg" onclick="handleOverlayClick(event)">
+    <div class="drawer" id="drawer">
+      <div class="drawer-handle"></div>
+
+      <div class="drawer-head" id="drawer-head">
+        <div class="drawer-ico" id="d-ico">🍜</div>
+        <div>
+          <div class="drawer-name" id="d-name">—</div>
+          <div class="drawer-cat"  id="d-cat">—</div>
+        </div>
+        <div class="drawer-amt" id="d-amt">—</div>
+      </div>
+
+      <div class="drawer-rows" id="drawer-rows"></div>
+
+      <div class="drawer-ai">
+        <div class="dai-badge">AI</div>
+        <div class="dai-text" id="d-ai-text">—</div>
+      </div>
+
+      <div class="drawer-actions">
+        <button class="d-btn" onclick="showToast('Edit — segera hadir! ✎')">✎ EDIT</button>
+        <button class="d-btn danger" onclick="showToast('Transaksi dihapus! 🗑️'); closeDrw()">✕ HAPUS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+// =====================================================
+// DATA
+// =====================================================
+const TX = [
+  { id:1,  name:'Jajan Bakso',        cat:'makanan',   icon:'🍜', type:'expense', amount:20000,   date:'2026-08-10', tag:'new' },
+  { id:2,  name:'Bensin Motor',       cat:'transport',  icon:'🚗', type:'expense', amount:25000,   date:'2026-08-09', tag:'' },
+  { id:3,  name:'Parkir Mall',        cat:'transport',  icon:'🚗', type:'expense', amount:10000,   date:'2026-08-09', tag:'' },
+  { id:4,  name:'Beli Flanel',        cat:'belanja',    icon:'🛍️',type:'expense', amount:150000,  date:'2026-08-09', tag:'new' },
+  { id:5,  name:'Celana Jeans',       cat:'belanja',    icon:'🛍️',type:'expense', amount:70000,   date:'2026-08-09', tag:'' },
+  { id:6,  name:'Sate Padang',        cat:'makanan',    icon:'🍜', type:'expense', amount:20000,   date:'2026-08-09', tag:'' },
+  { id:7,  name:'Gaji Agustus',       cat:'gaji',       icon:'💰', type:'income',  amount:7500000, date:'2026-08-01', tag:'' },
+  { id:8,  name:'Freelance Project',  cat:'freelance',  icon:'💻', type:'income',  amount:2500000, date:'2026-07-28', tag:'' },
+  { id:9,  name:'Tagihan Listrik',    cat:'tagihan',    icon:'⚡', type:'expense', amount:185000,  date:'2026-07-25', tag:'recurring' },
+  { id:10, name:'Kopi Starbucks',     cat:'makanan',    icon:'☕', type:'expense', amount:65000,   date:'2026-07-22', tag:'' },
+  { id:11, name:'Grab ke Kantor',     cat:'transport',  icon:'🚗', type:'expense', amount:35000,   date:'2026-07-20', tag:'' },
+  { id:12, name:'Spotify Premium',    cat:'hiburan',    icon:'🎮', type:'expense', amount:54990,   date:'2026-07-15', tag:'recurring' },
+  { id:13, name:'Belanja Shopee',     cat:'belanja',    icon:'🛍️',type:'expense', amount:320000,  date:'2026-07-12', tag:'' },
+  { id:14, name:'Gaji Juli',          cat:'gaji',       icon:'💰', type:'income',  amount:7500000, date:'2026-07-01', tag:'' },
+  { id:15, name:'Makan Siang',        cat:'makanan',    icon:'🍜', type:'expense', amount:35000,   date:'2026-06-30', tag:'' },
+  { id:16, name:'Netflix',            cat:'hiburan',    icon:'🎮', type:'expense', amount:120000,  date:'2026-06-15', tag:'recurring' },
+  { id:17, name:'Tagihan Air PDAM',   cat:'tagihan',    icon:'⚡', type:'expense', amount:85000,   date:'2026-06-10', tag:'recurring' },
+  { id:18, name:'Gaji Juni',          cat:'gaji',       icon:'💰', type:'income',  amount:7500000, date:'2026-06-01', tag:'' },
+];
+
+const AI_HINTS = {
+  makanan:  'Pos <strong>makanan</strong> kamu bulan ini sudah Rp 140.000. Coba masak sendiri 2x seminggu untuk hemat lebih banyak.',
+  transport:'Pengeluaran <strong>transportasi</strong> masih wajar — di bawah 10% dari total pengeluaran bulan ini.',
+  belanja:  'Hati-hati! <strong>Belanja</strong> bulan ini sudah naik 34% vs bulan lalu. Coba terapkan "48-hour rule" sebelum beli.',
+  tagihan:  'Ini tagihan <strong>rutin</strong> — ZAKU akan ingatkan kamu otomatis H-3 sebelum jatuh tempo bulan depan.',
+  hiburan:  'Pengeluaran <strong>subscription/hiburan</strong> kamu Rp 174.990 bulan ini. Cek apakah semua masih aktif dipakai.',
+  gaji:     'Pemasukan <strong>gaji</strong> diterima tepat waktu. Saving rate bulan ini ada di angka 43% — di atas rata-rata nasional!',
+  freelance:'Pendapatan <strong>freelance</strong> ini mendorong saving rate-mu jadi 76% bulan ini. Pertahankan!',
+  default:  'Transaksi ini dicatat otomatis oleh <strong>ZAKU AI</strong> dari percakapan di AI Chat.',
+};
+
+// =====================================================
+// STATE
+// =====================================================
+let filter  = 'all';
+let sortKey = 'date';
+let sortAsc = false;
+let query   = '';
+let page    = 1;
+const PER   = 7;
+
+// =====================================================
+// FILTER / SORT / SEARCH
+// =====================================================
+function getFiltered() {
+  let d = [...TX];
+  if (query) {
+    const q = query.toLowerCase();
+    d = d.filter(t => t.name.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q));
+  }
+  if (filter === 'income')  d = d.filter(t => t.type === 'income');
+  else if (filter === 'expense') d = d.filter(t => t.type === 'expense');
+  else if (!['all','income','expense'].includes(filter)) d = d.filter(t => t.cat === filter);
+
+  d.sort((a,b) => {
+    const v = sortKey === 'date'
+      ? new Date(a.date) - new Date(b.date)
+      : a.amount - b.amount;
+    return sortAsc ? v : -v;
+  });
+  return d;
+}
+
+function setFilter(btn) {
+  filter = btn.dataset.filter;
+  page   = 1;
+  document.querySelectorAll('.fpill').forEach(p => {
+    p.classList.remove('on','punch-on','mint-on');
+  });
+  if (filter === 'income')  btn.classList.add('mint-on');
+  else if (filter === 'expense') btn.classList.add('punch-on');
+  else btn.classList.add('on');
+  render();
+}
+
+function setSort(key, btn) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  document.getElementById('btn-date').classList.remove('active');
+  document.getElementById('btn-amount').classList.remove('active');
+  btn.classList.add('active');
+  document.getElementById('btn-date').textContent   = sortKey==='date'   ? (sortAsc?'↑ TERLAMA':'↓ TERBARU') : '↓ TERBARU';
+  document.getElementById('btn-amount').textContent = sortKey==='amount' ? (sortAsc?'↑ TERKECIL':'↓ TERBESAR') : '↕ NOMINAL';
+  render();
+}
+
+function doSearch(v) {
+  query = v; page = 1; render();
+}
+
+// =====================================================
+// RENDER
+// =====================================================
+function render() {
+  const filtered = getFiltered();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER));
+  if (page > totalPages) page = totalPages;
+
+  document.getElementById('total-count').textContent = filtered.length;
+  document.getElementById('pag-cur').textContent = page;
+  document.getElementById('pag-tot').textContent = totalPages;
+
+  const slice = filtered.slice((page-1)*PER, page*PER);
+
+  // group by month
+  const groups = {};
+  slice.forEach(t => {
+    const k = new Date(t.date).toLocaleDateString('id-ID',{month:'long',year:'numeric'}).toUpperCase();
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(t);
+  });
+
+  const body = document.getElementById('tx-body');
+
+  if (!slice.length) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-ico">🔍</div>
+        <div class="empty-title">Tidak ada transaksi</div>
+        <div class="empty-sub">Coba ubah filter atau kata kunci pencarian kamu.</div>
+      </div>`;
+    renderPag(totalPages);
+    return;
+  }
+
+  body.innerHTML = Object.entries(groups).map(([month, txs]) => {
+    const exp = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    return `
+      <div class="month-group">
+        <div class="month-label-row">
+          <div class="month-label-text">${month}</div>
+          ${exp ? `<div class="month-total">−${rp(exp)}</div>` : ''}
+        </div>
+        <div class="tx-rows">${txs.map(txRow).join('')}</div>
+      </div>`;
+  }).join('');
+
+  renderPag(totalPages);
+}
+
+function txRow(t) {
+  const sign    = t.type === 'income' ? '+' : '−';
+  const dateStr = new Date(t.date).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+  const tagHtml = t.tag === 'new'
+    ? `<span class="tx-tag new">BARU</span>`
+    : t.tag === 'recurring'
+    ? `<span class="tx-tag recurring">RUTIN</span>`
+    : '';
+
+  return `
+    <div class="tx-row ${t.type}" onclick="openDrw(${t.id})">
+      <div class="tx-ico">
+        ${t.icon}
+        <div class="tx-ico-dot"></div>
+      </div>
+      <div class="tx-info">
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-meta">
+          <span class="tx-cat">${t.cat}</span>
+          <span class="tx-sep">·</span>
+          <span class="tx-date">${dateStr}</span>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount">${sign}${rp(t.amount)}</div>
+        ${tagHtml}
+      </div>
+    </div>`;
+}
+
+// =====================================================
+// PAGINATION
+// =====================================================
+function renderPag(total) {
+  const ctrl = document.getElementById('pag-controls');
+  let html = `<button class="pag-btn arrow" onclick="goPage(${page-1})" ${page===1?'disabled':''}>‹</button>`;
+
+  const r = [];
+  if (total <= 5) { for(let i=1;i<=total;i++) r.push(i); }
+  else {
+    r.push(1);
+    if (page > 3) r.push('…');
+    for (let i=Math.max(2,page-1); i<=Math.min(total-1,page+1); i++) r.push(i);
+    if (page < total-2) r.push('…');
+    r.push(total);
+  }
+
+  r.forEach(p => {
+    html += p === '…'
+      ? `<span class="pag-dots">···</span>`
+      : `<button class="pag-btn ${p===page?'on':''}" onclick="goPage(${p})">${p}</button>`;
+  });
+
+  html += `<button class="pag-btn arrow" onclick="goPage(${page+1})" ${page===total?'disabled':''}>›</button>`;
+  ctrl.innerHTML = html;
+}
+
+function goPage(p) {
+  const filtered = getFiltered();
+  const total = Math.max(1, Math.ceil(filtered.length / PER));
+  if (p < 1 || p > total) return;
+  page = p;
+  render();
+  document.getElementById('tx-body').scrollTop = 0;
+}
+
+// =====================================================
+// DRAWER
+// =====================================================
+function openDrw(id) {
+  const t = TX.find(x=>x.id===id);
+  if (!t) return;
+  const sign    = t.type==='income' ? '+' : '−';
+  const dateStr = new Date(t.date).toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('d-ico').textContent  = t.icon;
+  document.getElementById('d-name').textContent = t.name;
+  document.getElementById('d-cat').textContent  = t.cat.toUpperCase() + ' · ' + (t.type==='income'?'PEMASUKAN':'PENGELUARAN');
+  document.getElementById('d-amt').textContent  = sign + rp(t.amount);
+
+  const head = document.getElementById('drawer-head');
+  head.className = 'drawer-head ' + t.type;
+
+  document.getElementById('drawer-rows').innerHTML = `
+    <div class="drow"><div class="drow-k">NOMINAL</div><div class="drow-v">${sign}${rp(t.amount)}</div></div>
+    <div class="drow"><div class="drow-k">TANGGAL</div><div class="drow-v">${dateStr}</div></div>
+    <div class="drow"><div class="drow-k">KATEGORI</div><div class="drow-v">${t.cat.toUpperCase()}</div></div>
+    <div class="drow"><div class="drow-k">INPUT VIA</div><div class="drow-v">ZAKU AI CHAT</div></div>
+    ${t.tag==='recurring'?`<div class="drow"><div class="drow-k">STATUS</div><div class="drow-v" style="color:var(--gray)">TRANSAKSI RUTIN ↻</div></div>`:''}
+  `;
+
+  document.getElementById('d-ai-text').innerHTML = AI_HINTS[t.cat] || AI_HINTS.default;
+  document.getElementById('drawer-bg').classList.add('open');
+}
+
+function closeDrw() {
+  document.getElementById('drawer-bg').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('drawer-bg')) closeDrw();
+}
+
+// =====================================================
+// UTILS
+// =====================================================
+function rp(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// =====================================================
+// INIT
+// =====================================================
+render();
+</script>
+</body>
+</html>
