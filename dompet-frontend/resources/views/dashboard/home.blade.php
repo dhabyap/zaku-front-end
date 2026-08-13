@@ -249,10 +249,9 @@
                     categories: true,
                     budget: true
                 },
-                init() {
+                async init() {
                     console.log('Init dashboard...');
-                    this.fetchDashboard();
-                    this.fetchCatBudgets();
+                    await Promise.all([this.fetchDashboard(), this.fetchCatBudgets()]);
                 },
                 formatNumber(n) {
                     if (!n) return '0';
@@ -449,16 +448,21 @@
                     return map[(name||'').toUpperCase()] || '📄';
                 },
                 async fetchCatBudgets() {
+                    console.log('Fetching budgets...');
                     try {
                         const res = await window.apiClient.get('/v1/budgets');
+                        console.log('Budgets response:', res.data);
                         this.catBudgets = res.data.data || [];
+                        console.log('catBudgets set:', this.catBudgets);
                         for (const b of this.catBudgets) {
                             try {
                                 const pr = await window.apiClient.get('/v1/budgets/' + b.id + '/progress');
                                 this.catBudgetProgress[b.id] = pr.data.data;
                             } catch { /* ignore */ }
                         }
-                    } catch { /* no budgets yet */ } finally {
+                    } catch (e) {
+                        console.error('Fetch budgets error:', e);
+                    } finally {
                         this.loading.budget = false;
                     }
                 },
