@@ -55,7 +55,7 @@
                 </template>
 
                 {{-- Per-category budgets exist --}}
-                <template x-if="!loading.budget && catBudgets.length > 0">
+                <template x-if="!loading.budget && catBudgets && catBudgets.length > 0">
                     <div>
                         <div class="budget-top">
                             <div>
@@ -96,7 +96,7 @@
                 </template>
 
                 {{-- No budgets yet --}}
-                <template x-if="!loading.budget && catBudgets.length === 0">
+                <template x-if="!loading.budget && (!catBudgets || catBudgets.length === 0)">
                     <div class="budget-empty">
                         <div>
                             <div class="budget-label">BUDGET HEALTH</div>
@@ -250,6 +250,7 @@
                     budget: true
                 },
                 async init() {
+                    console.log('Init dashboard...');
                     this.fetchDashboard();
                     this.fetchCatBudgets();
                 },
@@ -413,7 +414,6 @@
                         this.loading.balance = false;
                         this.loading.transactions = false;
                         this.loading.categories = false;
-                        this.loading.budget = false;
                     }
                 },
                 get catTotalBudget() { return this.catBudgets.reduce((s, b) => s + (b.amount || 0), 0); },
