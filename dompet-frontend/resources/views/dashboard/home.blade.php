@@ -2,7 +2,7 @@
 
 @section('content')
     <div x-data="dashboardHome()" style="display:flex;flex-direction:column;height:100%;">
-        <header class="dash-header" x-data="{ user: window.auth.getUser(), showAmount: localStorage.getItem('zaku_hide_amount') !== 'false' }">
+        <header class="dash-header" x-data="{ user: window.auth.getUser() }">
             <div class="dh-row">
                 <div>
                     <div class="dh-greet" x-text="greeting()"></div>
@@ -236,6 +236,7 @@
                 insightText: '',
                 insightDetail: '',
                 insightType: 'info',
+                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false', // Moved here
                 budget: {
                     limit: 0,
                     used: 0,
