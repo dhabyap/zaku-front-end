@@ -55,7 +55,7 @@
                 </template>
 
                 {{-- Per-category budgets exist --}}
-                <template x-if="!loading.budget && catBudgets && catBudgets.length > 0">
+                <template x-if="!loading.budget && typeof catBudgets !== 'undefined' && catBudgets && catBudgets.length > 0">
                     <div>
                         <div class="budget-top">
                             <div>
@@ -96,7 +96,7 @@
                 </template>
 
                 {{-- No budgets yet --}}
-                <template x-if="!loading.budget && (!catBudgets || catBudgets.length === 0)">
+                <template x-if="!loading.budget && (typeof catBudgets === 'undefined' || !catBudgets || catBudgets.length === 0)">
                     <div class="budget-empty">
                         <div>
                             <div class="budget-label">BUDGET HEALTH</div>
@@ -249,7 +249,7 @@
                     categories: true,
                     budget: true
                 },
-                async init() {
+                init() {
                     console.log('Init dashboard...');
                     this.fetchDashboard();
                     this.fetchCatBudgets();
