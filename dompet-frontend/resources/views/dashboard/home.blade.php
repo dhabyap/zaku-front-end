@@ -235,9 +235,8 @@
                 maxCategoryPct: 0,
                 insightText: '',
                 insightDetail: '',
-                showAmount: true,
                 insightType: 'info',
-                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false', // Moved here
+                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false',
                 budget: {
                     limit: 0,
                     used: 0,
@@ -250,7 +249,6 @@
                 },
                 catBudgets: [],
                 catBudgetProgress: {},
-                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false',
                 loading: {
                     balance: true,
                     transactions: true,
