@@ -235,6 +235,7 @@
                 maxCategoryPct: 0,
                 insightText: '',
                 insightDetail: '',
+                showAmount: true,
                 insightType: 'info',
                 showAmount: localStorage.getItem('zaku_hide_amount') !== 'false', // Moved here
                 budget: {
