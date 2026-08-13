@@ -38,6 +38,7 @@
             </div>
 
             <div class="budget-box budget-health-box">
+                {{-- Loading skeleton --}}
                 <template x-if="loading.budget">
                     <div>
                         <div class="budget-top">
@@ -53,34 +54,56 @@
                     </div>
                 </template>
 
-                <template x-if="!loading.budget && budget.limit > 0">
+                {{-- Per-category budgets exist --}}
+                <template x-if="!loading.budget && typeof catBudgets !== 'undefined' && catBudgets && catBudgets.length > 0">
                     <div>
                         <div class="budget-top">
                             <div>
                                 <div class="budget-label">BUDGET HEALTH</div>
-                                <div class="budget-amount" x-text="budget.status">AMAN</div>
+                                <div class="budget-amount" x-text="catBudgetStatus.text">AMAN</div>
                             </div>
-                            <div class="budget-pct" x-text="budget.score">80</div>
+                            <div class="budget-pct" x-text="catBudgetScore">80</div>
                         </div>
                         <div class="budget-track">
-                            <div class="budget-fill" :class="budget.statusClass" :style="'width:' + budget.usedPct + '%'"></div>
+                            <div class="budget-fill" :class="catBudgetStatus.cls" :style="'width:' + catBudgetPct + '%'"></div>
                         </div>
                         <div class="budget-foot">
-                            <span x-text="'TERPAKAI Rp ' + formatNumber(budget.used)">TERPAKAI Rp 0</span>
-                            <span x-text="'SISA Rp ' + formatNumber(budget.left)">SISA Rp 0</span>
+                            <span x-text="'TERPAKAI Rp ' + formatNumber(catTotalSpent)">TERPAKAI Rp 0</span>
+                            <span x-text="'SISA Rp ' + formatNumber(catTotalRemaining)">SISA Rp 0</span>
                         </div>
-                        <div class="budget-health-note" x-text="budget.insight"></div>
+                        <div class="budget-health-note" x-text="catBudgetInsight"></div>
+
+                        {{-- Per-category mini bars --}}
+                        <div class="cat-budget-mini-list">
+                            <template x-for="cb in catTopBudgets" :key="cb.name">
+                                <div class="cat-budget-mini">
+                                    <div class="cat-budget-mini-top">
+                                        <span class="cat-budget-mini-name">
+                                            <span x-text="catEmoji(cb.name)"></span>
+                                            <span x-text="cb.name"></span>
+                                        </span>
+                                        <span class="cat-budget-mini-amt" x-text="'Rp ' + formatNumber(cb.spent) + ' / Rp ' + formatNumber(cb.amount)"></span>
+                                    </div>
+                                    <div class="budget-track" style="height:6px;">
+                                        <div class="budget-fill" :class="{ 'safe': cb.status === 'aman', 'watch': cb.status === 'waspada', 'risk': cb.status === 'boros' || cb.status === 'melebihi' }" :style="'width:' + Math.min(100, cb.pct) + '%'"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <a href="/budgets" class="btn-tiny budget-manage-btn">KELOLA BUDGET →</a>
                     </div>
                 </template>
 
-                <template x-if="!loading.budget && budget.limit <= 0">
+                {{-- No budgets yet --}}
+                <template x-if="!loading.budget && (typeof catBudgets === 'undefined' || !catBudgets || catBudgets.length === 0)">
                     <div class="budget-empty">
                         <div>
                             <div class="budget-label">BUDGET HEALTH</div>
-                            <div class="budget-amount">Budget belum diatur</div>
-                            <div class="budget-health-note">Atur budget bulanan agar Zaku bisa membaca kondisi pengeluaranmu.</div>
+                            <div class="budget-amount">Belum ada budget</div>
+                            <div class="budget-health-note">Atur budget per kategori agar bisa tracking pengeluaran.</div>
                         </div>
-                        <a href="/profile" class="btn-tiny budget-setup-btn">ATUR</a>
+                        <a href="/budgets" class="btn-tiny budget-setup-btn">ATUR</a>
                     </div>
                 </template>
             </div>
@@ -218,6 +241,8 @@
                     statusClass: 'risk',
                     insight: ''
                 },
+                catBudgets: [],
+                catBudgetProgress: {},
                 loading: {
                     balance: true,
                     transactions: true,
@@ -225,7 +250,8 @@
                     budget: true
                 },
                 async init() {
-                    this.fetchDashboard();
+                    console.log('Init dashboard...');
+                    await Promise.all([this.fetchDashboard(), this.fetchCatBudgets()]);
                 },
                 formatNumber(n) {
                     if (!n) return '0';
@@ -387,6 +413,56 @@
                         this.loading.balance = false;
                         this.loading.transactions = false;
                         this.loading.categories = false;
+                    }
+                },
+                get catTotalBudget() { return this.catBudgets.reduce((s, b) => s + (b.amount || 0), 0); },
+                get catTotalSpent() { return Object.values(this.catBudgetProgress).reduce((s, p) => s + (p.spent || 0), 0); },
+                get catTotalRemaining() { return Math.max(0, this.catTotalBudget - this.catTotalSpent); },
+                get catBudgetPct() { return this.catTotalBudget > 0 ? Math.min(100, Math.round((this.catTotalSpent / this.catTotalBudget) * 100)) : 0; },
+                get catBudgetStatus() {
+                    if (this.catBudgetPct >= 80) return { text: 'BOROS', cls: 'risk' };
+                    if (this.catBudgetPct >= 60) return { text: 'WASPADA', cls: 'watch' };
+                    return { text: 'AMAN', cls: 'safe' };
+                },
+                get catBudgetScore() { return this.catTotalBudget > 0 ? Math.max(0, 100 - this.catBudgetPct) : 0; },
+                get catBudgetInsight() {
+                    if (this.catTotalBudget <= 0) return 'Belum ada budget per kategori.';
+                    if (this.catBudgetScore >= 80) return 'Budget masih aman. Pertahankan!';
+                    if (this.catBudgetScore >= 50) return 'Pengeluaran mendekati batas. Jaga transaksi berikutnya.';
+                    return 'Budget berisiko habis. Prioritaskan kebutuhan utama.';
+                },
+                get catTopBudgets() {
+                    return this.catBudgets.slice(0, 4).map(b => {
+                        const p = this.catBudgetProgress[b.id];
+                        return {
+                            name: b.category?.name || 'LAINNYA',
+                            amount: b.amount || 0,
+                            spent: p?.spent || 0,
+                            pct: p?.percentage || 0,
+                            status: p?.status || 'aman',
+                        };
+                    });
+                },
+                catEmoji(name) {
+                    const map = { 'MAKANAN':'🍜','TRANSPORTASI':'🚗','TAGIHAN':'⚡','BELANJA':'🛍️','GAJI':'💰','FREELANCE':'💻','KESEHATAN':'💊' };
+                    return map[(name||'').toUpperCase()] || '📄';
+                },
+                async fetchCatBudgets() {
+                    console.log('Fetching budgets...');
+                    try {
+                        const res = await window.apiClient.get('/v1/budgets');
+                        console.log('Budgets response:', res.data);
+                        this.catBudgets = res.data.data || [];
+                        console.log('catBudgets set:', this.catBudgets);
+                        for (const b of this.catBudgets) {
+                            try {
+                                const pr = await window.apiClient.get('/v1/budgets/' + b.id + '/progress');
+                                this.catBudgetProgress[b.id] = pr.data.data;
+                            } catch { /* ignore */ }
+                        }
+                    } catch (e) {
+                        console.error('Fetch budgets error:', e);
+                    } finally {
                         this.loading.budget = false;
                     }
                 },
