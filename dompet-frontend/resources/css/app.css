@@ -1230,6 +1230,49 @@ html, body {
   text-decoration: none;
 }
 
+.budget-manage-btn {
+  display: inline-block;
+  margin-top: 12px;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.cat-budget-mini-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cat-budget-mini {
+  background: rgba(17,16,16,.04);
+  border: 1px solid rgba(17,16,16,.08);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.cat-budget-mini-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.cat-budget-mini-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cat-budget-mini-amt {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(17,16,16,.5);
+}
+
 .menu-block {
   margin: 16px 16px 0;
   border: var(--border);
