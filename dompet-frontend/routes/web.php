@@ -17,6 +17,8 @@ Route::middleware(['jwt.session'])->group(function () {
     Route::get('/transactions', [PageController::class, 'transactions'])->name('transactions');
     Route::get('/transactions/{id}', [PageController::class, 'transactionDetail'])->name('transaction-detail');
     Route::get('/chat', [PageController::class, 'chat'])->name('chat');
+    Route::get('/manual-input', [PageController::class, 'manualInput'])->name('manual-input');
+    Route::get('/categories', [PageController::class, 'categories'])->name('categories');
     Route::get('/profile', [PageController::class, 'profile'])->name('profile');
     Route::get('/changelogs', [PageController::class, 'changelogs'])->name('changelogs');
     Route::get('/monthly-recap', [PageController::class, 'monthlyRecap'])->name('monthly-recap');

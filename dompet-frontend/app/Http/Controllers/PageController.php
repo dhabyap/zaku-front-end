@@ -66,6 +66,16 @@ class PageController extends Controller
         return view('chat.index');
     }
 
+    public function manualInput()
+    {
+        return view('dashboard.manual-input');
+    }
+
+    public function categories()
+    {
+        return view('dashboard.categories');
+    }
+
     public function topup()
     {
         return view('wallet.topup');

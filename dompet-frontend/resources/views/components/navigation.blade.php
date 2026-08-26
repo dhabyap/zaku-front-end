@@ -13,6 +13,10 @@
         </div>
         <span>AI CHAT</span>
     </a>
+    <a href="/manual-input" class="nav-item {{ request()->is('manual-input') ? 'active' : '' }}" id="nav-manual">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>INPUT</span>
+    </a>
     <a href="/profile" class="nav-item {{ request()->is('profile') ? 'active' : '' }}" id="nav-profile">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>PROFIL</span>

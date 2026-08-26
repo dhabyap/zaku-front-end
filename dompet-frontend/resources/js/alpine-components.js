@@ -876,6 +876,240 @@ export default function (Alpine) {
             }
         },
     }));
+
+    // ── Manual Input Page ──
+    Alpine.data('manualInputPage', () => ({
+        txType: 'income',
+        selectedCat: '',
+        amount: 0,
+        description: '',
+        dateRaw: '',
+        dateDisplay: '',
+        notes: '',
+        loading: false,
+        saved: false,
+        allCategories: [],
+        savedData: { icon: '💰', description: '', amount: 0, type: 'income' },
+        showQuickAdd: false,
+        quickAddSaving: false,
+        quickAddForm: { name: '', icon: '📌', type: 'expense' },
+        quickAddIcons: ['☕', '🚗', '🛒', '🧾', '🎮', '💰', '📌', '🏠', '💊', '🎓', '✈️', '🐱', '👶', '💼', '🎁', '🔧', '📱', '🎬', '🏋️', '🎵', '📚', '🍕', '🛍️'],
+        async init() {
+            const today = new Date();
+            this.dateRaw = today.toISOString().split('T')[0];
+            this.dateDisplay = this.formatDateID(this.dateRaw);
+            await this.fetchCategories();
+        },
+        async fetchCategories() {
+            try {
+                const res = await window.apiClient.get('/v1/categories');
+                this.allCategories = res.data.data || [];
+            } catch {
+                this.allCategories = [
+                    { name: 'MAKANAN', icon: '☕', type: 'expense' },
+                    { name: 'TRANSPORT', icon: '🚗', type: 'expense' },
+                    { name: 'BELANJA', icon: '🛒', type: 'expense' },
+                    { name: 'TAGIHAN', icon: '🧾', type: 'expense' },
+                    { name: 'HIBURAN', icon: '🎮', type: 'expense' },
+                    { name: 'GAJI', icon: '💰', type: 'income' },
+                    { name: 'LAINNYA', icon: '📌', type: 'both' },
+                ];
+            }
+        },
+        get categories() {
+            return this.allCategories.filter(c =>
+                c.type === this.txType || c.type === 'both'
+            );
+        },
+        formatNumber(n) { return Number(n || 0).toLocaleString('id-ID'); },
+        setType(t) { this.txType = t; this.selectedCat = ''; },
+        addAmount(n) { this.amount = (Number(this.amount) || 0) + n; },
+        getCatLabel() {
+            const cat = this.allCategories.find(c => c.name === this.selectedCat);
+            return cat ? cat.icon + ' ' + cat.name : '—';
+        },
+        formatDateID(d) {
+            if (!d) return '—';
+            try {
+                const dt = new Date(d + 'T00:00:00');
+                if (isNaN(dt.getTime())) return d;
+                return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            } catch { return d; }
+        },
+        parseDateInput(val) {
+            const cleaned = val.replace(/[/]/g, '-');
+            const parts = cleaned.split('-');
+            if (parts.length === 3) {
+                let [d, m, y] = parts;
+                if (y.length === 2) y = '20' + y;
+                if (m.length === 1) m = '0' + m;
+                if (d.length === 1) d = '0' + d;
+                const iso = y + '-' + m + '-' + d;
+                if (!isNaN(new Date(iso + 'T00:00:00').getTime())) {
+                    this.dateRaw = iso;
+                    this.dateDisplay = this.formatDateID(iso);
+                    return;
+                }
+            }
+            this.dateRaw = '';
+            this.dateDisplay = val;
+        },
+        setToday() {
+            const today = new Date();
+            this.dateRaw = today.toISOString().split('T')[0];
+            this.dateDisplay = this.formatDateID(this.dateRaw);
+        },
+        openQuickAdd() {
+            this.quickAddForm = { name: '', icon: '📌', type: this.txType };
+            this.showQuickAdd = true;
+        },
+        async quickAddCategory() {
+            if (!this.quickAddForm.name) return;
+            this.quickAddSaving = true;
+            try {
+                const res = await window.apiClient.post('/v1/categories', this.quickAddForm);
+                const newCat = res.data.data;
+                this.allCategories.push(newCat);
+                this.selectedCat = newCat.name;
+                this.showQuickAdd = false;
+                window.utils.showToast('success', 'Kategori "' + newCat.name + '" berhasil ditambahkan');
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menambahkan kategori');
+                window.utils.showToast('error', msg, true);
+            } finally {
+                this.quickAddSaving = false;
+            }
+        },
+        resetForm() {
+            this.amount = 0;
+            this.description = '';
+            this.notes = '';
+            this.selectedCat = '';
+            this.txType = 'income';
+            const today = new Date();
+            this.dateRaw = today.toISOString().split('T')[0];
+            this.dateDisplay = this.formatDateID(this.dateRaw);
+        },
+        async submitForm() {
+            if (this.amount <= 0) { window.utils.showToast('error', 'Masukkan nominal terlebih dahulu!'); return; }
+            if (!this.description) { window.utils.showToast('error', 'Isi deskripsi transaksi!'); return; }
+            if (!this.selectedCat) { window.utils.showToast('error', 'Pilih kategori transaksi!'); return; }
+            this.loading = true;
+            try {
+                const txDate = this.dateRaw || new Date().toISOString().split('T')[0];
+                await window.apiClient.post('/v1/transactions', {
+                    type: this.txType,
+                    amount: this.amount,
+                    description: this.description,
+                    category: this.selectedCat,
+                    transaction_date: txDate,
+                });
+                const cat = this.allCategories.find(c => c.name === this.selectedCat);
+                this.savedData = {
+                    icon: cat ? cat.icon : '💰',
+                    description: this.description,
+                    amount: this.amount,
+                    type: this.txType,
+                };
+                this.saved = true;
+            } catch (e) {
+                window.utils.handleApiError(e, 'Gagal menyimpan transaksi');
+            } finally { this.loading = false; }
+        }
+    }));
+
+    // ── Categories Management Page ──
+    Alpine.data('categoriesPage', () => ({
+        categories: [],
+        loading: false,
+        filter: 'all',
+        showModal: false,
+        showDeleteModal: false,
+        editingCat: null,
+        deletingCat: null,
+        saving: false,
+        deleting: false,
+        keywordsInput: '',
+        form: { name: '', icon: '📌', type: 'expense', keywords: [] },
+        iconOptions: ['☕', '🚗', '🛒', '🧾', '🎮', '💰', '📌', '🏠', '💊', '🎓', '✈️', '🐱', '👶', '💼', '🎁', '🔧', '📱', '🎬', '🏋️', '🎵', '📚', '✈️', '🍕', '🛍️', '🐱'],
+        get filteredCategories() {
+            if (this.filter === 'all') return this.categories;
+            return this.categories.filter(c => c.type === this.filter || c.type === 'both');
+        },
+        async init() {
+            await this.fetchCategories();
+        },
+        async fetchCategories() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/categories');
+                this.categories = res.data.data || [];
+            } catch {
+                window.utils.showToast('error', 'Gagal memuat kategori');
+            } finally {
+                this.loading = false;
+            }
+        },
+        openAddModal() {
+            this.editingCat = null;
+            this.keywordsInput = '';
+            this.form = { name: '', icon: '📌', type: 'expense', keywords: [] };
+            this.showModal = true;
+        },
+        openEditModal(cat) {
+            this.editingCat = cat;
+            this.keywordsInput = (cat.keywords || []).join(', ');
+            this.form = { name: cat.name, icon: cat.icon, type: cat.type, keywords: cat.keywords || [] };
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.editingCat = null;
+        },
+        async saveCategory() {
+            if (!this.form.name) return;
+            this.saving = true;
+            try {
+                if (this.editingCat) {
+                    const res = await window.apiClient.put('/v1/categories/' + this.editingCat.id, this.form);
+                    const idx = this.categories.findIndex(c => c.id === this.editingCat.id);
+                    if (idx !== -1) this.categories[idx] = res.data.data;
+                    window.utils.showToast('success', 'Kategori berhasil diperbarui');
+                } else {
+                    const res = await window.apiClient.post('/v1/categories', this.form);
+                    this.categories.push(res.data.data);
+                    window.utils.showToast('success', 'Kategori berhasil ditambahkan');
+                }
+                this.closeModal();
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menyimpan kategori');
+                window.utils.showToast('error', msg, true);
+            } finally {
+                this.saving = false;
+            }
+        },
+        confirmDelete(cat) {
+            this.deletingCat = cat;
+            this.showDeleteModal = true;
+        },
+        async deleteCategory() {
+            if (!this.deletingCat) return;
+            this.deleting = true;
+            try {
+                await window.apiClient.delete('/v1/categories/' + this.deletingCat.id);
+                this.categories = this.categories.filter(c => c.id !== this.deletingCat.id);
+                window.utils.showToast('success', 'Kategori berhasil dihapus');
+                this.showDeleteModal = false;
+                this.deletingCat = null;
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menghapus kategori');
+                window.utils.showToast('error', msg, true);
+            } finally {
+                this.deleting = false;
+            }
+        },
+    }));
+
 }
 
 // changelogPage registered via Alpine.data() above

@@ -62,6 +62,11 @@
                 <span>Kelola Budget</span>
                 <div class="menu-arr">→</div>
             </a>
+            <a href="/categories" class="menu-row" style="text-decoration:none;color:var(--ink);">
+                <div class="menu-ico">🏷️</div>
+                <span>Kelola Kategori</span>
+                <div class="menu-arr">→</div>
+            </a>
             <div class="menu-row" @click="exportData()">
                 <div class="menu-ico">↓</div>
                 <span>Export Data CSV</span>

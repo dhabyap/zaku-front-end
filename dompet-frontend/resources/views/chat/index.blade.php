@@ -8,7 +8,12 @@
             <div class="chat-ai-name">ZAKU AI</div>
             <div class="chat-ai-online"><div class="online-dot"></div>Online · siap mencatat</div>
         </div>
-        <button class="chat-clear-btn" @click="clearChat()">HAPUS</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <a href="/manual-input" style="background:var(--punch-2);border:2px solid var(--punch-2);color:var(--ink);font-family:var(--font-mono);font-size:9px;font-weight:500;padding:6px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                <span>+</span> INPUT MANUAL
+            </a>
+            <button class="chat-clear-btn" @click="clearChat()">HAPUS</button>
+        </div>
     </div>
 
     <div class="chat-msgs" id="chat-msgs" x-ref="msgs">
