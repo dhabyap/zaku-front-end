@@ -482,11 +482,14 @@ export default function (Alpine) {
         hasMore: false,
         total: 0,
         searchQuery: '',
+        dateFrom: '',
+        dateTo: '',
         sortKey: 'date',
         sortAsc: false,
         activeTrx: null,
         totalIncome: 0,
         totalExpense: 0,
+        _searchTimer: null,
         async init() {
             await this.fetchTransactions();
             this.extractCategories();
@@ -509,16 +512,29 @@ export default function (Alpine) {
         },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
         async fetchTransactions(page = 1, append = false, isLoadMore = false) {
-            if (!isLoadMore) this.loading = true; // Hanya tampilkan loading penuh jika bukan loadMore
+            if (!isLoadMore) this.loading = true;
             try {
-                const res = await window.apiClient.get(`/v1/transactions?limit=20&page=${page}`);
+                const params = { limit: 20, page };
+                if (this.searchQuery) params.q = this.searchQuery;
+                if (this.filter !== 'all') {
+                    if (this.filter === 'income') params.filter = 'PEMASUKAN';
+                    else if (this.filter === 'expense') params.filter = 'PENGELUARAN';
+                    else params.filter = this.filter;
+                }
+                if (this.dateFrom) params.date_from = this.dateFrom;
+                if (this.dateTo) params.date_to = this.dateTo;
+                const sortBy = this.sortKey === 'date' ? 'transaction_date' : this.sortKey;
+                params.sort_by = sortBy;
+                params.sort_order = this.sortAsc ? 'asc' : 'desc';
+
+                const res = await window.apiClient.get('/v1/transactions', { params });
                 const payload = res.data.data || {};
                 const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                 const meta = payload.meta || {};
-                
+
                 this.totalIncome = meta.total_income || 0;
                 this.totalExpense = meta.total_expense || 0;
-                
+
                 let flatTx = [];
                 groups.forEach(group => {
                     if (Array.isArray(group.transactions)) {
@@ -529,13 +545,13 @@ export default function (Alpine) {
                         flatTx = flatTx.concat(transactions);
                     }
                 });
-                
+
                 if (append) {
                     this.transactions = [...this.transactions, ...flatTx];
                 } else {
                     this.transactions = flatTx;
                 }
-                
+
                 this.currentPage = meta.page || 1;
                 this.lastPage = Math.ceil((meta.total || 0) / (meta.limit || 20));
                 this.hasMore = meta.has_more || false;
@@ -543,7 +559,7 @@ export default function (Alpine) {
             } catch (e) {
                 console.error('Fetch transactions error:', e);
             } finally {
-                if (!isLoadMore) this.loading = false; // Sembunyikan loading penuh jika bukan loadMore
+                if (!isLoadMore) this.loading = false;
             }
         },
         async loadPage(p) {
@@ -585,10 +601,11 @@ export default function (Alpine) {
             }
             return rangeWithDots;
         },
-        setFilter(f, el) { 
-            this.filter = f; 
-            document.querySelectorAll('.fpill').forEach(p => p.classList.remove('on')); 
-            if (el) el.classList.add('on'); 
+        setFilter(f, el) {
+            this.filter = f;
+            document.querySelectorAll('.fpill').forEach(p => p.classList.remove('on'));
+            if (el) el.classList.add('on');
+            this.fetchTransactions(1);
         },
         setSort(key, btn) {
             if (this.sortKey === key) this.sortAsc = !this.sortAsc;
@@ -596,23 +613,22 @@ export default function (Alpine) {
             document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             btn.textContent = key === 'date' ? (this.sortAsc ? '↑ TERLAMA' : '↓ TERBARU') : (this.sortAsc ? '↑ TERKECIL' : '↓ TERBESAR');
+            this.fetchTransactions(1);
         },
-        doSearch(v) { this.searchQuery = v; },
+        doSearch(v) {
+            clearTimeout(this._searchTimer);
+            this._searchTimer = setTimeout(() => {
+                this.searchQuery = v;
+                this.fetchTransactions(1);
+            }, 400);
+        },
+        setDateRange(from, to) {
+            this.dateFrom = from;
+            this.dateTo = to;
+            this.fetchTransactions(1);
+        },
         filtered() {
-            let d = [...this.transactions];
-            if (this.searchQuery) {
-                const q = this.searchQuery.toLowerCase();
-                d = d.filter(t => (t.description || '').toLowerCase().includes(q) || (t.category_name || '').toLowerCase().includes(q));
-            }
-            if (this.filter !== 'all') {
-                if (this.filter === 'income' || this.filter === 'expense') d = d.filter(t => t.type === this.filter);
-                else d = d.filter(t => t.category_name?.toUpperCase() === this.filter);
-            }
-            d.sort((a, b) => {
-                const v = this.sortKey === 'date' ? new Date(this.getTransactionDate(a)) - new Date(this.getTransactionDate(b)) : a.amount - b.amount;
-                return this.sortAsc ? v : -v;
-            });
-            return d;
+            return this.transactions;
         },
         grouped() {
             const groups = {};
