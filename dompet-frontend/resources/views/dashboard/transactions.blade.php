@@ -11,7 +11,7 @@
       <!-- Removed hist-chips div -->
     </div>
     <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Cari nama atau kategori..." @input.debounce="doSearch($event.target.value)">
+      <input class="search-input" type="text" placeholder="Cari nama atau kategori..." @input="doSearch($event.target.value)">
       <div class="search-ico">⌕</div>
     </div>
     <div class="filter-strip">
@@ -21,6 +21,16 @@
       <template x-for="cat in categories" :key="cat">
         <button class="fpill" @click="setFilter(cat, $el)" x-text="cat"></button>
       </template>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:0 16px 8px;font-family:var(--font-mono);font-size:10px;">
+      <span style="letter-spacing:1.5px;color:rgba(17,16,16,.4);">TANGGAL</span>
+      <input type="date" :value="dateFrom" @change="setDateRange($event.target.value, dateTo)"
+        style="font-family:var(--font-mono);font-size:11px;padding:5px 8px;border:1.5px solid var(--border-color, rgba(17,16,16,.15));background:var(--paper);color:var(--ink);cursor:pointer;">
+      <span style="color:rgba(17,16,16,.3);">—</span>
+      <input type="date" :value="dateTo" @change="setDateRange(dateFrom, $event.target.value)"
+        style="font-family:var(--font-mono);font-size:11px;padding:5px 8px;border:1.5px solid var(--border-color, rgba(17,16,16,.15));background:var(--paper);color:var(--ink);cursor:pointer;">
+      <button x-show="dateFrom || dateTo" @click="setDateRange('', '')"
+        style="font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--punch);background:none;border:none;cursor:pointer;padding:4px 6px;">RESET</button>
     </div>
   </div>
 
