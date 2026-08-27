@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZAKU — Catat Duit, Gak Ribet</title>
 <link rel="icon" type="image/svg+xml" href="{{ asset('zaku-favicon.svg') }}">
+<meta name="description" content="ZAKU — Catat keuanganmu dengan chat. Tanpa form ribet. AI langsung paham dan analisis pengeluaran & pemasukan kamu.">
+<meta name="keywords" content="catat keuangan, finance tracker, AI finance, pengeluaran, pemasukan, aplikasi keuangan, zaku">
+<meta name="author" content="ZAKU">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph -->
+<meta property="og:title" content="ZAKU — Catat Duit, Gak Ribet">
+<meta property="og:description" content="Catat keuanganmu dengan chat. Tanpa form ribet. AI langsung paham dan analisis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zaku.abysoft.my.id">
+<meta property="og:image" content="https://zaku.abysoft.my.id/og-image.png">
+<meta property="og:site_name" content="ZAKU">
+<meta property="og:locale" content="id_ID">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ZAKU — Catat Duit, Gak Ribet">
+<meta name="twitter:description" content="Catat keuanganmu dengan chat. Tanpa form ribet. AI langsung paham dan analisis.">
+<meta name="twitter:image" content="https://zaku.abysoft.my.id/og-image.png">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://zaku.abysoft.my.id">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,700&display=swap" rel="stylesheet">
 <style>
