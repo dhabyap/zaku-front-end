@@ -105,4 +105,19 @@ class PageController extends Controller
     {
         return view('dashboard.budgets');
     }
+
+    public function recurring()
+    {
+        return view('dashboard.recurring');
+    }
+
+    public function insights()
+    {
+        return view('dashboard.insights');
+    }
+
+    public function settings()
+    {
+        return view('dashboard.settings');
+    }
 }

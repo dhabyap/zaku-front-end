@@ -23,4 +23,7 @@ Route::middleware(['jwt.session'])->group(function () {
     Route::get('/changelogs', [PageController::class, 'changelogs'])->name('changelogs');
     Route::get('/monthly-recap', [PageController::class, 'monthlyRecap'])->name('monthly-recap');
     Route::get('/budgets', [PageController::class, 'budgets'])->name('budgets');
+    Route::get('/recurring', [PageController::class, 'recurring'])->name('recurring');
+    Route::get('/insights', [PageController::class, 'insights'])->name('insights');
+    Route::get('/settings', [PageController::class, 'settings'])->name('settings');
 });

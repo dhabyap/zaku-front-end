@@ -87,6 +87,11 @@
                 <span>Laporan Bulanan</span>
                 <div class="menu-arr">→</div>
             </div>
+            <div class="menu-row danger" @click="deleteAccount()">
+                <div class="menu-ico">🗑️</div>
+                <span>Hapus Akun</span>
+                <div class="menu-arr">→</div>
+            </div>
             <div class="menu-row danger" @click="logout()">
                 <div class="menu-ico">↩</div>
                 <span>Keluar</span>

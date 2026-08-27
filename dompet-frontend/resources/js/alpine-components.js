@@ -731,6 +731,23 @@ export default function (Alpine) {
                 window.auth.clearUser();
                 window.location.href = '/login';
             }
+        },
+        async deleteAccount() {
+            const ok = await window.utils.confirmDialog({
+                title: 'Hapus Akun?',
+                message: 'Semua data kamu (transaksi, budget, kategori) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.',
+                okLabel: 'YA, HAPUS AKUN',
+                danger: true,
+            });
+            if (!ok) return;
+            try {
+                await window.apiClient.delete('/v1/user/account');
+                window.auth.clearToken();
+                window.auth.clearUser();
+                window.location.href = '/';
+            } catch (e) {
+                window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menghapus akun'));
+            }
         }
     }));
 
@@ -1122,6 +1139,207 @@ export default function (Alpine) {
                 window.utils.showToast('error', msg, true);
             } finally {
                 this.deleting = false;
+            }
+        },
+    }));
+
+    // ── Recurring Transactions Page ──
+    Alpine.data('recurringPage', () => ({
+        items: [],
+        categories: [],
+        loading: true,
+        saving: false,
+        editMode: false,
+        editId: null,
+        form: { type: 'expense', description: '', amount_cents: 0, category_id: '', frequency: 'monthly', interval_value: 1, start_date: '', end_date: '' },
+        async init() {
+            this.form.start_date = new Date().toISOString().slice(0, 10);
+            await Promise.all([this.fetchItems(), this.fetchCategories()]);
+        },
+        formatNumber(n) { if (n === undefined || n === null) return '0'; return Number(n).toLocaleString('id-ID'); },
+        formatDate(d) { if (!d) return '—'; const dt = new Date(d); return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); },
+        getEmoji(cat) {
+            const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮' };
+            return map[(cat || '').toUpperCase()] || '📄';
+        },
+        frequencyLabel(r) {
+            const freq = { daily: 'Harian', weekly: 'Mingguan', monthly: 'Bulanan', yearly: 'Tahunan' };
+            const base = freq[r.frequency] || r.frequency;
+            return (r.interval_value > 1 ? 'Setiap ' + r.interval_value + ' ' + base.toLowerCase() : base);
+        },
+        async fetchItems() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/recurring-transactions');
+                const data = res.data.data;
+                this.items = Array.isArray(data) ? data : (data.data || []);
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat transaksi berulang');
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchCategories() {
+            try {
+                const res = await window.apiClient.get('/v1/categories');
+                this.categories = res.data.data || [];
+            } catch { /* ignore */ }
+        },
+        openForm(r = null) {
+            if (r) {
+                this.editMode = true;
+                this.editId = r.id;
+                this.form = {
+                    type: r.type || 'expense',
+                    description: r.description || '',
+                    amount_cents: r.amount_cents || 0,
+                    category_id: r.category?.id || '',
+                    frequency: r.frequency || 'monthly',
+                    interval_value: r.interval_value || 1,
+                    start_date: r.start_date || new Date().toISOString().slice(0, 10),
+                    end_date: r.end_date || '',
+                };
+            } else {
+                this.editMode = false;
+                this.editId = null;
+                this.form = { type: 'expense', description: '', amount_cents: 0, category_id: '', frequency: 'monthly', interval_value: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+            }
+            document.getElementById('m-recurring-form')?.classList.add('open');
+        },
+        closeForm() {
+            document.getElementById('m-recurring-form')?.classList.remove('open');
+            this.editMode = false;
+            this.editId = null;
+        },
+        bgClose(e, id) { if (e.target === e.currentTarget) { document.getElementById(id)?.classList.remove('open'); } },
+        async saveRecurring() {
+            if (!this.form.description) { window.utils.showToast('error', 'Deskripsi wajib diisi'); return; }
+            if (!this.form.amount_cents || this.form.amount_cents <= 0) { window.utils.showToast('error', 'Nominal harus lebih dari 0'); return; }
+            if (!this.form.start_date) { window.utils.showToast('error', 'Tanggal mulai wajib diisi'); return; }
+            this.saving = true;
+            try {
+                const payload = { ...this.form };
+                if (!payload.category_id) delete payload.category_id;
+                if (!payload.end_date) delete payload.end_date;
+                if (this.editMode) {
+                    await window.apiClient.put('/v1/recurring-transactions/' + this.editId, payload);
+                    window.utils.showToast('success', 'Transaksi berulang diperbarui');
+                } else {
+                    await window.apiClient.post('/v1/recurring-transactions', payload);
+                    window.utils.showToast('success', 'Transaksi berulang ditambahkan');
+                }
+                this.closeForm();
+                await this.fetchItems();
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menyimpan transaksi berulang');
+                window.utils.showToast('error', msg, true);
+            } finally {
+                this.saving = false;
+            }
+        },
+        async toggleStatus(r) {
+            const newStatus = r.status === 'active' ? 'paused' : 'active';
+            try {
+                await window.apiClient.put('/v1/recurring-transactions/' + r.id, { status: newStatus });
+                r.status = newStatus;
+                window.utils.showToast('success', newStatus === 'active' ? 'Transaksi diaktifkan' : 'Transaksi dijeda');
+            } catch (e) {
+                window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal mengubah status'));
+            }
+        },
+        async confirmDelete(r) {
+            const ok = await window.utils.confirmDialog({
+                title: 'Hapus Transaksi Berulang?',
+                message: '"' + (r.description || 'Tanpa deskripsi') + '" akan dihapus permanen.',
+                okLabel: 'YA, HAPUS',
+                danger: true,
+            });
+            if (!ok) return;
+            try {
+                await window.apiClient.delete('/v1/recurring-transactions/' + r.id);
+                this.items = this.items.filter(i => i.id !== r.id);
+                window.utils.showToast('success', 'Transaksi berulang dihapus');
+            } catch (e) {
+                window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menghapus'));
+            }
+        },
+    }));
+
+    // ── Insights Page ──
+    Alpine.data('insightsPage', () => ({
+        insights: [],
+        loading: true,
+        async init() { await this.fetchInsights(); },
+        async fetchInsights() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/insights');
+                const data = res.data.data;
+                this.insights = Array.isArray(data) ? data : [];
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat insights');
+            } finally {
+                this.loading = false;
+            }
+        },
+        refresh() { this.fetchInsights(); },
+        iconFor(ins) {
+            const map = { budget_risk: '⚠️', largest_expense: '💸', largest_category: '📊', danger: '⚠️', warning: '⚡', info: '💡' };
+            return map[ins.type] || map[ins.severity] || '💡';
+        },
+        badgeFor(sev) {
+            const map = { danger: 'RISIKO', warning: 'WASPADA', info: 'INFO' };
+            return map[sev] || 'INFO';
+        },
+    }));
+
+    // ── Settings Page ──
+    Alpine.data('settingsPage', () => ({
+        form: {
+            monthly_budget: 0,
+            currency: 'IDR',
+            budget_alerts: true,
+            email_notifications: true,
+        },
+        loading: true,
+        saving: false,
+        async init() { await this.fetchSettings(); },
+        async fetchSettings() {
+            this.loading = true;
+            try {
+                const res = await window.apiClient.get('/v1/user/profile');
+                const data = res.data.data || {};
+                this.form.monthly_budget = Number(data.budget?.monthly_budget || data.monthly_budget || 0);
+                // Persist currency & notification prefs from localStorage (backend belum punya kolom khusus)
+                try {
+                    const prefs = JSON.parse(localStorage.getItem('zaku_settings') || '{}');
+                    this.form.currency = prefs.currency || 'IDR';
+                    this.form.budget_alerts = prefs.budget_alerts !== undefined ? prefs.budget_alerts : true;
+                    this.form.email_notifications = prefs.email_notifications !== undefined ? prefs.email_notifications : true;
+                } catch { /* ignore */ }
+            } catch (e) {
+                window.utils.showToast('error', 'Gagal memuat pengaturan');
+            } finally {
+                this.loading = false;
+            }
+        },
+        async save() {
+            this.saving = true;
+            try {
+                // Simpan budget ke backend
+                await window.apiClient.put('/v1/user/budget', { monthly_budget: this.form.monthly_budget });
+                // Simpan currency & notif prefs ke localStorage (backend belum punya kolom khusus)
+                localStorage.setItem('zaku_settings', JSON.stringify({
+                    currency: this.form.currency,
+                    budget_alerts: this.form.budget_alerts,
+                    email_notifications: this.form.email_notifications,
+                }));
+                window.utils.showToast('success', 'Pengaturan berhasil disimpan');
+            } catch (e) {
+                const msg = window.utils.parseApiError(e, 'Gagal menyimpan pengaturan');
+                window.utils.showToast('error', msg);
+            } finally {
+                this.saving = false;
             }
         },
     }));
