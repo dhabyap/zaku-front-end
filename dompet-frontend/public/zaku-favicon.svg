@@ -15,17 +15,28 @@
   <!-- orange accent blok kanan bawah -->
   <rect x="42" y="51" width="14" height="5" fill="#FF4800"/>
 
-  <!-- huruf Z bold -->
+  <!-- Sayap kiri (3 garis terpisah, miring ke atas) -->
+  <line x1="8" y1="38" x2="21" y2="28" stroke="#FFD600" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="10" y1="33" x2="22" y2="25" stroke="#FFD600" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="29" x2="23" y2="23" stroke="#FFD600" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Sayap kanan (3 garis terpisah, miring ke atas) -->
+  <line x1="56" y1="38" x2="43" y2="28" stroke="#FFD600" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="54" y1="33" x2="42" y2="25" stroke="#FFD600" stroke-width="2" stroke-linecap="round"/>
+  <line x1="51" y1="29" x2="41" y2="23" stroke="#FFD600" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Uang kertas (tengah) -->
+  <rect x="20" y="27" width="24" height="14" rx="2" fill="#FF4800"/>
+
+  <!-- Symbol $ di uang -->
   <text
-    x="28"
-    y="45"
+    x="32" y="38"
     font-family="Arial Black, sans-serif"
-    font-size="38"
+    font-size="13"
     font-weight="900"
     fill="#FFD600"
     text-anchor="middle"
-    letter-spacing="-2"
-  >Z</text>
+  >$</text>
 
   <!-- titik oranye pojok kanan atas -->
   <rect x="48" y="6" width="6" height="6" fill="#FF4800"/>
