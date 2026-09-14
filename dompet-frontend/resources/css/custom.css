@@ -1946,3 +1946,51 @@
   transition: transform .15s;
 }
 .settings-toggle.on .settings-toggle-knob { transform: translateX(22px); }
+
+/* =====================================================
+   CALENDAR PAGE
+===================================================== */
+.cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid transparent;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    position: relative;
+    transition: all .15s;
+    border-radius: 0;
+}
+
+.cal-cell:not(.cal-cell-empty):hover {
+    background: var(--cream);
+    border-color: rgba(17,16,16,.2);
+}
+
+.cal-cell-empty {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cal-cell-today {
+    border-color: var(--punch) !important;
+    background: rgba(255, 77, 0, .06);
+}
+
+.cal-cell-selected {
+    border-color: var(--ink) !important;
+    background: var(--cream);
+    box-shadow: var(--bs);
+}
+
+.cal-cell-has-tx {
+    background: rgba(17, 16, 16, .03);
+}
+
+@media (max-width: 380px) {
+    .cal-cell {
+        font-size: 11px;
+    }
+}

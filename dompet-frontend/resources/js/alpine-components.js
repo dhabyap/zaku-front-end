@@ -1344,6 +1344,202 @@ export default function (Alpine) {
         },
     }));
 
+    // ── Dashboard: Calendar View ──
+    Alpine.data('calendarPage', () => ({
+        currentYear: new Date().getFullYear(),
+        currentMonth: new Date().getMonth(),
+        transactions: [],
+        loading: true,
+        selectedDate: null,
+        selectedTransactions: [],
+        daySummary: {},
+
+        init() {
+            this.fetchTransactions();
+        },
+
+        formatNumber(n) {
+            if (n === undefined || n === null) return '0';
+            return Number(n).toLocaleString('id-ID');
+        },
+
+        getMonthName(month) {
+            const months = [
+                'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+                'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+            ];
+            return months[month];
+        },
+
+        getDayName(dayIndex) {
+            const days = ['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+            return days[dayIndex];
+        },
+
+        getDaysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
+        },
+
+        getFirstDayOfMonth(year, month) {
+            return new Date(year, month, 1).getDay();
+        },
+
+        generateCalendarDays() {
+            const daysInMonth = this.getDaysInMonth(this.currentYear, this.currentMonth);
+            const firstDay = this.getFirstDayOfMonth(this.currentYear, this.currentMonth);
+            const days = [];
+
+            for (let i = 0; i < firstDay; i++) {
+                days.push({ day: null, dateKey: null });
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateKey = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                days.push({ day: d, dateKey: dateKey });
+            }
+
+            return days;
+        },
+
+        formatDate(dateKey) {
+            if (!dateKey) return '';
+            const [y, m, d] = dateKey.split('-');
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            return `${d} ${monthNames[parseInt(m) - 1]} ${y}`;
+        },
+
+        async fetchTransactions() {
+            this.loading = true;
+            try {
+                const startDate = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-01`;
+                const lastDay = this.getDaysInMonth(this.currentYear, this.currentMonth);
+                const endDate = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+                const res = await window.apiClient.get('/v1/transactions', {
+                    params: {
+                        date_from: startDate,
+                        date_to: endDate,
+                        limit: 500,
+                    }
+                });
+
+                const payload = res.data.data || {};
+                const groups = Array.isArray(payload) ? payload : (payload.groups || []);
+
+                let allTx = [];
+                groups.forEach(group => {
+                    if (Array.isArray(group.transactions)) {
+                        allTx = allTx.concat(group.transactions);
+                    }
+                });
+
+                this.transactions = allTx;
+                this.calculateDaySummary();
+            } catch (e) {
+                console.error('Fetch transactions error:', e);
+                window.utils.showToast('error', 'Gagal memuat data transaksi.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        calculateDaySummary() {
+            const summary = {};
+            this.transactions.forEach(tx => {
+                const date = tx.transaction_date || tx.date || tx.created_at;
+                if (!date) return;
+                const dateKey = date.substring(0, 10);
+
+                if (!summary[dateKey]) {
+                    summary[dateKey] = { income: 0, expense: 0, count: 0 };
+                }
+                summary[dateKey].count++;
+
+                if (tx.type === 'income') {
+                    summary[dateKey].income += Number(tx.amount) || 0;
+                } else if (tx.type === 'expense') {
+                    summary[dateKey].expense += Number(tx.amount) || 0;
+                }
+            });
+            this.daySummary = summary;
+        },
+
+        prevMonth() {
+            if (this.currentMonth === 0) {
+                this.currentMonth = 11;
+                this.currentYear--;
+            } else {
+                this.currentMonth--;
+            }
+            this.selectedDate = null;
+            this.selectedTransactions = [];
+            this.fetchTransactions();
+        },
+
+        nextMonth() {
+            if (this.currentMonth === 11) {
+                this.currentMonth = 0;
+                this.currentYear++;
+            } else {
+                this.currentMonth++;
+            }
+            this.selectedDate = null;
+            this.selectedTransactions = [];
+            this.fetchTransactions();
+        },
+
+        goToToday() {
+            this.currentYear = new Date().getFullYear();
+            this.currentMonth = new Date().getMonth();
+            this.selectedDate = null;
+            this.selectedTransactions = [];
+            this.fetchTransactions();
+        },
+
+        selectDate(dateKey) {
+            if (!dateKey) return;
+            this.selectedDate = dateKey;
+
+            this.selectedTransactions = this.transactions.filter(tx => {
+                const date = tx.transaction_date || tx.date || tx.created_at;
+                if (!date) return false;
+                return date.substring(0, 10) === dateKey;
+            });
+        },
+
+        closeDetail() {
+            this.selectedDate = null;
+            this.selectedTransactions = [];
+        },
+
+        isToday(dateKey) {
+            if (!dateKey) return false;
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            return dateKey === todayKey;
+        },
+
+        getEmoji(cat) {
+            const map = {
+                'MAKANAN': '🍜', 'FOOD': '🍜',
+                'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗',
+                'TAGIHAN': '⚡', 'BILLS': '⚡',
+                'BELANJA': '🛍️', 'SHOPPING': '🛍️',
+                'GAJI': '💰', 'SALARY': '💰',
+                'FREELANCE': '💻',
+                'KESEHATAN': '💊', 'HEALTH': '💊',
+                'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮',
+            };
+            return map[cat?.toUpperCase()] || '📄';
+        },
+
+        txCount(dateKey) {
+            const s = this.daySummary[dateKey];
+            if (!s || s.count === 0) return '';
+            return s.count + ' tx';
+        },
+    }));
+
 }
 
 // changelogPage registered via Alpine.data() above
