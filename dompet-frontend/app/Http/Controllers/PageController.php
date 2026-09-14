@@ -120,4 +120,9 @@ class PageController extends Controller
     {
         return view('dashboard.settings');
     }
+
+    public function calendar()
+    {
+        return view('dashboard.calendar');
+    }
 }
