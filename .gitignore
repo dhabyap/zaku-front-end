@@ -1,0 +1,18 @@
+# Junk / OS (root only — jangan abaikan file di dompet-frontend/)
+ /*.stackdump
+/e.message)
+Thumbs.db
+.DS_Store
+
+# Legacy static prototypes di root (app Blade ada di dompet-frontend/resources/views/)
+ /*.html
+
+# Legacy helper scripts di root (app pakai dompet-frontend/package.json)
+ /create-issues.ps1
+ /tasks.json
+ /package-lock.json
+
+# Laravel (root wrapper — app real di dompet-frontend/)
+vendor/
+node_modules/
+.env
