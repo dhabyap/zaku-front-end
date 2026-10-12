@@ -98,8 +98,10 @@ git --version
 
 ```bash
 git clone https://github.com/dhabyap/zaku-front-end.git
-cd zaku-front-end
+cd zaku-front-end/dompet-frontend
 ```
+
+> Struktur repo: app Laravel real ada di `dompet-frontend/`. Root hanya berisi `PRD-Frontend.md`, `TASKS.md`, `README.md`.
 
 ### 2. Install Dependencies
 
