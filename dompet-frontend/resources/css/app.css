@@ -380,6 +380,23 @@ html, body {
 
 .nav-item.chat-fab-btn span { color: var(--ink); margin-top: 5px; }
 
+/* ===== Bottom nav muat di layar sempit (Bug: INPUT terpotong) ===== */
+@media (max-width: 400px) {
+  .bottom-nav {
+    padding: 0 4px;                 /* dari 0 8px */
+  }
+  .nav-item {
+    padding: 8px 6px;               /* dari 8px 18px — hemat 24px per item */
+  }
+  .nav-item span {
+    font-size: 8px;                 /* label lebih kecil supaya muat */
+    letter-spacing: 0.5px;
+  }
+  .nav-item.chat-fab-btn {
+    padding: 8px 4px;               /* lingkaran 56px jangan didorong keluar */
+  }
+}
+
 /* ===== DASHBOARD ===== */
 .dash-header {
   background: var(--ink);
