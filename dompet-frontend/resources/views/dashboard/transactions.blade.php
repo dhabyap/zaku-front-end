@@ -69,7 +69,7 @@
                                 </div>
                             </div>
                             <div class="tx-right">
-                                <div class="tx-amount" x-text="(trx.type=='income'?'+':'−') + formatNumber(trx.amount)"></div>
+                                <div class="tx-amount" x-text="(trx.type=='income'?'+':'−') + 'Rp ' + formatNumber(trx.amount)"></div>
                                 <template x-if="trx.tag"><span class="tx-tag" :class="trx.tag" x-text="trx.tag.toUpperCase()"></span></template>
                             </div>
                         </div>
@@ -115,10 +115,10 @@
           <div class="drawer-name" x-text="activeTrx?.description"></div>
           <div class="drawer-cat" x-text="(activeTrx?.category_name||'').toUpperCase() + ' · ' + (activeTrx?.type||'').toUpperCase()"></div>
         </div>
-        <div class="drawer-amt" x-text="(activeTrx?.type=='income'?'+':'−') + formatNumber(activeTrx?.amount||0)"></div>
+        <div class="drawer-amt" x-text="(activeTrx?.type=='income'?'+':'−') + 'Rp ' + formatNumber(activeTrx?.amount||0)"></div>
       </div>
       <div class="drawer-rows">
-        <div class="drow"><div class="drow-k">NOMINAL</div><div class="drow-v" x-text="(activeTrx?.type=='income'?'+':'−') + formatNumber(activeTrx?.amount||0)"></div></div>
+        <div class="drow"><div class="drow-k">NOMINAL</div><div class="drow-v" x-text="(activeTrx?.type=='income'?'+':'−') + 'Rp ' + formatNumber(activeTrx?.amount||0)"></div></div>
         <div class="drow"><div class="drow-k">TANGGAL</div><div class="drow-v" x-text="transactionDay(activeTrx)"></div></div>
       </div>
       <div class="drawer-ai">
