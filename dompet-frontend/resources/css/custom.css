@@ -773,6 +773,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   padding: 9px 16px;
   background: var(--cream);
   border-bottom: 2px solid var(--ink);
@@ -787,6 +788,8 @@
   display: flex;
   align-items: center;
   gap: 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .sort-num {
@@ -803,6 +806,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  margin-left: auto;
 }
 
 .sort-label {
@@ -878,7 +882,7 @@
 .tx-body::-webkit-scrollbar-thumb { background: var(--gray-l); }
 
 /* ── Tx Rows Container ── */
-.tx-rows { display: flex; flex-direction: column; padding-top: 10px; }
+.tx-rows { display: flex; flex-direction: column; padding-top: 10px; padding-bottom: 100px; }
 
 /* ── Tx Row ── */
 .tx-row {
