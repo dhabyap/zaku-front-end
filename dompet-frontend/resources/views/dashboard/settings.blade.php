@@ -38,29 +38,25 @@
                 </div>
             </div>
 
-            {{-- Notifications --}}
+            {{-- Notification availability --}}
             <div class="settings-section">
                 <div class="settings-section-title">NOTIFIKASI</div>
-                <div class="settings-section-desc">Kontrol notifikasi dari Zaku.</div>
+                <div class="settings-section-desc">Status fitur notifikasi yang tersedia di akun kamu.</div>
 
                 <div class="settings-toggle-row" style="margin-top:12px;">
                     <div style="flex:1;">
                         <div style="font-size:14px;font-weight:700;color:var(--ink);">Notifikasi Budget</div>
-                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Peringatan saat budget mendekati batas.</div>
+                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Peringatan muncul di inbox saat penggunaan budget mencapai ambang. Pengaturan aktif/nonaktif belum tersedia.</div>
                     </div>
-                    <button class="settings-toggle" :class="{ on: form.budget_alerts }" @click="form.budget_alerts = !form.budget_alerts">
-                        <div class="settings-toggle-knob"></div>
-                    </button>
+                    <span class="settings-feature-status">OTOMATIS</span>
                 </div>
 
                 <div class="settings-toggle-row">
                     <div style="flex:1;">
                         <div style="font-size:14px;font-weight:700;color:var(--ink);">Notifikasi Email</div>
-                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Kirim ringkasan lewat email.</div>
+                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Ringkasan dan peringatan melalui email belum tersedia.</div>
                     </div>
-                    <button class="settings-toggle" :class="{ on: form.email_notifications }" @click="form.email_notifications = !form.email_notifications">
-                        <div class="settings-toggle-knob"></div>
-                    </button>
+                    <span class="settings-feature-status unavailable">BELUM TERSEDIA</span>
                 </div>
             </div>
 
