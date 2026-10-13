@@ -40,8 +40,9 @@
     <div class="shell" id="app-shell">
         @include('components.toast-notification')
         @include('components.confirm-modal')
+        @include('components.desktop-navigation')
 
-        <div style="flex:1;overflow:hidden;position:relative;">
+        <div class="app-content" id="app-content">
             @yield('content')
         </div>
 
