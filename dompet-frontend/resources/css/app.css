@@ -39,6 +39,17 @@ html, body {
   flex-direction: column;
 }
 
+.app-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.desktop-navigation { display: none; }
+
+.desktop-nav-brand { display: none; }
+
 .screen {
   position: absolute;
   inset: 0;
@@ -416,7 +427,8 @@ html, body {
 
 .notification-bell:focus-visible,
 .notification-close:focus-visible,
-.notification-panel button:focus-visible {
+.notification-panel button:focus-visible,
+.desktop-navigation a:focus-visible {
   outline: 2px solid var(--punch-2);
   outline-offset: 2px;
 }
@@ -593,6 +605,93 @@ html, body {
 
 .notification-mark-read { cursor: pointer; }
 .notification-read-label { opacity: .6; }
+
+@media (min-width: 1024px) {
+  #app-shell.shell {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    flex-direction: row;
+  }
+
+  .desktop-navigation {
+    width: 248px;
+    height: 100%;
+    flex: 0 0 248px;
+    display: block;
+    overflow-y: auto;
+    padding: 24px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border-right: 3px solid var(--punch);
+  }
+
+  .desktop-nav-brand {
+    display: inline-block;
+    margin: 0 10px 26px;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    text-decoration: none;
+  }
+
+  .desktop-nav-brand span { color: var(--punch); }
+
+  .desktop-navigation nav { display: flex; flex-direction: column; gap: 24px; }
+
+  .desktop-nav-group { display: flex; flex-direction: column; gap: 4px; }
+
+  .desktop-nav-group h2 {
+    padding: 0 10px 7px;
+    color: rgba(245,240,232,.4);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+  }
+
+  .desktop-nav-link {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-left: 3px solid transparent;
+    color: rgba(245,240,232,.72);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-decoration: none;
+    transition: background .12s, color .12s;
+  }
+
+  .desktop-nav-link:hover {
+    background: rgba(245,240,232,.08);
+    color: var(--paper);
+  }
+
+  .desktop-nav-link.active {
+    border-left-color: var(--punch-2);
+    background: rgba(255,214,0,.1);
+    color: var(--punch-2);
+  }
+
+  #app-content {
+    height: 100%;
+  }
+
+  #app-content > div { height: 100%; }
+
+  #app-content > .shell,
+  #app-content > div > .shell {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+  }
+
+  #bottom-nav { display: none; }
+}
 
 /* ===== DASHBOARD ===== */
 .dash-header {
