@@ -325,19 +325,21 @@ html, body {
   height: 72px;
   background: var(--paper);
   border-top: var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
   z-index: 50;
-  padding: 0 8px;
+  padding: 0 4px;
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 8px 18px;
+  min-width: 0;
+  padding: 8px 2px 10px;
   background: none;
   border: none;
   cursor: pointer;
@@ -358,7 +360,7 @@ html, body {
 .nav-item.active::after {
   content: '';
   position: absolute;
-  top: 0; left: 12px; right: 12px;
+  top: 0; left: 18%; right: 18%;
   height: 3px;
   background: var(--punch);
 }
@@ -367,10 +369,11 @@ html, body {
   color: var(--paper) !important;
   position: relative;
   top: -10px;
+  padding-bottom: 2px;
 }
 
 .chat-fab-inner {
-  width: 56px; height: 56px;
+  width: 52px; height: 52px;
   background: var(--ink);
   border: var(--border);
   box-shadow: var(--bs-lg);
@@ -378,7 +381,46 @@ html, body {
   color: var(--punch-2);
 }
 
-.nav-item.chat-fab-btn span { color: var(--ink); margin-top: 5px; }
+.nav-item.chat-fab-btn span {
+  color: var(--ink);
+  margin-top: 5px;
+  white-space: nowrap;
+}
+
+.nav-item span {
+  display: block;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* ===== Bottom nav muat di layar sempit (Bug: INPUT terpotong) ===== */
+@media (max-width: 420px) {
+  .bottom-nav {
+    height: 76px;
+    padding: 0 2px 0;
+  }
+
+  .nav-item {
+    gap: 3px;
+    padding: 8px 2px 8px;
+  }
+
+  .nav-item span {
+    font-size: clamp(6px, 1.9vw, 8px);
+    letter-spacing: 0.4px;
+  }
+
+  .nav-item.chat-fab-btn {
+    top: -8px;
+    padding: 8px 2px 4px;
+  }
+
+  .chat-fab-inner {
+    width: 48px;
+    height: 48px;
+  }
+}
 
 /* ===== Bottom nav muat di layar sempit (Bug: INPUT terpotong) ===== */
 @media (max-width: 400px) {
