@@ -9,8 +9,8 @@
                     <div class="dh-name" x-text="user?.name || 'Teman'"></div>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <button @click="showAmount = !showAmount; localStorage.setItem('zaku_hide_amount', showAmount)" style="background:none;border:none;cursor:pointer;font-size:20px;">
-                        <span x-text="showAmount ? '👁️' : '🙈'"></span>
+                    <button type="button" :aria-label="showAmount ? 'Sembunyikan nominal saldo' : 'Tampilkan nominal saldo'" :aria-pressed="(!showAmount).toString()" @click="showAmount = !showAmount; localStorage.setItem('zaku_hide_amount', showAmount)" style="background:none;border:none;cursor:pointer;font-size:20px;">
+                        <span aria-hidden="true" x-text="showAmount ? '👁️' : '🙈'"></span>
                     </button>
                     <div class="notification-inbox" x-data="notificationInbox()">
                         <button type="button" class="notification-bell" aria-label="Notifikasi" :aria-label="unreadCount ? 'Notifikasi, ' + unreadCount + ' belum dibaca' : 'Notifikasi'" :aria-expanded="isOpen.toString()" aria-controls="notification-panel" @click="togglePanel()">
@@ -19,7 +19,7 @@
                         </button>
                         <template x-teleport="body">
                             <div class="notification-panel-backdrop" x-cloak x-show="isOpen" x-transition.opacity @click.self="closePanel()" @keydown.escape.window="closePanel()">
-                                <section class="notification-panel" id="notification-panel" role="dialog" aria-modal="true" aria-labelledby="notification-panel-title" @click.stop>
+                                <section class="notification-panel" id="notification-panel" role="dialog" aria-modal="true" aria-labelledby="notification-panel-title" @click.stop @keydown.tab="trapFocus($event)">
                                     <div class="notification-panel-header">
                                         <div>
                                             <h2 id="notification-panel-title">Notifikasi</h2>
