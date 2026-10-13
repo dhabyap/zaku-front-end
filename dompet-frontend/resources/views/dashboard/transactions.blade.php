@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="transactionList()" class="shell">
+<div x-data="transactionList()" class="shell" @keydown.escape.window="if (detailOpen) closeDetail()">
   <div class="hist-header">
     <div class="hist-top">
       <div>
@@ -58,7 +58,7 @@
                         <div class="month-total" x-text="'−Rp ' + formatNumber(group.reduce((s,t) => s + (t.type=='expense' ? t.amount : 0), 0))"></div>
                     </div>
                     <template x-for="trx in group" :key="trx.id">
-                        <div class="tx-row" :class="trx.type" @click="window.location.href = '/transactions/' + trx.id">
+                        <div class="tx-row" :class="trx.type" @click="openDetail(trx, $event.currentTarget)" @keydown.enter.prevent="openDetail(trx, $event.currentTarget)" @keydown.space.prevent="openDetail(trx, $event.currentTarget)" role="button" tabindex="0" :aria-label="'Lihat detail transaksi ' + trx.description" :aria-haspopup="'dialog'" :aria-expanded="detailOpen && detailTarget?.id === trx.id">
                             <div class="tx-ico"><span x-text="getEmoji(trx.category_name)"></span><div class="tx-ico-dot"></div></div>
                             <div class="tx-info">
                                 <div class="tx-name" x-text="trx.description"></div>
@@ -106,30 +106,61 @@
     </div>
   </div>
 
-  <div class="drawer-bg" id="drawer-bg" @click="closeDrw()" style="display:none;">
-    <div class="drawer">
-      <div class="drawer-handle"></div>
-      <div class="drawer-head" :class="activeTrx?.type" id="drawer-head">
-        <div class="drawer-ico" x-text="activeTrx?.category_icon || '📌'"></div>
-        <div>
-          <div class="drawer-name" x-text="activeTrx?.description"></div>
-          <div class="drawer-cat" x-text="(activeTrx?.category_name||'').toUpperCase() + ' · ' + (activeTrx?.type||'').toUpperCase()"></div>
+  <template x-teleport="body">
+    <div class="drawer-bg" id="drawer-bg" x-show="detailOpen" :class="{ 'open': detailOpen }" x-transition.opacity @click.self="closeDetail()" role="presentation">
+      <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="transaction-detail-title" @click.stop>
+        <div class="drawer-handle" aria-hidden="true"></div>
+        <div class="drawer-head" :class="activeTrx?.type">
+          <div class="drawer-ico" x-text="activeTrx?.category_icon || getEmoji(activeTrx?.category_name)"></div>
+          <div class="drawer-heading">
+            <h2 class="drawer-name" id="transaction-detail-title" x-text="activeTrx?.description || (detailLoading ? 'Memuat detail transaksi…' : 'Detail transaksi')"></h2>
+            <div class="drawer-cat" x-show="activeTrx" x-text="((activeTrx?.category_name || activeTrx?.category || 'UMUM').toUpperCase()) + ' · ' + ((activeTrx?.type || '').toUpperCase())"></div>
+          </div>
+          <button class="drawer-close-icon" id="transaction-detail-close" type="button" aria-label="Tutup detail transaksi" @click="closeDetail()">×</button>
         </div>
-        <div class="drawer-amt" x-text="(activeTrx?.type=='income'?'+':'−') + 'Rp ' + formatNumber(activeTrx?.amount||0)"></div>
-      </div>
-      <div class="drawer-rows">
-        <div class="drow"><div class="drow-k">NOMINAL</div><div class="drow-v" x-text="(activeTrx?.type=='income'?'+':'−') + 'Rp ' + formatNumber(activeTrx?.amount||0)"></div></div>
-        <div class="drow"><div class="drow-k">TANGGAL</div><div class="drow-v" x-text="transactionDay(activeTrx)"></div></div>
-      </div>
-      <div class="drawer-ai">
-        <div class="dai-badge">AI</div>
-        <div class="dai-text" x-text="getAiHint(activeTrx?.category_name)"></div>
-      </div>
-      <div class="drawer-actions">
-        <button class="d-btn" @click="showToast('Edit segera hadir!')">✎ EDIT</button>
-        <button class="d-btn danger" @click="closeDrw()">✕ TUTUP</button>
-      </div>
+
+        <div class="drawer-content" aria-live="polite">
+          <div class="drawer-loading" x-show="detailLoading" role="status">Memuat detail transaksi…</div>
+          <div class="drawer-error" x-show="!detailLoading && detailError" role="alert">
+            <p x-text="detailError"></p>
+            <button class="d-btn" type="button" @click="retryDetail()">Coba lagi</button>
+          </div>
+          <template x-if="!detailLoading && activeTrx">
+            <div class="drawer-details">
+              <div class="drawer-amount-card" :class="activeTrx.type">
+                <div class="drow-k">NOMINAL TRANSAKSI</div>
+                <div class="drawer-amt" x-text="(activeTrx.type === 'income' ? '+' : '−') + 'Rp ' + formatNumber(activeTrx.amount)"></div>
+              </div>
+              <div class="drawer-rows">
+                <div class="drow">
+                  <div class="drow-k">KATEGORI</div>
+                  <div class="drow-v" x-text="(activeTrx.category_icon || '') + ' ' + (activeTrx.category_name || activeTrx.category || 'UMUM')"></div>
+                </div>
+                <div class="drow">
+                  <div class="drow-k">TIPE</div>
+                  <div class="drow-v" x-text="activeTrx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'"></div>
+                </div>
+                <div class="drow">
+                  <div class="drow-k">TANGGAL & WAKTU</div>
+                  <div class="drow-v" x-text="formatTransactionDate(activeTrx)"></div>
+                </div>
+                <div class="drow" x-show="activeTrx.source">
+                  <div class="drow-k">SUMBER</div>
+                  <div class="drow-v" x-text="activeTrx.source"></div>
+                </div>
+                <div class="drow drow-note" x-show="activeTrx.note || activeTrx.notes">
+                  <div class="drow-k">CATATAN</div>
+                  <div class="drow-v" x-text="activeTrx.note || activeTrx.notes"></div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+        <div class="drawer-actions">
+          <button class="d-btn danger" type="button" @click="closeDetail()">TUTUP</button>
+        </div>
+      </section>
     </div>
-  </div>
+  </template>
 </div>
 @endsection
