@@ -1284,19 +1284,26 @@
 .d-btn {
   flex: 1;
   background: transparent;
-  border: 1.5px solid var(--yellow);
-  color: var(--yellow);
+  border: 1.5px solid var(--punch-2);
+  color: var(--punch-2);
   padding: 12px 10px;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 1px;
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--yellow);
+  box-shadow: 2px 2px 0 var(--punch-2);
   transition: transform .1s, box-shadow .1s;
 }
 
 .d-btn:active { transform: translate(2px,2px); box-shadow: none; }
+.d-btn.edit-action {
+  background: var(--punch-2);
+  border-color: var(--punch-2);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--paper);
+}
 .d-btn.danger { border-color: var(--punch); color: var(--punch); background: #FFF0E8; }
 
 @media (min-width: 768px) {
