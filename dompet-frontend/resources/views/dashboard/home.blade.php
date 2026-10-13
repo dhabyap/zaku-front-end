@@ -12,6 +12,45 @@
                     <button @click="showAmount = !showAmount; localStorage.setItem('zaku_hide_amount', showAmount)" style="background:none;border:none;cursor:pointer;font-size:20px;">
                         <span x-text="showAmount ? '👁️' : '🙈'"></span>
                     </button>
+                    <div class="notification-inbox" x-data="notificationInbox()">
+                        <button type="button" class="notification-bell" aria-label="Notifikasi" :aria-label="unreadCount ? 'Notifikasi, ' + unreadCount + ' belum dibaca' : 'Notifikasi'" :aria-expanded="isOpen.toString()" aria-controls="notification-panel" @click="togglePanel()">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                            <span class="notification-badge" x-show="unreadCount > 0" x-text="unreadCount > 99 ? '99+' : unreadCount" aria-live="polite"></span>
+                        </button>
+                        <template x-teleport="body">
+                            <div class="notification-panel-backdrop" x-cloak x-show="isOpen" x-transition.opacity @click.self="closePanel()" @keydown.escape.window="closePanel()">
+                                <section class="notification-panel" id="notification-panel" role="dialog" aria-modal="true" aria-labelledby="notification-panel-title" @click.stop>
+                                    <div class="notification-panel-header">
+                                        <div>
+                                            <h2 id="notification-panel-title">Notifikasi</h2>
+                                            <p x-text="unreadCount + ' belum dibaca'"></p>
+                                        </div>
+                                        <button id="notification-panel-close" type="button" class="notification-close" aria-label="Tutup notifikasi" @click="closePanel()">×</button>
+                                    </div>
+                                    <button type="button" class="notification-read-all" x-show="unreadCount > 0" :disabled="markingAll" @click="markAllRead()" x-text="markingAll ? 'MEMPROSES...' : 'TANDAI SEMUA DIBACA'"></button>
+                                    <div class="notification-panel-body" aria-live="polite">
+                                        <div class="notification-state" x-show="loading" role="status">Memuat notifikasi...</div>
+                                        <div class="notification-error" x-show="!loading && error" role="alert">
+                                            <p x-text="error"></p>
+                                            <button type="button" @click="fetchNotifications()">Coba lagi</button>
+                                        </div>
+                                        <div class="notification-state" x-show="!loading && !error && items.length === 0">Belum ada notifikasi.</div>
+                                        <template x-for="item in items" :key="item.id">
+                                            <article class="notification-item" :class="{ unread: !item.is_read }">
+                                                <div class="notification-item-copy">
+                                                    <h3 x-text="item.title || 'Notifikasi'"></h3>
+                                                    <p x-text="item.message || ''"></p>
+                                                    <time x-text="formatNotificationDate(item.created_at)" :datetime="item.created_at"></time>
+                                                </div>
+                                                <button type="button" class="notification-mark-read" x-show="!item.is_read" :disabled="markingId !== null" @click="markRead(item)" :aria-label="'Tandai ' + (item.title || 'notifikasi') + ' sudah dibaca'" x-text="markingId === item.id ? '...' : 'BACA'"></button>
+                                                <span class="notification-read-label" x-show="item.is_read">DIBACA</span>
+                                            </article>
+                                        </template>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+                    </div>
                     <a href="/profile" class="dh-avatar" aria-label="Buka Profil" title="Profil" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
                 </div>
             </div>
