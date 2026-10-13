@@ -12,7 +12,7 @@
                     <button @click="showAmount = !showAmount; localStorage.setItem('zaku_hide_amount', showAmount)" style="background:none;border:none;cursor:pointer;font-size:20px;">
                         <span x-text="showAmount ? '👁️' : '🙈'"></span>
                     </button>
-                    <a href="/profile" class="dh-avatar" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
+                    <a href="/profile" class="dh-avatar" aria-label="Buka Profil" title="Profil" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
                 </div>
             </div>
         </header>
