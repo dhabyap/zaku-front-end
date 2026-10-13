@@ -487,6 +487,13 @@ export default function (Alpine) {
         sortKey: 'date',
         sortAsc: false,
         activeTrx: null,
+        detailTarget: null,
+        detailOpen: false,
+        detailLoading: false,
+        detailError: '',
+        detailRequestId: 0,
+        detailOpener: null,
+        previousBodyOverflow: '',
         totalIncome: 0,
         totalExpense: 0,
         _searchTimer: null,
@@ -496,20 +503,72 @@ export default function (Alpine) {
         },
         formatNumber(n) { if (n === undefined || n === null) return '0'; return Number(n).toLocaleString('id-ID'); },
         rp(n) { return 'Rp ' + this.formatNumber(n); },
-        formatDay(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return ''; return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); },
-        getTransactionDate(trx) { return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null; },
-        transactionDay(trx) { return this.formatDay(this.getTransactionDate(trx)); },
-        getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮' }; return map[cat?.toUpperCase()] || '📄'; },
-        getAiHint(cat) {
-            const hints = {
-                'MAKANAN': 'Pos makanan kamu bulan ini cukup tinggi. Coba masak sendiri untuk hemat lebih banyak.',
-                'TRANSPORTASI': 'Pengeluaran transportasi masih wajar bulan ini.',
-                'BELANJA': 'Hati-hati! Belanja bulan ini naik. Coba terapkan "48-hour rule" sebelum beli.',
-                'TAGIHAN': 'Ini tagihan rutin — ZAKU akan ingatkan kamu otomatis bulan depan.',
-                'GAJI': 'Pemasukan gaji diterima tepat waktu. Mantap!'
-            };
-            return hints[cat?.toUpperCase()] || 'Transaksi ini dicatat otomatis oleh ZAKU AI.';
+        formatTransactionDate(trx) {
+            const value = this.getTransactionDate(trx);
+            if (!value) return 'Tidak tersedia';
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return 'Tidak tersedia';
+            return date.toLocaleString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
         },
+        getTransactionDate(trx) { return trx.transaction_date || trx.date || trx.created_at || trx.updated_at || null; },
+        async openDetail(trx, opener) {
+            this.detailRequestId += 1;
+            const requestId = this.detailRequestId;
+            this.detailTarget = trx;
+            this.activeTrx = null;
+            this.detailError = '';
+            this.detailLoading = true;
+            if (!this.detailOpen) {
+                this.detailOpener = opener || document.activeElement;
+                this.previousBodyOverflow = document.body.style.overflow;
+                document.body.style.overflow = 'hidden';
+            }
+            this.detailOpen = true;
+            this.$nextTick(() => document.getElementById('transaction-detail-close')?.focus());
+
+            try {
+                const res = await window.apiClient.get('/v1/transactions/' + encodeURIComponent(trx.id));
+                if (requestId !== this.detailRequestId) return;
+                const detail = res.data.data;
+                this.activeTrx = {
+                    ...trx,
+                    ...detail,
+                    category_name: detail.category_name || detail.category || trx.category_name,
+                    category_icon: detail.category_icon || trx.category_icon,
+                    transaction_date: detail.transaction_date || trx.transaction_date || trx.date,
+                    date_formatted: detail.date_formatted || trx.date_formatted,
+                };
+            } catch (e) {
+                if (requestId !== this.detailRequestId) return;
+                this.detailError = window.utils.parseApiError(e, 'Gagal memuat detail transaksi. Coba lagi.');
+            } finally {
+                if (requestId === this.detailRequestId) this.detailLoading = false;
+            }
+        },
+        closeDetail() {
+            if (!this.detailOpen) return;
+            this.detailRequestId += 1;
+            this.detailOpen = false;
+            this.activeTrx = null;
+            this.detailTarget = null;
+            this.detailLoading = false;
+            this.detailError = '';
+            document.body.style.overflow = this.previousBodyOverflow;
+            this.$nextTick(() => {
+                if (this.detailOpener?.isConnected) this.detailOpener.focus();
+                this.detailOpener = null;
+            });
+        },
+        retryDetail() {
+            if (this.detailTarget) this.openDetail(this.detailTarget, this.detailOpener);
+        },
+        getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮' }; return map[cat?.toUpperCase()] || '📄'; },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
         async fetchTransactions(page = 1, append = false, isLoadMore = false) {
             if (!isLoadMore) this.loading = true;
@@ -641,9 +700,7 @@ export default function (Alpine) {
                 groups[key].push(t);
             });
             return groups;
-        },
-        // Removed openDrw and closeDrw as they are no longer needed for redirect
-        showToast(msg) { window.utils.showToast('info', msg); }
+        }
     }));
 
     // ── Profile Page ──
