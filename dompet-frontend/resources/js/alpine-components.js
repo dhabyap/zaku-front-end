@@ -1443,8 +1443,6 @@ export default function (Alpine) {
         form: {
             monthly_budget: 0,
             currency: 'IDR',
-            budget_alerts: true,
-            email_notifications: true,
         },
         loading: true,
         saving: false,
@@ -1455,12 +1453,10 @@ export default function (Alpine) {
                 const res = await window.apiClient.get('/v1/user/profile');
                 const data = res.data.data || {};
                 this.form.monthly_budget = Number(data.budget?.monthly_budget || data.monthly_budget || 0);
-                // Persist currency & notification prefs from localStorage (backend belum punya kolom khusus)
+                // Currency is a device-local display preference; notification state is not user-configurable.
                 try {
                     const prefs = JSON.parse(localStorage.getItem('zaku_settings') || '{}');
                     this.form.currency = prefs.currency || 'IDR';
-                    this.form.budget_alerts = prefs.budget_alerts !== undefined ? prefs.budget_alerts : true;
-                    this.form.email_notifications = prefs.email_notifications !== undefined ? prefs.email_notifications : true;
                 } catch { /* ignore */ }
             } catch (e) {
                 window.utils.showToast('error', 'Gagal memuat pengaturan');
@@ -1473,13 +1469,11 @@ export default function (Alpine) {
             try {
                 // Simpan budget ke backend
                 await window.apiClient.put('/v1/user/budget', { monthly_budget: this.form.monthly_budget });
-                // Simpan currency & notif prefs ke localStorage (backend belum punya kolom khusus)
+                // Currency remains a device-local display preference.
                 localStorage.setItem('zaku_settings', JSON.stringify({
                     currency: this.form.currency,
-                    budget_alerts: this.form.budget_alerts,
-                    email_notifications: this.form.email_notifications,
                 }));
-                window.utils.showToast('success', 'Pengaturan berhasil disimpan');
+                window.utils.showToast('success', 'Budget tersimpan di akun dan mata uang di perangkat ini.');
             } catch (e) {
                 const msg = window.utils.parseApiError(e, 'Gagal menyimpan pengaturan');
                 window.utils.showToast('error', msg);
