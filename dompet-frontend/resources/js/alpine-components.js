@@ -1350,6 +1350,94 @@ export default function (Alpine) {
         },
     }));
 
+    Alpine.data('notificationInbox', () => ({
+        isOpen: false,
+        loading: false,
+        markingAll: false,
+        markingId: null,
+        error: '',
+        items: [],
+        unreadCount: 0,
+        returnFocus: null,
+        async init() {
+            await this.fetchNotifications(true);
+        },
+        async fetchNotifications(silent = false) {
+            this.loading = true;
+            this.error = '';
+            try {
+                const response = await window.apiClient.get('/notifications', {
+                    params: { per_page: 10 },
+                });
+                const data = response.data.data || {};
+                this.items = Array.isArray(data.items) ? data.items : [];
+                this.unreadCount = Math.max(0, Number(data.unread_count) || 0);
+            } catch (error) {
+                this.error = window.utils.parseApiError(error, 'Notifikasi gagal dimuat.');
+                if (!silent) window.utils.showToast('error', this.error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async togglePanel() {
+            if (this.isOpen) {
+                this.closePanel();
+                return;
+            }
+            this.returnFocus = document.activeElement;
+            this.isOpen = true;
+            await this.fetchNotifications();
+            this.$nextTick(() => document.getElementById('notification-panel-close')?.focus());
+        },
+        closePanel() {
+            if (!this.isOpen) return;
+            this.isOpen = false;
+            this.$nextTick(() => {
+                if (this.returnFocus?.isConnected) this.returnFocus.focus();
+                this.returnFocus = null;
+            });
+        },
+        formatNotificationDate(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        },
+        async markRead(item) {
+            if (item.is_read || this.markingId !== null) return;
+            this.markingId = item.id;
+            this.error = '';
+            try {
+                await window.apiClient.post('/notifications/' + encodeURIComponent(item.id) + '/read');
+                item.is_read = true;
+                this.unreadCount = Math.max(0, this.unreadCount - 1);
+            } catch (error) {
+                this.error = window.utils.parseApiError(error, 'Notifikasi gagal ditandai sudah dibaca.');
+            } finally {
+                this.markingId = null;
+            }
+        },
+        async markAllRead() {
+            if (this.markingAll || this.unreadCount === 0) return;
+            this.markingAll = true;
+            this.error = '';
+            try {
+                await window.apiClient.post('/notifications/read-all');
+                this.items = this.items.map(item => ({ ...item, is_read: true }));
+                this.unreadCount = 0;
+            } catch (error) {
+                this.error = window.utils.parseApiError(error, 'Notifikasi gagal ditandai sudah dibaca.');
+            } finally {
+                this.markingAll = false;
+            }
+        },
+    }));
+
     // ── Settings Page ──
     Alpine.data('settingsPage', () => ({
         form: {
