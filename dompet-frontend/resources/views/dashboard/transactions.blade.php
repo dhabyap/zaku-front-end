@@ -157,6 +157,7 @@
           </template>
         </div>
         <div class="drawer-actions">
+          <button class="d-btn" type="button" @click="window.location.href = '/transactions/' + encodeURIComponent(activeTrx.id)" :disabled="!activeTrx" aria-label="Buka halaman detail untuk mengedit transaksi">✎ EDIT</button>
           <button class="d-btn danger" type="button" @click="closeDetail()">TUTUP</button>
         </div>
       </section>
