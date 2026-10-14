@@ -14,8 +14,8 @@
 
     <div class="screen-body" style="padding-bottom:100px;">
         {{-- Loading --}}
-        <template x-if="loading">
-            <div style="padding:16px;">
+        <template x-if="loading && !hasLoaded">
+            <div style="padding:16px;" role="status" aria-live="polite" aria-label="Memuat insight">
                 <div class="budget-card-skeleton" style="margin-bottom:12px;" x-repeat="3">
                     <div style="display:flex;gap:10px;align-items:center;">
                         <div style="width:40px;height:40px;border-radius:10px;background:rgba(17,16,16,.08);"></div>
@@ -28,20 +28,26 @@
             </div>
         </template>
 
+        <div class="data-state-refresh" x-show="loading && hasLoaded" role="status" aria-live="polite">Memperbarui insight…</div>
+        <div class="data-state data-state-error" x-show="!loading && error" role="alert" aria-live="assertive">
+            <p x-text="error"></p>
+            <button type="button" @click="refresh()" :disabled="loading">Coba lagi</button>
+        </div>
+
         {{-- Empty state --}}
-        <template x-if="!loading && insights.length === 0">
-            <div class="budget-empty-state">
+        <template x-if="hasLoaded && insights.length === 0 && !error">
+            <div class="budget-empty-state" role="status" aria-live="polite">
                 <div style="font-size:48px;margin-bottom:16px;">💡</div>
                 <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px;">Belum ada insight</div>
                 <div style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(17,16,16,.5);margin-bottom:20px;">Catat transaksi dan atur budget agar Zaku bisa memberi analisis.</div>
-                <button class="btn-budget-add" @click="refresh()">↻ MUAT ULANG</button>
+                <button class="btn-budget-add" type="button" @click="refresh()" :disabled="loading">↻ MUAT ULANG</button>
             </div>
         </template>
 
         {{-- Insights list --}}
-        <template x-if="!loading && insights.length > 0">
+        <template x-if="hasLoaded && insights.length > 0">
             <div style="padding:16px;">
-                <button class="btn-budget-add" @click="refresh()" style="margin-bottom:16px;">↻ MUAT ULANG</button>
+                <button class="btn-budget-add" type="button" @click="refresh()" :disabled="loading" style="margin-bottom:16px;">↻ MUAT ULANG</button>
 
                 <template x-for="(ins, idx) in insights" :key="idx">
                     <div class="insight-card" :class="'sev-' + (ins.severity || 'info')">

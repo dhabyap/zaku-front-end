@@ -475,6 +475,12 @@ export default function (Alpine) {
     Alpine.data('transactionList', () => ({
         transactions: [],
         loading: true,
+        loadingMore: false,
+        hasLoaded: false,
+        error: '',
+        retryPage: 1,
+        retryAppend: false,
+        transactionRequestId: 0,
         filter: 'all',
         categories: [],
         currentPage: 1,
@@ -571,7 +577,16 @@ export default function (Alpine) {
         getEmoji(cat) { const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰', 'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'HIBURAN': '🎮', 'ENTERTAINMENT': '🎮' }; return map[cat?.toUpperCase()] || '📄'; },
         extractCategories() { const set = new Set(); this.transactions.forEach(t => { if (t.category_name) set.add(t.category_name.toUpperCase()); }); this.categories = Array.from(set); },
         async fetchTransactions(page = 1, append = false, isLoadMore = false) {
-            if (!isLoadMore) this.loading = true;
+            if (isLoadMore && this.loadingMore) return;
+            if (isLoadMore) this.loadingMore = true;
+            else {
+                this.loading = true;
+                this.loadingMore = false;
+            }
+            this.error = '';
+            this.retryPage = page;
+            this.retryAppend = append;
+            const requestId = ++this.transactionRequestId;
             try {
                 const params = { limit: 20, page };
                 if (this.searchQuery) params.q = this.searchQuery;
@@ -587,7 +602,11 @@ export default function (Alpine) {
                 params.sort_order = this.sortAsc ? 'asc' : 'desc';
 
                 const res = await window.apiClient.get('/v1/transactions', { params });
+                if (requestId !== this.transactionRequestId) return;
                 const payload = res.data.data || {};
+                if (!Array.isArray(payload) && !Array.isArray(payload.groups)) {
+                    throw new Error('Invalid transactions response');
+                }
                 const groups = Array.isArray(payload) ? payload : (payload.groups || []);
                 const meta = payload.meta || {};
 
@@ -615,11 +634,20 @@ export default function (Alpine) {
                 this.lastPage = Math.ceil((meta.total || 0) / (meta.limit || 20));
                 this.hasMore = meta.has_more || false;
                 this.total = meta.total || 0;
+                this.hasLoaded = true;
             } catch (e) {
-                console.error('Fetch transactions error:', e);
+                if (requestId !== this.transactionRequestId) return;
+                this.error = 'Transaksi belum dapat dimuat. Coba lagi.';
             } finally {
-                if (!isLoadMore) this.loading = false;
+                if (requestId === this.transactionRequestId) {
+                    if (isLoadMore) this.loadingMore = false;
+                    else this.loading = false;
+                }
             }
+        },
+        retryTransactions() {
+            if (this.loading || this.loadingMore) return;
+            return this.fetchTransactions(this.retryPage, this.retryAppend, this.retryAppend);
         },
         async loadPage(p) {
             if (p < 1 || (this.lastPage && p > this.lastPage)) return;
@@ -627,7 +655,7 @@ export default function (Alpine) {
             document.getElementById('tx-body').scrollTop = 0;
         },
         async loadMore() {
-            if (!this.hasMore) return;
+            if (!this.hasMore || this.loading || this.loadingMore) return;
             const body = document.getElementById('tx-body');
             const scrollPos = body.scrollTop; 
             // Tidak perlu loading spinner untuk loadMore, hanya append
@@ -711,31 +739,52 @@ export default function (Alpine) {
         editForm: { name: '', email: '' },
         budgetInput: 0,
         loading: true,
+        hasLoaded: false,
+        error: '',
+        requestInFlight: false,
         async init() { await this.fetchProfile(); },
         formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
-        async fetchProfile() { this.loading = true; try {
-            const res = await window.apiClient.get('/v1/user/profile');
-            const data = res.data.data;
-            this.user = { ...this.user, ...data };
-            window.auth.setUser(this.user);
-            this.editForm = { name: data.name || '', email: data.email || '' };
-            const s = data.stats || {};
-            this.stats = {
-                total: s.total_transactions || 0,
-                month: s.transactions_this_month || 0,
-                biggest: s.largest_transaction_amount || 0,
-                categories: s.unique_categories_used || 0,
-            };
-            const b = data.budget || {};
-            this.budget = {
-                limit: b.monthly_budget || 0,
-                used: b.budget_used || 0,
-                left: b.budget_remaining || 0,
-                pct: b.budget_percentage || 0,
-            };
-            this.budgetInput = this.budget.limit;
-        } catch (e) { window.utils.showToast('error', 'Gagal memuat profil');
-        } finally { this.loading = false; }},
+        async fetchProfile() {
+            if (this.requestInFlight) return;
+            this.requestInFlight = true;
+            this.loading = true;
+            this.error = '';
+            try {
+                const res = await window.apiClient.get('/v1/user/profile');
+                const data = res.data.data;
+                if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                    throw new Error('Invalid profile response');
+                }
+                this.user = { ...this.user, ...data };
+                window.auth.setUser(this.user);
+                this.editForm = { name: data.name || '', email: data.email || '' };
+                const s = data.stats || {};
+                this.stats = {
+                    total: s.total_transactions || 0,
+                    month: s.transactions_this_month || 0,
+                    biggest: s.largest_transaction_amount || 0,
+                    categories: s.unique_categories_used || 0,
+                };
+                const b = data.budget || {};
+                this.budget = {
+                    limit: b.monthly_budget || 0,
+                    used: b.budget_used || 0,
+                    left: b.budget_remaining || 0,
+                    pct: b.budget_percentage || 0,
+                };
+                this.budgetInput = this.budget.limit;
+                this.hasLoaded = true;
+            } catch (e) {
+                this.error = 'Profil belum dapat dimuat. Coba lagi.';
+            } finally {
+                this.loading = false;
+                this.requestInFlight = false;
+            }
+        },
+        retryProfile() {
+            if (this.requestInFlight) return;
+            return this.fetchProfile();
+        },
         openModal(id) { document.getElementById(id)?.classList.add('open'); },
         closeModal(id) { document.getElementById(id)?.classList.remove('open'); },
         bgClose(e, id) { if (e.target === e.currentTarget) this.closeModal(id); },
@@ -859,12 +908,15 @@ export default function (Alpine) {
         categories: [],
         progressMap: {},
         loading: true,
+        hasLoaded: false,
+        error: '',
+        requestInFlight: false,
         saving: false,
         editMode: false,
         editId: null,
         form: { category: '', amount: 0, period: 'monthly', start_date: '', end_date: '' },
         get totalBudget() { return this.budgets.reduce((s, b) => s + (b.amount || 0), 0); },
-        get totalSpent() { return Object.values(this.progressMap).reduce((s, p) => s + (p.spent || 0), 0); },
+        get totalSpent() { return this.budgets.reduce((s, b) => s + (this.progressMap[b.id]?.spent || 0), 0); },
         get summaryPct() { return this.totalBudget > 0 ? Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100)) : 0; },
         get summaryStatusClass() {
             if (this.summaryPct >= 80) return 'risk';
@@ -908,14 +960,27 @@ export default function (Alpine) {
         },
         bgClose(e, id) { if (e.target === e.currentTarget) { document.getElementById(id)?.classList.remove('open'); } },
         async fetchBudgets() {
+            if (this.requestInFlight) return;
+            this.requestInFlight = true;
             this.loading = true;
+            this.error = '';
             try {
                 const res = await window.apiClient.get('/v1/budgets');
-                this.budgets = res.data.data || [];
+                const data = res.data.data;
+                if (!Array.isArray(data)) throw new Error('Invalid budgets response');
+                this.budgets = data;
+                this.hasLoaded = true;
                 await this.fetchProgress();
             } catch (e) {
-                window.utils.showToast('error', 'Gagal memuat budget');
-            } finally { this.loading = false; }
+                this.error = 'Budget belum dapat dimuat. Coba lagi.';
+            } finally {
+                this.loading = false;
+                this.requestInFlight = false;
+            }
+        },
+        retryBudgets() {
+            if (this.requestInFlight) return;
+            return this.fetchBudgets();
         },
         async fetchCategories() {
             try {
@@ -924,12 +989,16 @@ export default function (Alpine) {
             } catch { /* ignore */ }
         },
         async fetchProgress() {
+            let hasFailure = false;
             for (const b of this.budgets) {
                 try {
                     const res = await window.apiClient.get('/v1/budgets/' + b.id + '/progress');
                     this.progressMap[b.id] = res.data.data;
-                } catch { /* ignore */ }
+                } catch {
+                    hasFailure = true;
+                }
             }
+            if (hasFailure) throw new Error('Unable to load budget progress');
         },
         async saveBudget() {
             if (!this.form.category) { window.utils.showToast('error', 'Pilih kategori dulu'); return; }
@@ -1326,20 +1395,32 @@ export default function (Alpine) {
     Alpine.data('insightsPage', () => ({
         insights: [],
         loading: true,
+        hasLoaded: false,
+        error: '',
+        requestInFlight: false,
         async init() { await this.fetchInsights(); },
         async fetchInsights() {
+            if (this.requestInFlight) return;
+            this.requestInFlight = true;
             this.loading = true;
+            this.error = '';
             try {
                 const res = await window.apiClient.get('/v1/insights');
                 const data = res.data.data;
-                this.insights = Array.isArray(data) ? data : [];
+                if (!Array.isArray(data)) throw new Error('Invalid insights response');
+                this.insights = data;
+                this.hasLoaded = true;
             } catch (e) {
-                window.utils.showToast('error', 'Gagal memuat insights');
+                this.error = 'Insight belum dapat dimuat. Coba lagi.';
             } finally {
                 this.loading = false;
+                this.requestInFlight = false;
             }
         },
-        refresh() { this.fetchInsights(); },
+        refresh() {
+            if (this.requestInFlight) return;
+            return this.fetchInsights();
+        },
         iconFor(ins) {
             const map = { budget_risk: '⚠️', largest_expense: '💸', largest_category: '📊', danger: '⚠️', warning: '⚡', info: '💡' };
             return map[ins.type] || map[ins.severity] || '💡';

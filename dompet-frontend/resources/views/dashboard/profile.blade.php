@@ -3,14 +3,20 @@
 @section('content')
 <div x-data="profilePage" style="display:flex;flex-direction:column;height:100%;">
     <div class="screen-body" style="padding-top:0;padding-bottom:90px">
-        <div class="prof-hero">
+        <div class="data-state-refresh" x-show="loading" x-text="hasLoaded ? 'Memperbarui profil…' : 'Memuat profil…'" role="status" aria-live="polite"></div>
+        <div class="data-state data-state-error" x-show="!loading && error" role="alert" aria-live="assertive">
+            <p x-text="error"></p>
+            <button type="button" @click="retryProfile()" :disabled="loading">Coba lagi</button>
+        </div>
+
+        <div class="prof-hero" x-show="user">
             <div class="prof-av" x-text="(user?.name?.charAt(0) || '?').toUpperCase()"></div>
             <div class="prof-name" x-text="user?.name || 'Teman'"></div>
             <div class="prof-email" x-text="user?.email || ''"></div>
             <div class="prof-badge">MEMBER AKTIF</div>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid" x-show="hasLoaded">
             <div class="stat-box">
                 <div class="stat-box-label">TOTAL TRANSAKSI</div>
                 <div class="stat-box-val" x-text="stats.total || '0'">47</div>
@@ -29,7 +35,7 @@
             </div>
         </div>
 
-        <div class="budget-box">
+        <div class="budget-box" x-show="hasLoaded">
             <div class="budget-top">
                 <div>
                     <div class="budget-label">BUDGET BULANAN</div>
