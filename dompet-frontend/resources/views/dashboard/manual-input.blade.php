@@ -83,17 +83,17 @@
             </template>
             <div class="mi-cat-grid">
                 <template x-for="cat in categories" :key="cat.name">
-                    <div class="mi-cat-card"
+                    <button type="button" class="mi-cat-card"
                          :class="selectedCat === cat.name ? (txType === 'income' ? 'selected inc-sel' : 'selected') : ''"
-                         @click="selectedCat = cat.name">
-                        <div class="mi-cat-ico" x-text="cat.icon"></div>
+                         :aria-pressed="(selectedCat === cat.name).toString()" @click="selectedCat = cat.name">
+                        <div class="mi-cat-ico" aria-hidden="true" x-text="cat.icon"></div>
                         <div class="mi-cat-name" x-text="cat.name"></div>
-                    </div>
+                    </button>
                 </template>
-                <div class="mi-cat-card add-new" @click="openQuickAdd()">
-                    <div class="mi-cat-ico">+</div>
+                <button type="button" class="mi-cat-card add-new" @click="openQuickAdd()">
+                    <div class="mi-cat-ico" aria-hidden="true">+</div>
                     <div class="mi-cat-name">TAMBAH</div>
-                </div>
+                </button>
             </div>
         </div>
 

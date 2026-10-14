@@ -242,6 +242,11 @@
     align-items: center; gap: 6px;
     cursor: pointer;
     transition: transform .1s, box-shadow .1s, background .12s;
+    width: 100%;
+    border-radius: 0;
+    color: var(--ink);
+    font: inherit;
+    text-align: center;
 }
 .mi-cat-card:active { transform: translate(1px,1px); box-shadow: none; }
 .mi-cat-card.selected { background: var(--punch-2); box-shadow: 3px 3px 0 var(--ink); }
@@ -2117,4 +2122,26 @@
     .cal-cell {
         font-size: 11px;
     }
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--punch);
+  outline-offset: 3px;
+}
+
+.field input:focus-visible,
+.chat-input:focus-visible,
+.mi-amount-input:focus-visible,
+.mi-field-input:focus-visible,
+.mi-field-date:focus-visible,
+.mi-date-text-input:focus-visible,
+.field-select:focus-visible,
+.field-input:focus-visible,
+.cat-form-input:focus-visible,
+.search-input:focus-visible {
+  outline: 3px solid var(--punch);
+  outline-offset: 3px;
 }

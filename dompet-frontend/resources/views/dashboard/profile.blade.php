@@ -53,16 +53,16 @@
         </div>
 
         <div class="menu-block mt16">
-            <div class="menu-row" @click="openModal('m-edit')">
-                <div class="menu-ico">✎</div>
+            <button type="button" class="menu-row" @click="openModal('m-edit')">
+                <div class="menu-ico" aria-hidden="true">✎</div>
                 <span>Edit Profil</span>
-                <div class="menu-arr">→</div>
-            </div>
-            <div class="menu-row" @click="openModal('m-budget')">
-                <div class="menu-ico">💰</div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
+            <button type="button" class="menu-row" @click="openModal('m-budget')">
+                <div class="menu-ico" aria-hidden="true">💰</div>
                 <span>Atur Budget</span>
-                <div class="menu-arr">→</div>
-            </div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
             <a href="/budgets" class="menu-row" style="text-decoration:none;color:var(--ink);">
                 <div class="menu-ico">📊</div>
                 <span>Kelola Budget</span>
@@ -73,36 +73,36 @@
                 <span>Kelola Kategori</span>
                 <div class="menu-arr">→</div>
             </a>
-            <div class="menu-row" @click="exportData()">
-                <div class="menu-ico">↓</div>
+            <button type="button" class="menu-row" @click="exportData()">
+                <div class="menu-ico" aria-hidden="true">↓</div>
                 <span>Export Data CSV</span>
-                <div class="menu-arr">→</div>
-            </div>
-            <div class="menu-row" @click="window.utils.showToast('info', 'Fitur segera hadir! 🔔')">
-                <div class="menu-ico">🔔</div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
+            <button type="button" class="menu-row" @click="window.utils.showToast('info', 'Fitur segera hadir! 🔔')">
+                <div class="menu-ico" aria-hidden="true">🔔</div>
                 <span>Notifikasi</span>
-                <div class="menu-arr">→</div>
-            </div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
             <a href="/changelogs" class="menu-row" style="text-decoration:none;color:var(--ink);">
                 <div class="menu-ico">📋</div>
                 <span>Update Zaku</span>
                 <div class="menu-arr">→</div>
             </a>
-            <div class="menu-row" @click="window.utils.showToast('info', 'Fitur segera hadir! 📊')">
-                <div class="menu-ico">📊</div>
+            <button type="button" class="menu-row" @click="window.utils.showToast('info', 'Fitur segera hadir! 📊')">
+                <div class="menu-ico" aria-hidden="true">📊</div>
                 <span>Laporan Bulanan</span>
-                <div class="menu-arr">→</div>
-            </div>
-            <div class="menu-row danger" @click="deleteAccount()">
-                <div class="menu-ico">🗑️</div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
+            <button type="button" class="menu-row danger" @click="deleteAccount()">
+                <div class="menu-ico" aria-hidden="true">🗑️</div>
                 <span>Hapus Akun</span>
-                <div class="menu-arr">→</div>
-            </div>
-            <div class="menu-row danger" @click="logout()">
-                <div class="menu-ico">↩</div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
+            <button type="button" class="menu-row danger" @click="logout()">
+                <div class="menu-ico" aria-hidden="true">↩</div>
                 <span>Keluar</span>
-                <div class="menu-arr">→</div>
-            </div>
+                <div class="menu-arr" aria-hidden="true">→</div>
+            </button>
         </div>
     </div>
 
