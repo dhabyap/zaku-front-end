@@ -44,12 +44,20 @@
   </div>
 
   <div class="tx-body" id="tx-body">
-    <template x-if="loading">
-        <div style="padding:20px;">
+    <div class="data-state data-state-error" x-show="!loading && error" role="alert" aria-live="assertive">
+      <p x-text="error"></p>
+      <button type="button" @click="retryTransactions()" :disabled="loading || loadingMore">Coba lagi</button>
+    </div>
+    <div class="data-state-refresh" x-show="loading && hasLoaded" role="status" aria-live="polite">Memperbarui transaksi…</div>
+    <template x-if="loading && !hasLoaded">
+        <div style="padding:20px;" role="status" aria-live="polite" aria-label="Memuat transaksi">
             <x-loading-skeleton count="5" />
         </div>
     </template>
-    <template x-if="!loading">  
+    <div class="data-state data-state-empty" x-show="hasLoaded && transactions.length === 0 && !error" role="status" aria-live="polite">
+      <p>Belum ada transaksi untuk ditampilkan.</p>
+    </div>
+    <template x-if="transactions.length > 0">
         <div class="tx-rows">
             <template x-for="(group, month) in grouped()" :key="month">
                 <div class="month-group">
@@ -81,9 +89,9 @@
     
     <!-- Load more button, integrated -->
     <div class="load-more-wrap" x-show="hasMore">
-        <button class="load-more-btn" @click="loadMore" :disabled="loading" :class="{'loading': loading}">
-        <span x-show="!loading">Muat Transaksi Lainnya</span>
-        <span x-show="loading">Memuat...</span>
+        <button class="load-more-btn" type="button" @click="loadMore" :disabled="loading || loadingMore" :class="{'loading': loadingMore}">
+        <span x-show="!loadingMore">Muat Transaksi Lainnya</span>
+        <span x-show="loadingMore">Memuat...</span>
         </button>
     </div>
   </div>
@@ -93,16 +101,16 @@
       HAL <strong x-text="currentPage"></strong> DARI <span x-text="lastPage || 1"></span>
     </div>
     <div class="pag-controls">
-      <button class="pag-btn arrow" @click="loadPage(currentPage-1)" :disabled="currentPage<=1">‹</button>
+      <button class="pag-btn arrow" @click="loadPage(currentPage-1)" :disabled="loading || currentPage<=1">‹</button>
       <template x-for="p in paginationNumbers()" :key="p">
         <template x-if="p === '...'">
           <span class="pag-dots">···</span>
         </template>
         <template x-if="p !== '...'">
-          <button class="pag-btn" :class="{'on': p === currentPage}" @click="loadPage(p)" x-text="p"></button>
+          <button class="pag-btn" :class="{'on': p === currentPage}" @click="loadPage(p)" :disabled="loading" x-text="p"></button>
         </template>
       </template>
-      <button class="pag-btn arrow" @click="loadPage(currentPage+1)" :disabled="currentPage>=lastPage">›</button>
+      <button class="pag-btn arrow" @click="loadPage(currentPage+1)" :disabled="loading || currentPage>=lastPage">›</button>
     </div>
   </div>
 

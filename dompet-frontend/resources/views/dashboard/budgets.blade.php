@@ -14,8 +14,8 @@
 
     <div class="screen-body" style="padding-bottom:100px;">
         {{-- Loading skeleton --}}
-        <template x-if="loading">
-            <div>
+        <template x-if="loading && !hasLoaded">
+            <div role="status" aria-live="polite" aria-label="Memuat budget">
                 <div class="budget-card-skeleton" style="margin-bottom:12px;" x-repeat="3">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;gap:10px;">
@@ -32,9 +32,15 @@
             </div>
         </template>
 
+        <div class="data-state-refresh" x-show="loading && hasLoaded" role="status" aria-live="polite">Memperbarui budget…</div>
+        <div class="data-state data-state-error" x-show="!loading && error" role="alert" aria-live="assertive">
+            <p x-text="error"></p>
+            <button type="button" @click="retryBudgets()" :disabled="loading">Coba lagi</button>
+        </div>
+
         {{-- Empty state --}}
-        <template x-if="!loading && budgets.length === 0">
-            <div class="budget-empty-state">
+        <template x-if="hasLoaded && budgets.length === 0 && !error">
+            <div class="budget-empty-state" role="status" aria-live="polite">
                 <div style="font-size:48px;margin-bottom:16px;">💰</div>
                 <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px;">Belum ada budget</div>
                 <div style="font-family:'DM Mono',monospace;font-size:12px;color:rgba(17,16,16,.5);margin-bottom:20px;">Atur budget per kategori agar bisa tracking pengeluaran.</div>
@@ -43,7 +49,7 @@
         </template>
 
         {{-- Budget list --}}
-        <template x-if="!loading && budgets.length > 0">
+        <template x-if="hasLoaded && budgets.length > 0">
             <div>
                 {{-- Summary card --}}
                 <div class="budget-summary-card">
