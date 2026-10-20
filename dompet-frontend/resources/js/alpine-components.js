@@ -189,8 +189,16 @@ export default function (Alpine) {
             }
         })(),
         budget: { limit: 0, used: 0, left: 0, usedPct: 0, score: 0, status: 'Budget belum diatur', statusClass: 'risk', insight: '' },
+        catBudgets: [],
+        budgetHealthLoading: true,
+        budgetHealthLoaded: false,
+        budgetHealthError: '',
+        budgetHealthInFlight: false,
         loading: { balance: true, transactions: true, categories: true, budget: true },
-        async init() { this.fetchDashboard(); },
+        async init() {
+            this.fetchDashboard();
+            this.fetchCategoryBudgets();
+        },
         formatNumber(n) { if (!n) return '0'; return Number(n).toLocaleString('id-ID'); },
         formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); },
         toNumber(v) { const n = Number(v); return Number.isFinite(n) ? n : 0; },
@@ -207,34 +215,51 @@ export default function (Alpine) {
             const left = Math.max(0, this.toNumber(data.remaining_budget || data.budget_left
                 || data.budget?.left || data.budget?.remaining || (limit - used)));
             if (limit <= 0) {
-                this.budget = { limit: 0, used, left: 0, usedPct: 0, score: 0, status: 'Budget belum diatur', statusClass: 'risk', insight: 'Atur budget bulanan agar Zaku bisa membaca kondisi pengeluaranmu.' };
+                this.budget = { limit: 0, used, left: 0, usedPct: 0, score: 0, status: 'Budget bulanan umum belum diatur', statusClass: 'risk', insight: 'Atur budget bulanan agar Zaku bisa membaca kondisi pengeluaranmu.' };
                 return;
             }
             const usedPct = this.clamp(Math.round((used / limit) * 100), 0, 100);
             const score = this.clamp(100 - usedPct, 0, 100);
             let status = 'RISIKO BOROS', statusClass = 'risk';
             if (score >= 80) { status = 'AMAN'; statusClass = 'safe'; }
-            else if (score >= 50) { status = 'PERLU DIJAGA'; statusClass = 'watch'; }
+            else if (score >= 50) { status = 'PERLU DIJAGA', statusClass = 'watch'; }
             const insight = score >= 80
                 ? 'Budget masih aman. Pertahankan ritme pengeluaran bulan ini.'
                 : score >= 50 ? 'Pengeluaran mulai mendekati batas. Jaga transaksi besar berikutnya.'
                 : 'Budget berisiko habis. Prioritaskan kebutuhan utama dulu.';
             this.budget = { limit, used, left, usedPct, score, status, statusClass, insight };
         },
-        getEmoji(cat) {
-            const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'FOOD & BEVERAGE': '🍜',
-                'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'UTILITY': '⚡',
-                'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰',
-                'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'MAKAN': '🍜' };
-            return map[cat?.toUpperCase()] || '📄';
+        categoryBudgetStatusClass(pct) {
+            if (pct >= 80) return 'risk';
+            if (pct >= 60) return 'watch';
+            return 'safe';
+        },
+        categoryBudgetStatusLabel(pct) {
+            if (pct >= 100) return 'MELEBIHI';
+            if (pct >= 80) return 'BOROS';
+            if (pct >= 60) return 'WASPADA';
+            return 'AMAN';
         },
         updateInsight() {
             this.insightType = 'info';
             this.insightText = 'Belum ada insight. Mulai catat transaksimu agar Zaku bisa memberikan insight.';
             this.insightDetail = '';
+
+            if (this.catBudgets.length > 0) {
+                const pct = this.catBudgetPct;
+                if (pct >= 80) {
+                    this.insightType = 'warning';
+                    this.insightText = 'Total pengeluaran budget kategori ';
+                    this.insightText += pct >= 100 ? 'sudah melebihi batas.' : 'hampir habis.';
+                    this.insightDetail = 'Terpakai Rp ' + this.formatNumber(this.catTotalSpent)
+                        + ' · Sisa Rp ' + this.formatNumber(this.catTotalRemaining);
+                    return;
+                }
+            }
+
             if (this.budget?.limit > 0 && this.budget?.score <= 50) {
                 this.insightType = 'warning';
-                this.insightText = 'Pengeluaran mendekati batas budget.';
+                this.insightText = 'Budget bulanan umum mulai menipis.';
                 this.insightDetail = 'Terpakai Rp ' + this.formatNumber(this.budget.used) + ' · Sisa Rp ' + this.formatNumber(this.budget.left);
                 return;
             }
@@ -243,6 +268,97 @@ export default function (Alpine) {
                 this.insightText = this.maxCategory.name + ' mengambil ' + this.maxCategoryPct + '% dari total pengeluaran bulan ini.';
                 this.insightDetail = 'Total Rp ' + this.formatNumber(this.maxCategoryAmount);
             }
+        },
+        getEmoji(cat) {
+            const map = { 'MAKANAN': '🍜', 'FOOD': '🍜', 'FOOD & BEVERAGE': '🍜',
+                'TRANSPORTASI': '🚗', 'TRANSPORT': '🚗', 'TAGIHAN': '⚡', 'BILLS': '⚡', 'UTILITY': '⚡',
+                'BELANJA': '🛍️', 'SHOPPING': '🛍️', 'GAJI': '💰', 'SALARY': '💰', 'INCOME': '💰',
+                'FREELANCE': '💻', 'KESEHATAN': '💊', 'HEALTH': '💊', 'MAKAN': '🍜' };
+            return map[cat?.toUpperCase()] || '📄';
+        },
+        async fetchCategoryBudgets() {
+            if (this.budgetHealthInFlight) return;
+            this.budgetHealthInFlight = true;
+            this.budgetHealthLoading = true;
+            this.budgetHealthError = '';
+            try {
+                const res = await window.apiClient.get('/v1/budgets');
+                const budgets = res.data.data;
+                if (!Array.isArray(budgets)) {
+                    throw new Error('Data budget tidak valid.');
+                }
+
+                const progress = await Promise.all(budgets.map(async (budget) => {
+                    const progressRes = await window.apiClient.get('/v1/budgets/' + encodeURIComponent(budget.id) + '/progress');
+                    const payload = progressRes.data.data || {};
+                    const detail = payload.budget || {};
+                    const categoryName = detail.category || budget.category?.name || budget.category_name || 'LAINNYA';
+                    const spent = Number(payload.spent || 0);
+                    const amount = Number(detail.amount || budget.amount || 0);
+                    const remaining = Number(payload.remaining || Math.max(0, amount - spent));
+                    const pct = Number(payload.percentage || (amount > 0 ? Math.round((spent / amount) * 100) : 0));
+                    return {
+                        id: budget.id,
+                        name: categoryName,
+                        amount,
+                        spent,
+                        remaining,
+                        pct,
+                        status: payload.status || this.categoryBudgetStatusLabel(pct),
+                        period: detail.period || budget.period || '',
+                    };
+                }));
+
+                progress.sort((a, b) => b.pct - a.pct);
+                this.catBudgets = progress;
+                this.budgetHealthLoaded = true;
+                this.updateInsight();
+            } catch (e) {
+                this.budgetHealthError = 'Budget belum dapat dimuat. Coba lagi.';
+                console.error('Budget health load error:', e);
+            } finally {
+                this.budgetHealthLoading = false;
+                this.budgetHealthInFlight = false;
+                this.loading.budget = false;
+            }
+        },
+        retryBudgetHealth() {
+            if (this.budgetHealthInFlight) return;
+            return this.fetchCategoryBudgets();
+        },
+        get catTotalBudget() {
+            return this.catBudgets.reduce((total, budget) => total + budget.amount, 0);
+        },
+        get catTotalSpent() {
+            return this.catBudgets.reduce((total, budget) => total + budget.spent, 0);
+        },
+        get catTotalRemaining() {
+            return this.catBudgets.reduce((total, budget) => total + budget.remaining, 0);
+        },
+        get catBudgetPct() {
+            if (this.catTotalBudget <= 0) return 0;
+            return Math.round((this.catTotalSpent / this.catTotalBudget) * 100);
+        },
+        get catBudgetClass() {
+            return this.categoryBudgetStatusClass(this.catBudgetPct);
+        },
+        get catBudgetStatus() {
+            return {
+                text: this.categoryBudgetStatusLabel(this.catBudgetPct),
+                cls: this.categoryBudgetStatusClass(this.catBudgetPct),
+                score: this.clamp(100 - this.catBudgetPct, 0, 100),
+            };
+        },
+        get catBudgetInsight() {
+            const pct = this.catBudgetPct;
+            if (this.catBudgets.length === 0) return '';
+            if (pct >= 100) return 'Total pengeluaran budget kategori sudah melebihi batas.';
+            if (pct >= 80) return 'Total pengeluaran budget kategori hampir habis.';
+            if (pct >= 60) return 'Pengeluaran budget kategori mulai perlu dijaga.';
+            return 'Total pengeluaran budget kategori masih aman bulan ini.';
+        },
+        get catTopBudgets() {
+            return this.catBudgets.slice(0, 3);
         },
         async fetchDashboard() {
             try {

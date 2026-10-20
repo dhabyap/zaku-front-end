@@ -84,7 +84,7 @@
 
             <div class="budget-box budget-health-box">
                 {{-- Loading skeleton --}}
-                <template x-if="loading.budget">
+                <template x-if="budgetHealthLoading">
                     <div>
                         <div class="budget-top">
                             <div>
@@ -99,15 +99,26 @@
                     </div>
                 </template>
 
+                {{-- Load failed: show a real error state instead of an empty state --}}
+                <template x-if="!budgetHealthLoading && budgetHealthError">
+                    <div class="budget-empty">
+                        <div>
+                            <div class="budget-label">BUDGET HEALTH</div>
+                            <div class="budget-health-note" x-text="budgetHealthError"></div>
+                        </div>
+                        <button type="button" class="btn-tiny" @click="retryBudgetHealth()">COBA LAGI</button>
+                    </div>
+                </template>
+
                 {{-- Per-category budgets exist --}}
-                <template x-if="!loading.budget && typeof catBudgets !== 'undefined' && catBudgets && catBudgets.length > 0">
+                <template x-if="!budgetHealthLoading && !budgetHealthError && budgetHealthLoaded && catBudgets.length > 0">
                     <div>
                         <div class="budget-top">
                             <div>
                                 <div class="budget-label">BUDGET HEALTH</div>
                                 <div class="budget-amount" x-text="catBudgetStatus.text">AMAN</div>
                             </div>
-                            <div class="budget-pct" x-text="catBudgetScore">80</div>
+                            <div class="budget-pct" x-text="catBudgetStatus.score">80</div>
                         </div>
                         <div class="budget-track">
                             <div class="budget-fill" :class="catBudgetStatus.cls" :style="'width:' + catBudgetPct + '%'"></div>
@@ -141,12 +152,12 @@
                 </template>
 
                 {{-- No budgets yet --}}
-                <template x-if="!loading.budget && (typeof catBudgets === 'undefined' || !catBudgets || catBudgets.length === 0)">
+                <template x-if="!budgetHealthLoading && !budgetHealthError && budgetHealthLoaded && catBudgets.length === 0">
                     <div class="budget-empty">
                         <div>
                             <div class="budget-label">BUDGET HEALTH</div>
-                            <div class="budget-amount">Belum ada budget</div>
-                            <div class="budget-health-note">Atur budget per kategori agar bisa tracking pengeluaran.</div>
+                            <div class="budget-amount">Belum ada budget kategori</div>
+                            <div class="budget-health-note">Atur budget per kategori agar Zaku bisa melacak pengeluaran kamu.</div>
                         </div>
                         <a href="/budgets" class="btn-tiny budget-setup-btn">ATUR</a>
                     </div>
@@ -156,10 +167,10 @@
             <div class="insight-strip" style="cursor:pointer;">
                 <div class="insight-icon" x-text="insightType === 'warning' ? '⚠️' : '💡'">💡</div>
                 <div class="insight-text">
-                    <template x-if="loading.categories || loading.budget">
+                    <template x-if="loading.categories || budgetHealthLoading">
                         <div style="opacity:.5">Memuat insight...</div>
                     </template>
-                    <template x-if="!loading.categories && !loading.budget">
+                    <template x-if="!loading.categories && !budgetHealthLoading">
                         <div x-text="insightText">Belum ada insight. Mulai catat transaksimu agar Zaku bisa memberikan insight.</div>
                         <template x-if="insightDetail">
                             <span x-text="insightDetail" style="display:block;margin-top:6px;font-size:12px;color:rgba(17,16,16,.6)"></span>
