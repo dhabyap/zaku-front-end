@@ -33,10 +33,10 @@ export default function (Alpine) {
                 window.auth.setUser(user, this.formData.remember);
                 const cookieLifetime = this.formData.remember ? '; max-age=2592000' : '';
                 document.cookie = 'zaku_token=' + token + '; path=/; SameSite=Lax' + cookieLifetime;
-                window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
+                window.utils.showToast('success', 'Anda berhasil masuk! Sedang mengalihkan...');
                 setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
             } catch (error) {
-                const msg = window.utils.parseApiError(error, 'Email atau password salah. Silakan coba lagi.');
+                const msg = window.utils.parseApiError(error, 'Email atau kata sandi belum benar. Periksa kembali, lalu coba lagi.');
                 window.utils.showToast('error', msg, true);
             } finally { this.loading = false; }
         }
@@ -49,10 +49,10 @@ export default function (Alpine) {
         async submit() {
             if (this.loading) return;
             if (this.formData.password !== this.formData.password_confirmation) {
-                window.utils.showToast('error', 'Konfirmasi password tidak sesuai.'); return;
+                window.utils.showToast('error', 'Konfirmasi kata sandi tidak sesuai.'); return;
             }
             if (this.formData.password.length < 8) {
-                window.utils.showToast('error', 'Password harus minimal 8 karakter.'); return;
+                window.utils.showToast('error', 'Kata sandi harus minimal 8 karakter.'); return;
             }
             this.loading = true;
             try {
@@ -60,7 +60,7 @@ export default function (Alpine) {
                 window.utils.showToast('success', 'Akun berhasil dibuat! Silakan masuk.');
                 setTimeout(() => { window.location.href = '/login'; }, 1500);
             } catch (error) {
-                const msg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');
+                const msg = window.utils.parseApiError(error, 'Gagal membuat akun. Periksa kembali data Anda, lalu coba lagi.');
                 window.utils.showToast('error', msg, true);
             } finally { this.loading = false; }
         }
@@ -77,9 +77,9 @@ export default function (Alpine) {
             try {
                 await window.apiClient.post('/v1/auth/forgot-password', { email: this.email });
                 this.sent = true;
-                window.utils.showToast('success', 'Link reset password telah dikirim ke email Anda.');
+                window.utils.showToast('success', 'Tautan ubah kata sandi sudah dikirim ke email Anda.');
             } catch (error) {
-                const msg = window.utils.parseApiError(error, 'Gagal mengirim link reset.');
+                const msg = window.utils.parseApiError(error, 'Gagal mengirim tautan ubah kata sandi. Coba lagi.');
                 window.utils.showToast('error', msg, true);
             } finally { this.loading = false; }
         }
@@ -119,9 +119,9 @@ export default function (Alpine) {
             if (!this.email) { window.utils.showToast('error', 'Masukkan email terlebih dahulu.'); return; }
             try {
                 await window.apiClient.post('/v1/auth/resend-verification', { email: this.email });
-                window.utils.showToast('success', 'Kode baru telah dikirim!');
+                window.utils.showToast('success', 'Kode verifikasi baru sudah dikirim!');
             } catch (error) {
-                const msg = window.utils.parseApiError(error, 'Gagal mengirim ulang kode.');
+                const msg = window.utils.parseApiError(error, 'Gagal mengirim kode verifikasi. Coba lagi sebentar lagi.');
                 window.utils.showToast('error', msg, true);
             }
         }
@@ -167,9 +167,9 @@ export default function (Alpine) {
             this.loading = true;
             try {
                 await window.apiClient.post('/v1/auth/resend-verification', { email: this.email });
-                window.utils.showToast('success', 'Kode verifikasi telah dikirim ulang!');
+                window.utils.showToast('success', 'Kode verifikasi sudah dikirim ulang!');
             } catch (error) {
-                const msg = window.utils.parseApiError(error, 'Gagal mengirim ulang verifikasi.');
+                const msg = window.utils.parseApiError(error, 'Gagal mengirim kode verifikasi. Coba lagi sebentar lagi.');
                 window.utils.showToast('error', msg, true);
             } finally { this.loading = false; }
         }
