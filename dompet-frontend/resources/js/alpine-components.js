@@ -1468,7 +1468,7 @@ export default function (Alpine) {
             }
             this.returnFocus = document.activeElement;
             this.isOpen = true;
-            await this.fetchNotifications();
+            this.fetchNotifications();
             this.$nextTick(() => document.getElementById('notification-panel-close')?.focus());
         },
         closePanel() {
@@ -1478,6 +1478,27 @@ export default function (Alpine) {
                 if (this.returnFocus?.isConnected) this.returnFocus.focus();
                 this.returnFocus = null;
             });
+        },
+        trapFocus(event) {
+            const panel = document.getElementById('notification-panel');
+            const focusable = panel
+                ? [...panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+                    .filter(element => element.getClientRects().length > 0)
+                : [];
+            if (focusable.length === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
         },
         formatNotificationDate(value) {
             if (!value) return '';

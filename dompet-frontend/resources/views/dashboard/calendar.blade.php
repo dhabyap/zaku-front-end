@@ -49,7 +49,10 @@
                 {{-- Grid Tanggal --}}
                 <div class="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">
                     <template x-for="(cell, idx) in generateCalendarDays()" :key="idx">
-                        <div class="cal-cell"
+                        <button type="button" class="cal-cell"
+                             :disabled="!cell.day"
+                             :aria-label="cell.day ? 'Pilih tanggal ' + cell.dateKey : null"
+                             :aria-pressed="cell.day ? (selectedDate === cell.dateKey).toString() : null"
                              :class="{
                                  'cal-cell-empty': !cell.day,
                                  'cal-cell-today': isToday(cell.dateKey),
@@ -57,7 +60,7 @@
                                  'cal-cell-has-tx': daySummary[cell.dateKey] && daySummary[cell.dateKey].count > 0
                              }"
                              @click="cell.day && selectDate(cell.dateKey)"
-                             style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid transparent;font-family:var(--font-mono);cursor:pointer;position:relative;transition:all .15s;">
+                             style="width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid transparent;border-radius:0;background:transparent;color:var(--ink);font-family:var(--font-mono);cursor:pointer;position:relative;transition:all .15s;">
 
                             {{-- Angka Tanggal --}}
                             <span x-show="cell.day" x-text="cell.day"
@@ -70,7 +73,7 @@
                                      style="width:5px;height:5px;border-radius:50%;background:var(--mint);"></div>
                                 <div x-show="daySummary[cell.dateKey]?.expense > 0"
                                      style="width:5px;height:5px;border-radius:50%;background:var(--punch);"></div>
-                            </div>
+                            </button>
 
                             {{-- Jumlah Transaksi --}}
                             <span x-show="daySummary[cell.dateKey]?.count > 0"
