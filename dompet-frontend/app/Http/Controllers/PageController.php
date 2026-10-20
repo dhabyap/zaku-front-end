@@ -11,8 +11,12 @@ class PageController extends Controller
         return view('landing');
     }
 
-    public function login()
+    public function login(Request $request)
     {
+        if ($request->cookie('zaku_token')) {
+            return redirect()->route('dashboard');
+        }
+
         return view('auth.login');
     }
 
