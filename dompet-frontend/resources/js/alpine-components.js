@@ -29,9 +29,10 @@ export default function (Alpine) {
             try {
                 const response = await window.apiClient.post('/v1/auth/login', this.formData);
                 const { token, user } = response.data.data;
-                window.auth.setToken(token);
-                window.auth.setUser(user);
-                document.cookie = 'zaku_token=' + token + '; path=/; max-age=86400; SameSite=Lax';
+                window.auth.setToken(token, null, this.formData.remember);
+                window.auth.setUser(user, this.formData.remember);
+                const cookieLifetime = this.formData.remember ? '; max-age=2592000' : '';
+                document.cookie = 'zaku_token=' + token + '; path=/; SameSite=Lax' + cookieLifetime;
                 window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                 setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
             } catch (error) {

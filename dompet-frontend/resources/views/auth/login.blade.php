@@ -40,6 +40,11 @@
                     </div>
                 </div>
 
+                <label for="remember-login" style="display:flex;align-items:center;gap:8px;margin:4px 0 16px;font-size:13px;cursor:pointer;">
+                    <input id="remember-login" type="checkbox" x-model="formData.remember" style="width:16px;height:16px;accent-color:var(--ink);">
+                    <span>Ingat saya <span style="opacity:.65">(tetap masuk hingga 30 hari)</span></span>
+                </label>
+
                 <button type="submit" class="btn-main" :disabled="loading">
                     <span x-show="!loading">MASUK SEKARANG →</span>
                     <span x-show="loading" x-cloak>MEMPROSES...</span>
@@ -79,9 +84,10 @@
                     try {
                         const response = await window.apiClient.post('/v1/auth/login', this.formData);
                         const { token, user } = response.data.data;
-                        window.auth.setToken(token);
-                        window.auth.setUser(user);
-                        document.cookie = 'zaku_token=' + token + '; path=/; max-age=86400; SameSite=Lax';
+                        window.auth.setToken(token, null, this.formData.remember);
+                        window.auth.setUser(user, this.formData.remember);
+                        const cookieLifetime = this.formData.remember ? '; max-age=2592000' : '';
+                        document.cookie = 'zaku_token=' + token + '; path=/; SameSite=Lax' + cookieLifetime;
                         window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                         setTimeout(() => {
                             window.location.href = '/dashboard';
