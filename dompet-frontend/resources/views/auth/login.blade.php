@@ -76,6 +76,11 @@
                     const params = new URLSearchParams(window.location.search);
                     if (params.get('session') === 'expired') {
                         window.utils.showToast('error', 'Sesi Anda telah berakhir. Silakan login kembali.', true);
+                        return;
+                    }
+
+                    if (window.auth.isLoggedIn()) {
+                        window.location.replace('/dashboard');
                     }
                 },
                 async submit() {
