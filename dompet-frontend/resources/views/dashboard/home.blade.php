@@ -34,13 +34,14 @@
                                             <p x-text="error"></p>
                                             <button type="button" @click="fetchNotifications()">Coba lagi</button>
                                         </div>
-                                        <div class="notification-state" x-show="!loading && !error && items.length === 0">Belum ada notifikasi.</div>
+                                        <div class="notification-state" x-show="!loading && !error && items.length === 0">Belum ada notifikasi. Peringatan budget muncul di sini saat pengeluaran mencapai 80% atau 100%.</div>
                                         <template x-for="item in items" :key="item.id">
                                             <article class="notification-item" :class="{ unread: !item.is_read }">
                                                 <div class="notification-item-copy">
                                                     <h3 x-text="item.title || 'Notifikasi'"></h3>
                                                     <p x-text="item.message || ''"></p>
                                                     <time x-text="formatNotificationDate(item.created_at)" :datetime="item.created_at"></time>
+                                                    <a x-show="item.data?.budget_id" href="/budgets" class="notification-budget-link">Lihat budget</a>
                                                 </div>
                                                 <button type="button" class="notification-mark-read" x-show="!item.is_read" :disabled="markingId !== null" @click="markRead(item)" :aria-label="'Tandai ' + (item.title || 'notifikasi') + ' sudah dibaca'" x-text="markingId === item.id ? '...' : 'BACA'"></button>
                                                 <span class="notification-read-label" x-show="item.is_read">DIBACA</span>

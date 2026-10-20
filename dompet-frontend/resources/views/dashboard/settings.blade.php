@@ -41,12 +41,12 @@
             {{-- Notification availability --}}
             <div class="settings-section">
                 <div class="settings-section-title">NOTIFIKASI</div>
-                <div class="settings-section-desc">Status fitur notifikasi yang tersedia di akun kamu.</div>
+                <div class="settings-section-desc">Peringatan budget muncul di inbox aplikasi dan lonceng notifikasi.</div>
 
                 <div class="settings-toggle-row" style="margin-top:12px;">
                     <div style="flex:1;">
                         <div style="font-size:14px;font-weight:700;color:var(--ink);">Notifikasi Budget</div>
-                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Peringatan muncul di inbox saat penggunaan budget mencapai ambang. Pengaturan aktif/nonaktif belum tersedia.</div>
+                        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(17,16,16,.5);">Peringatan dibuat saat pengeluaran mencapai 80% dan 100% budget, lalu muncul di lonceng notifikasi.</div>
                     </div>
                     <span class="settings-feature-status">OTOMATIS</span>
                 </div>
