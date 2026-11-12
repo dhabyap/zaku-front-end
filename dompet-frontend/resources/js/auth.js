@@ -1,26 +1,19 @@
 // resources/js/auth.js
+// Token is now stored in httpOnly cookie (set by backend), not accessible via JS.
+// We only store user data in localStorage/sessionStorage.
 
-export const getToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-export const getRefreshToken = () => localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+export const getToken = () => null; // Token in httpOnly cookie, not readable by JS
+export const getRefreshToken = () => null;
 
 export const setToken = (access, refresh = null, remember = false) => {
-    const storage = remember ? localStorage : sessionStorage;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('refresh_token');
-    storage.setItem('access_token', access);
-    if (refresh) storage.setItem('refresh_token', refresh);
+    // No-op: token is in httpOnly cookie managed by backend
+    // We only store user data
 };
 
 export const clearToken = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
-    sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('refresh_token');
     sessionStorage.removeItem('user');
-    document.cookie = 'zaku_token=; path=/; max-age=0';
+    // Cookie cleared by backend on logout endpoint
 
     if (window.location.pathname !== '/login') {
         const separator = window.location.search ? '&' : '?';
@@ -28,24 +21,13 @@ export const clearToken = () => {
     }
 };
 
-export const isTokenExpired = () => {
-    const token = getToken();
-    if (!token) return true;
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        // Exp is in seconds, add 60s buffer
-        return payload.exp ? Date.now() >= (payload.exp * 1000) + 60000 : true;
-    } catch {
-        return true;
-    }
-};
-
+// Check if user data exists (proxy for logged in status)
+// Actual verification happens via API call to /auth/me
 export const isLoggedIn = () => {
-    const token = getToken();
-    return !!token && !isTokenExpired();
+    return !!getUser();
 };
 
-export const setUser = (user, remember = !!localStorage.getItem('access_token')) => {
+export const setUser = (user, remember = false) => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
     if (!user) return;

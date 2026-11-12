@@ -52,7 +52,6 @@
             },
             logout() {
                 window.auth.clearToken();
-                window.location.href = '/login';
             }
         }
     }

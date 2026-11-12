@@ -29,10 +29,8 @@ export default function (Alpine) {
             try {
                 const response = await window.apiClient.post('/v1/auth/login', this.formData);
                 const { token, user } = response.data.data;
-                window.auth.setToken(token, null, this.formData.remember);
+                // Token is set in httpOnly cookie by backend
                 window.auth.setUser(user, this.formData.remember);
-                const cookieLifetime = this.formData.remember ? '; max-age=2592000' : '';
-                document.cookie = 'zaku_token=' + token + '; path=/; SameSite=Lax' + cookieLifetime;
                 window.utils.showToast('success', 'Anda berhasil masuk! Sedang mengalihkan...');
                 setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
             } catch (error) {
@@ -951,8 +949,6 @@ export default function (Alpine) {
                 await window.apiClient.post('/v1/auth/logout');
             } catch { /* ignore */ } finally {
                 window.auth.clearToken();
-                window.auth.clearUser();
-                window.location.href = '/login';
             }
         },
         async deleteAccount() {
@@ -966,8 +962,6 @@ export default function (Alpine) {
             try {
                 await window.apiClient.delete('/v1/user/account');
                 window.auth.clearToken();
-                window.auth.clearUser();
-                window.location.href = '/';
             } catch (e) {
                 window.utils.showToast('error', window.utils.parseApiError(e, 'Gagal menghapus akun'));
             }

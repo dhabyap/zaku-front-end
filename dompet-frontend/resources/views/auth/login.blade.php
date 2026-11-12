@@ -89,10 +89,8 @@
                     try {
                         const response = await window.apiClient.post('/v1/auth/login', this.formData);
                         const { token, user } = response.data.data;
-                        window.auth.setToken(token, null, this.formData.remember);
+                        // Token is set in httpOnly cookie by backend
                         window.auth.setUser(user, this.formData.remember);
-                        const cookieLifetime = this.formData.remember ? '; max-age=2592000' : '';
-                        document.cookie = 'zaku_token=' + token + '; path=/; SameSite=Lax' + cookieLifetime;
                         window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                         setTimeout(() => {
                             window.location.href = '/dashboard';
@@ -109,9 +107,7 @@
         }
 
         function demoLogin() {
-            window.auth.setToken('demo-token', 'demo-refresh');
-            window.auth.setUser({ name: 'Budi Santoso', email: 'budi@email.com' });
-            document.cookie = 'zaku_token=demo-token; path=/; max-age=86400; SameSite=Lax';
+            window.auth.setUser({ name: 'Budi Santoso', email: 'budi@email.com' }, true);
             window.location.href = '/dashboard';
         }
     </script>

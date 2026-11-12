@@ -1,6 +1,5 @@
 // resources/js/api-client.js
 import axios from "axios";
-import { getToken, isTokenExpired, clearToken } from "./auth";
 
 // Create an axios instance with base URL and JSON headers
 const apiClient = axios.create({
@@ -9,26 +8,17 @@ const apiClient = axios.create({
         "Content-Type": "application/json",
     },
     timeout: 15000,
+    withCredentials: true, // Important: send cookies with cross-origin requests
 });
 
 // Auth endpoints that should NOT attach or validate existing tokens
-const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification'];
+const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification', '/v1/auth/change-password', '/v1/auth/me', '/v1/auth/refresh', '/v1/auth/logout'];
 
-// Request interceptor: attach JWT, check expiry before sending
+// Request interceptor: no need to attach JWT manually (cookie sent automatically)
 apiClient.interceptors.request.use(
     (config) => {
-        // Skip token logic for auth endpoints (login, register, etc.)
-        const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => config.url?.endsWith(ep));
-        if (isAuthEndpoint) return config;
-
-        const token = getToken();
-        if (token) {
-            if (isTokenExpired()) {
-                clearToken();
-                return Promise.reject(new axios.Cancel('Session expired'));
-            }
-            config.headers["Authorization"] = `Bearer ${token}`;
-        }
+        // For auth endpoints, we don't need to do anything special
+        // The cookie will be sent automatically with withCredentials: true
         return config;
     },
     (error) => Promise.reject(error),
@@ -40,9 +30,15 @@ apiClient.interceptors.response.use(
     async (error) => {
         if (error.response?.status === 401) {
             const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => error.config?.url?.endsWith(ep));
-            // Don't clear token on 401 from auth endpoints (invalid credentials is expected)
+            // Don't redirect on 401 from auth endpoints (invalid credentials is expected)
             if (!isAuthEndpoint) {
-                clearToken();
+                // Clear user data and redirect to login
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('user');
+                if (window.location.pathname !== '/login') {
+                    const separator = window.location.search ? '&' : '?';
+                    window.location.href = `/login${separator}session=expired`;
+                }
             }
             return Promise.reject(error);
         }
