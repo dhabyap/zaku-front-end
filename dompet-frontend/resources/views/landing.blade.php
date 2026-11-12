@@ -29,6 +29,22 @@
 <link rel="canonical" href="https://zaku.abysoft.my.id">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,700&display=swap" rel="stylesheet">
+
+<!-- Schema.org JSON-LD for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ZAKU",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "url": "https://zaku.abysoft.my.id",
+  "description": "ZAKU — Catat keuanganmu dengan chat. Tanpa form ribet. AI langsung paham dan analisis pengeluaran & pemasukan kamu.",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "IDR"},
+  "inLanguage": "id-ID"
+}
+</script>
+
 <style>
 
 /* =====================================================

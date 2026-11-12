@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # www → non-www 301 redirect
+    RewriteCond %{HTTP_HOST} ^www\.zaku\.abysoft\.my\.id$ [NC]
+    RewriteRule ^(.*)$ https://zaku.abysoft.my.id/$1 [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -18,4 +22,14 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Cache-Control for static assets
+<IfModule mod_headers.c>
+    <FilesMatch "\.(woff2|css|js|svg|png|jpg|jpeg|gif|ico|webp|avif)$">
+        Header set Cache-Control "public, max-age=604800, immutable"
+    </FilesMatch>
+    <FilesMatch "\.(html|xml|txt)$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
 </IfModule>
