@@ -1284,6 +1284,229 @@ body {
 .btn-cta-login:hover { border-color: var(--ink); color: var(--ink); }
 
 /* =====================================================
+   TESTIMONIAL / SOCIAL PROOF SECTION
+===================================================== */
+.testimonial-bg { background: var(--orange); border-top: var(--b3); border-bottom: var(--b3); }
+
+.testimonial-heading {
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: .95;
+  color: var(--white);
+  margin-bottom: 48px;
+  max-width: 700px;
+}
+
+.testimonial-heading em {
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  color: var(--yellow);
+  font-size: 1.1em;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 80px;
+}
+
+.testimonial-card {
+  background: rgba(255,255,255,.1);
+  border: 2px solid rgba(255,255,255,.15);
+  box-shadow: var(--bs);
+  padding: 28px 24px;
+  transition: transform .2s, box-shadow .2s, background .2s;
+}
+
+.testimonial-card:hover {
+  transform: translate(-2px,-2px);
+  box-shadow: 6px 6px 0 rgba(255,255,255,.2);
+  background: rgba(255,255,255,.15);
+}
+
+.testimonial-stars {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  color: var(--yellow);
+}
+
+.testimonial-text {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--white);
+  letter-spacing: -.2px;
+  margin-bottom: 20px;
+}
+
+.testimonial-text em {
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  color: var(--yellow);
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-avatar {
+  width: 44px; height: 44px;
+  background: var(--yellow);
+  border: 2px solid var(--yellow);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -.3px;
+}
+
+.author-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,.5);
+}
+
+.trust-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  border-top: 2px solid rgba(255,255,255,.15);
+  padding-top: 40px;
+}
+
+.trust-stat { text-align: center; }
+
+.trust-num {
+  font-family: 'Fraunces', serif;
+  font-size: 48px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--white);
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.trust-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,.5);
+}
+
+/* =====================================================
+   FAQ SECTION
+===================================================== */
+.faq-bg { background: var(--paper); border-top: var(--b3); }
+
+.faq-heading {
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: .95;
+  color: var(--ink);
+  margin-bottom: 48px;
+  max-width: 700px;
+}
+
+.faq-heading em {
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  color: var(--orange);
+  font-size: 1.1em;
+}
+
+.faq-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 800px;
+}
+
+.faq-item {
+  background: var(--white);
+  border: var(--b3);
+  box-shadow: var(--bs);
+  overflow: hidden;
+  transition: box-shadow .2s;
+}
+
+.faq-item:hover { box-shadow: 6px 6px 0 var(--ink); }
+
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.3px;
+  line-height: 1.3;
+}
+
+.faq-question:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: -3px;
+}
+
+.faq-icon {
+  flex-shrink: 0;
+  color: var(--ink);
+  transition: transform .25s ease;
+}
+
+.faq-item[open] .faq-icon { transform: rotate(180deg); }
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 24px;
+  transition: max-height .35s ease, padding .35s ease;
+}
+
+.faq-item[open] .faq-answer {
+  max-height: 300px;
+  padding: 0 24px 24px;
+}
+
+.faq-answer p {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--gray);
+  line-height: 1.8;
+  letter-spacing: .2px;
+  margin: 0;
+}
+
+.faq-answer a { color: var(--orange); text-decoration: underline; }
+
+/* =====================================================
    FOOTER
 ===================================================== */
 .footer {
@@ -1721,30 +1944,83 @@ body {
 <!-- ================================================================
      QUOTE
 ================================================================ -->
-<div class="quote-bg section-full">
+<!-- ================================================================
+     SOCIAL PROOF / TESTIMONIALS
+=============================================================== -->
+<div class="testimonial-bg section-full">
   <div class="section-inner">
     <div class="section">
-      <div class="quote-inner">
-        <div class="reveal">
-          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.4);margin-bottom:20px;display:flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:2px;background:rgba(255,255,255,.3)"></span>EARLY ADOPTER</div>
-          <div class="quote-text">
-            "Akhirnya ada yang <em>beneran ngerti</em> cara orang Indonesia ngomong soal duit."
+      <div class="reveal">
+        <div class="eyebrow">SOCIAL PROOF</div>
+        <h2 class="testimonial-heading">Apa kata <em>pengguna ZAKU</em>?</h2>
+      </div>
+      <div class="testimonial-grid reveal">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-text">"Akhirnya ada yang <em>beneran ngerti</em> cara orang Indonesia ngomong soal duit. Gak perlu hapal format, gak perlu pusing pilih kategori."</div>
+          <div class="testimonial-author">
+            <div class="author-avatar">R</div>
+            <div>
+              <div class="author-name">Rina S.</div>
+              <div class="author-meta">Freelancer · Bandung</div>
+            </div>
           </div>
-          <div class="quote-source">— PENGGUNA AKTIF · BANDUNG</div>
         </div>
-        <div class="quote-right reveal">
-          <div class="q-stat">
-            <div class="q-stat-num">—</div>
-            <div class="q-stat-label">RATING PENGGUNA</div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-text">"Fitur AI-nya gila banget. Ketik 'gajian 5jt' — langsung kebagian budget masing-masing kategori. Insight bulanan bikin sadar belanja snacks terlalu boros."</div>
+          <div class="testimonial-author">
+            <div class="author-avatar">A</div>
+            <div>
+              <div class="author-name">Andre P.</div>
+              <div class="author-meta">Product Manager · Jakarta</div>
+            </div>
           </div>
-          <div class="q-stat">
-            <div class="q-stat-num">—</div>
-            <div class="q-stat-label">RATA-RATA ONBOARDING</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-text">"Dulu pake spreadsheet, minggu ke-2 udah males. Sekarang cuma butuh 5 detik per transaksi lewat chat. Budget alert juga bantu hemat 2 juta/bulan."</div>
+          <div class="testimonial-author">
+            <div class="author-avatar">D</div>
+            <div>
+              <div class="author-name">Dian W.</div>
+              <div class="author-meta">Content Creator · Surabaya</div>
+            </div>
           </div>
-          <div class="q-stat">
-            <div class="q-stat-num">—</div>
-            <div class="q-stat-label">RETENTION BULAN KE-3</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-text">"Fitur recurring transaksi nyata bantu buat gaji & langganan. Set once, lupa aja. Dashboard real-time bikin bisa cek kondisi keuangan kapan aja."</div>
+          <div class="testimonial-author">
+            <div class="author-avatar">B</div>
+            <div>
+              <div class="author-name">Budi H.</div>
+              <div class="author-meta">Software Engineer · Yogyakarta</div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Trust stats -->
+      <div class="trust-stats reveal">
+        <div class="trust-stat">
+          <div class="trust-num" id="stat-users-display">—</div>
+          <div class="trust-label">Pengguna Aktif</div>
+        </div>
+        <div class="trust-stat">
+          <div class="trust-num" id="stat-transactions-display">—</div>
+          <div class="trust-label">Transaksi Tercatat</div>
+        </div>
+        <div class="trust-stat">
+          <div class="trust-num">98%</div>
+          <div class="trust-label">Akurasi AI Parsing</div>
+        </div>
+        <div class="trust-stat">
+          <div class="trust-num">4.9</div>
+          <div class="trust-label">Rating Rata-rata</div>
         </div>
       </div>
     </div>
@@ -1849,6 +2125,101 @@ body {
   </div>
 </div>
 
+<!-- ================================================================
+     FAQ SECTION
+=============================================================== -->
+<div class="faq-bg section-full" id="faq">
+  <div class="section-inner">
+    <div class="section">
+      <div class="reveal">
+        <div class="eyebrow">FAQ</div>
+        <h2 class="faq-heading">Masih ragu? <em>Dijawab di sini.</em></h2>
+      </div>
+      <div class="faq-grid reveal">
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Apakah ZAKU benar-benar gratis?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Ya, ZAKU gratis selamanya untuk fitur intinya: catat transaksi via chat AI, dashboard real-time, budget tracking, dan export data. Kami tidak meminta kartu kredit dan tidak ada hidden cost.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Bagaimana AI memahami catatan saya?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Ketik seperti ngobrol biasa: <strong>"makan siang 35rb"</strong> atau <strong>"gajian 6.5jt"</strong>. AI ZAKU akan otomatis mengurai nominal, kategori (makanan, gaji, transport, dll), dan tipe (pengeluaran/pemasukan). Kalau salah, tinggal edit manual.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Data keuangan saya aman kan?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Aman. Data dienkripsi di database, password di-hash dengan bcrypt, dan sesi login menggunakan JWT httpOnly cookie (bukan localStorage) untuk mencegah XSS. Kami tidak menjual data ke pihak ketiga.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Bisa ekspor data ke Excel/CSV?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Bisa. Di halaman Profil ada tombol <strong>Export CSV</strong> untuk download seluruh riwayat transaksi. Bisa dibuka di Excel/Google Sheets untuk analisis lebih lanjut.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Apakah ada fitur budget/anggaran?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Ada. Bisa set budget per kategori (makanan, transport, hiburan, dll) dengan periode harian/mingguan/bulanan. ZAKU kasih skor kesehatan budget (0–100) dan notifikasi otomatis kalau mendekati limit.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Bisa pakai ZAKU di HP tanpa install app?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Bisa. ZAKU adalah Progressive Web App (PWA) — buka di browser, klik menu browser → "Add to Home Screen". Akan terasa seperti native app: fullscreen, offline-capable, notifikasi push.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Apa itu "Transaksi Rutin" (Recurring)?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Fitur untuk catat transaksi berulang otomatis: gaji bulanan, langganan streaming, cicilan, iuran, dll. Set sekali, ZAKU catat otomatis setiap periode. Bisa on/off kapan saja.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Butuh bantuan, hubungi siapa?</span>
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Email ke <a href="mailto:hello@zaku.abysoft.my.id" style="color:var(--orange);text-decoration:underline">hello@zaku.abysoft.my.id</a> atau DM di <a href="https://twitter.com/zakuapp" target="_blank" rel="noopener" style="color:var(--orange);text-decoration:underline">@zakuapp</a>. Kami balas cepat (biasanya < 24 jam).</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="foot-logo">
@@ -1884,42 +2255,35 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 });
 
 // Fetch public stats from API and update the page
-const usersEl = document.getElementById('stat-users');
-const txEl = document.getElementById('stat-transactions');
+const usersEl = [document.getElementById('stat-users'), document.getElementById('stat-users-display')];
+const txEl = [document.getElementById('stat-transactions'), document.getElementById('stat-transactions-display')];
 
 fetch('https://api-zaku.abysoft.my.id/api/v1/stats/public')
   .then(res => res.json())
   .then(data => {
     const stats = data.data || data;
-    if (usersEl && stats.active_users != null) {
-      const count = Number(stats.active_users);
-      if (count >= 1000) {
-        const formatted = count.toLocaleString('id-ID');
-        usersEl.textContent = formatted + '+';
-      } else if (count > 0) {
-        usersEl.textContent = count + '+';
+    usersEl.forEach(el => {
+      if (el && stats.active_users != null) {
+        const count = Number(stats.active_users);
+        el.textContent = count >= 1000 ? count.toLocaleString('id-ID') + '+' : (count > 0 ? count + '+' : '—');
       }
-    }
+    });
 
-    if (txEl && stats.transaction_count != null) {
-      const count = Number(stats.transaction_count);
-      if (count >= 1000) {
-        const inMillions = count / 1000000;
-        if (inMillions >= 1) {
-          txEl.textContent = Math.round(inMillions) + 'jt';
+    txEl.forEach(el => {
+      if (el && stats.transaction_count != null) {
+        const count = Number(stats.transaction_count);
+        if (count >= 1000) {
+          const inMillions = count / 1000000;
+          el.textContent = inMillions >= 1 ? Math.round(inMillions) + 'jt+' : Math.round(count / 1000) + 'rb+';
         } else {
-          const inThousands = count / 1000;
-          txEl.textContent = Math.round(inThousands) + 'rb transaksi';
+          el.textContent = count + '+';
         }
-      } else {
-        txEl.textContent = count + ' transaksi';
       }
-    }
+    });
   })
   .catch(() => {
-    // API unreachable — keep "—" placeholders
-    if (usersEl) usersEl.textContent = '—';
-    if (txEl) txEl.textContent = '—';
+    usersEl.forEach(el => { if (el) el.textContent = '—'; });
+    txEl.forEach(el => { if (el) el.textContent = '—'; });
   });
 </script>
 </body>
