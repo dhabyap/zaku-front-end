@@ -129,4 +129,9 @@ class PageController extends Controller
     {
         return view('dashboard.calendar');
     }
+
+    public function onboarding()
+    {
+        return view('onboarding');
+    }
 }
