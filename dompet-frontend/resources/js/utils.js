@@ -16,6 +16,15 @@ export function formatDate(dateString) {
 }
 
 export function parseApiError(error, fallback = 'Terjadi kesalahan. Silakan coba lagi.') {
+    if (error?.response?.status === 429) {
+        const data = error.response.data || {};
+        const retryAfter = Number(data.retry_after || error.response.headers?.['retry-after']);
+        if (data.message && data.retry_after) return data.message;
+        if (Number.isFinite(retryAfter) && retryAfter > 0) {
+            return `Terlalu banyak permintaan. Silakan coba lagi dalam ${retryAfter} detik.`;
+        }
+        return 'Terlalu banyak permintaan. Silakan coba lagi nanti.';
+    }
     if (error?.response?.data?.message) {
         let msg = error.response.data.message;
         if (error.response.data.errors) {
