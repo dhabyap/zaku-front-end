@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create an axios instance with base URL and JSON headers
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-zaku.abysoft.my.id/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-zaku.abysoft.my.id/api',
     headers: {
         "Content-Type": "application/json",
     },
