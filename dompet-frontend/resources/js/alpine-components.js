@@ -31,9 +31,8 @@ export default function (Alpine) {
                 const { token, user, needs_onboarding } = response.data.data;
                 // Token is set in httpOnly cookie by backend
                 window.auth.setUser(user, this.formData.remember);
-                window.utils.showToast('success', 'Anda berhasil masuk! Sedang mengalihkan...');
-                const redirect = needs_onboarding ? '/onboarding' : '/dashboard';
-                setTimeout(() => { window.location.href = redirect; }, 1500);
+                window.utils.showToast('success', 'Anda berhasil masuk!');
+                window.location.assign(needs_onboarding ? '/onboarding' : '/dashboard');
             } catch (error) {
                 const msg = window.utils.parseApiError(error, 'Email atau kata sandi belum benar. Periksa kembali, lalu coba lagi.');
                 window.utils.showToast('error', msg, true);
