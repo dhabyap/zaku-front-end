@@ -29,3 +29,13 @@ Route::middleware(['jwt.session'])->group(function () {
     Route::get('/calendar', [PageController::class, 'calendar'])->name('calendar');
     Route::get('/onboarding', [PageController::class, 'onboarding'])->name('onboarding');
 });
+
+Route::get('/logout', function () {
+    auth()->guard('web')->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    // Also clear JWT cookie if exists
+    $response = redirect('/login')->with('status', 'Logged out');
+    $response->withCookie(cookie()->forget('zaku_token'));
+    return $response;
+})->name('logout');
