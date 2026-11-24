@@ -89,12 +89,16 @@
                     try {
                         const response = await window.apiClient.post('/v1/auth/login', this.formData);
                         const { token, user } = response.data.data;
-                        // Token is set in httpOnly cookie by backend
+                        // In case browser rejects cross-site cookie, set fallback token cookie on current domain
+                        if (token) {
+                            const maxAge = this.formData.remember ? 30 * 86400 : 86400;
+                            document.cookie = `token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+                        }
                         window.auth.setUser(user, this.formData.remember);
                         window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
                         setTimeout(() => {
                             window.location.href = '/dashboard';
-                        }, 1500);
+                        }, 1000);
                     } catch (error) {
                         console.error('Login error:', error);
                         const detailedMsg = window.utils.parseApiError(error, 'Email atau password salah. Silakan coba lagi.');

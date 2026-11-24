@@ -29,7 +29,10 @@ export default function (Alpine) {
             try {
                 const response = await window.apiClient.post('/v1/auth/login', this.formData);
                 const { token, user, needs_onboarding } = response.data.data;
-                // Token is set in httpOnly cookie by backend
+                if (token) {
+                    const maxAge = this.formData.remember ? 30 * 86400 : 86400;
+                    document.cookie = `token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+                }
                 window.auth.setUser(user, this.formData.remember);
                 window.utils.showToast('success', 'Anda berhasil masuk!');
                 window.location.assign(needs_onboarding ? '/onboarding' : '/dashboard');
