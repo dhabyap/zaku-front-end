@@ -832,6 +832,34 @@ export default function (Alpine) {
             this.dateTo = to;
             this.fetchTransactions(1);
         },
+        async exportCsv() {
+            try {
+                const params = new URLSearchParams();
+                if (this.dateFrom) params.append('start_date', this.dateFrom);
+                if (this.dateTo) params.append('end_date', this.dateTo);
+                if (this.filter === 'income' || this.filter === 'expense') {
+                    params.append('type', this.filter);
+                }
+
+                const url = '/v1/export/transactions-csv?' + params.toString();
+                const res = await window.apiClient.get(url, { responseType: 'blob' });
+                const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute('download', 'zaku-transactions-' + new Date().toISOString().slice(0, 10) + '.csv');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                if (window.utils && window.utils.showToast) {
+                    window.utils.showToast('File CSV berhasil diunduh! 📄', 'success');
+                }
+            } catch (err) {
+                console.error('Export CSV error:', err);
+                if (window.utils && window.utils.showToast) {
+                    window.utils.showToast('Gagal mengunduh CSV. Coba lagi.', 'error');
+                }
+            }
+        },
         filtered() {
             return this.transactions;
         },

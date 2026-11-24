@@ -8,7 +8,12 @@
         <div class="hist-title"><strong>Riwayat</strong><span class="hist-title-dot">.</span></div>
         <div class="hist-sub">SEMUA TRANSAKSI KAMU</div>
       </div>
-      <!-- Removed hist-chips div -->
+      <div>
+        <button class="btn btn-secondary btn-sm" @click="exportCsv()" style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1px;padding:6px 12px;border:1.5px solid var(--ink);background:var(--paper);cursor:pointer;box-shadow:2px 2px 0 var(--ink);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          EXPORT CSV
+        </button>
+      </div>
     </div>
     <div class="search-wrap">
       <input class="search-input" type="text" placeholder="Cari nama atau kategori..." @input="doSearch($event.target.value)">

@@ -1,0 +1,18 @@
+{
+  "name": "ZAKU - Dompet Finansial",
+  "short_name": "ZAKU",
+  "description": "Aplikasi pencatatan keuangan pribadi neo-brutalisme dengan AI.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#111010",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/zaku-favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

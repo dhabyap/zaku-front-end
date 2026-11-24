@@ -262,6 +262,51 @@
                 </div>
             </div>
 
+            <!-- Floating Action Button (FAB) -->
+            <a href="/manual-input" class="fab-quick-add" aria-label="Catat Transaksi Cepat" title="Catat Transaksi">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </a>
+
+            <style>
+                .fab-quick-add {
+                    position: fixed;
+                    right: 20px;
+                    bottom: 84px;
+                    width: 52px;
+                    height: 52px;
+                    background: var(--punch, #ff4d4d);
+                    color: #fff;
+                    border: 2.5px solid var(--ink, #111010);
+                    box-shadow: 3px 3px 0 var(--ink, #111010);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 99;
+                    cursor: pointer;
+                    transition: transform 0.1s ease, box-shadow 0.1s ease;
+                }
+                .fab-quick-add:hover {
+                    transform: translate(-2px, -2px);
+                    box-shadow: 5px 5px 0 var(--ink, #111010);
+                }
+                .fab-quick-add:active {
+                    transform: translate(2px, 2px);
+                    box-shadow: 1px 1px 0 var(--ink, #111010);
+                }
+                @media (min-width: 768px) {
+                    .fab-quick-add {
+                        bottom: 30px;
+                        right: 30px;
+                        width: 56px;
+                        height: 56px;
+                    }
+                }
+            </style>
+
 
 
     <script>
