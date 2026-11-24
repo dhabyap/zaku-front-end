@@ -60,6 +60,20 @@
                 </div>
             </div>
 
+            {{-- Appearance / Theme --}}
+            <div class="settings-section">
+                <div class="settings-section-title">TEMA TAMPILAN</div>
+                <div class="settings-section-desc">Pilih tema antarmuka Zaku sesuai kenyamanan mata.</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+                    <button type="button" @click="setTheme('light')" :style="theme === 'light' ? 'background:var(--ink);color:var(--white);border:2px solid var(--ink);font-weight:700;' : 'background:var(--paper);color:var(--ink);border:2px solid var(--ink);'" style="padding:10px;font-family:var(--font-mono);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        ☀️ LIGHT
+                    </button>
+                    <button type="button" @click="setTheme('dark')" :style="theme === 'dark' ? 'background:var(--punch);color:var(--white);border:2px solid var(--ink);font-weight:700;' : 'background:var(--paper);color:var(--ink);border:2px solid var(--ink);'" style="padding:10px;font-family:var(--font-mono);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        🌙 CYBER DARK
+                    </button>
+                </div>
+            </div>
+
             {{-- Save --}}
             <button class="btn-budget-submit" @click="save()" :disabled="saving" x-text="saving ? 'MENYIMPAN...' : 'SIMPAN PENGATURAN'"></button>
         </div>

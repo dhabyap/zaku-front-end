@@ -52,6 +52,9 @@
                             </div>
                         </template>
                     </div>
+                    <button type="button" @click="toggleTheme()" class="dh-theme-toggle" aria-label="Ganti Tema" title="Ganti Tema" style="background:var(--paper);border:2px solid var(--ink);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:2px 2px 0 var(--ink);">
+                        <span x-text="isDark ? '☀️' : '🌙'">🌙</span>
+                    </button>
                     <a href="/profile" class="dh-avatar" aria-label="Buka Profil" title="Profil" x-text="user?.name?.charAt(0).toUpperCase() || '?'"></a>
                 </div>
             </div>
@@ -333,6 +336,20 @@
                 insightDetail: '',
                 insightType: 'info',
                 showAmount: localStorage.getItem('zaku_hide_amount') !== 'false',
+                isDark: localStorage.getItem('zaku_theme') === 'dark',
+                toggleTheme() {
+                    this.isDark = !this.isDark;
+                    const nextTheme = this.isDark ? 'dark' : 'light';
+                    localStorage.setItem('zaku_theme', nextTheme);
+                    if (this.isDark) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                    if (window.utils && window.utils.showToast) {
+                        window.utils.showToast('Tema diubah ke ' + (this.isDark ? 'Cyber Dark 🌙' : 'Light ☀️'), 'success');
+                    }
+                },
                 budget: {
                     limit: 0,
                     used: 0,

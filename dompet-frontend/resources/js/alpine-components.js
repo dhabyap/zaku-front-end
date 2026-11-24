@@ -1688,8 +1688,21 @@ export default function (Alpine) {
             monthly_budget: 0,
             currency: 'IDR',
         },
+        theme: localStorage.getItem('zaku_theme') || 'light',
         loading: true,
         saving: false,
+        setTheme(t) {
+            this.theme = t;
+            localStorage.setItem('zaku_theme', t);
+            if (t === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            if (window.utils && window.utils.showToast) {
+                window.utils.showToast('Tema diubah ke ' + (t === 'dark' ? 'Cyber Dark 🌙' : 'Light ☀️'), 'success');
+            }
+        },
         async init() { await this.fetchSettings(); },
         async fetchSettings() {
             this.loading = true;

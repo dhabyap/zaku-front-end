@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Zaku') }}</title>
+    <script>
+        // Inline execution to prevent white flash
+        (function() {
+            try {
+                if (localStorage.getItem('zaku_theme') === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ asset('zaku-favicon.svg') }}">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#111010">

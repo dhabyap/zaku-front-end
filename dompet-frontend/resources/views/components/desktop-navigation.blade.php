@@ -26,5 +26,25 @@
             <a href="/settings" class="desktop-nav-link {{ request()->is('settings') ? 'active' : '' }}" @if(request()->is('settings')) aria-current="page" @endif>Settings</a>
             <a href="/changelogs" class="desktop-nav-link {{ request()->is('changelogs') ? 'active' : '' }}" @if(request()->is('changelogs')) aria-current="page" @endif>Changelog</a>
         </section>
+        <section class="desktop-nav-group" aria-labelledby="desktop-nav-theme">
+            <h2 id="desktop-nav-theme">TEMA</h2>
+            <button type="button" onclick="(function(){
+                const cur = localStorage.getItem('zaku_theme') === 'dark' ? 'dark' : 'light';
+                const next = cur === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('zaku_theme', next);
+                if (next === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+                const lbl = document.getElementById('desktop-theme-label');
+                if (lbl) lbl.textContent = next === 'dark' ? '☀️ Ganti ke Light' : '🌙 Ganti ke Dark';
+                if (window.utils && window.utils.showToast) {
+                    window.utils.showToast('Tema diubah ke ' + (next === 'dark' ? 'Cyber Dark 🌙' : 'Light ☀️'), 'success');
+                }
+            })()" style="background:var(--cream);border:1.5px solid var(--ink);width:100%;padding:8px 12px;font-family:var(--font-mono);font-size:11px;font-weight:700;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                <span id="desktop-theme-label">🌙 / ☀️ Toggle Tema</span>
+            </button>
+        </section>
     </nav>
 </aside>

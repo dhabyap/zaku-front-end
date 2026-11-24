@@ -17,6 +17,37 @@
   --white:        #fff;
 }
 
+html[data-theme="dark"] {
+  --ink:     #0C0D0E;
+  --paper:   #1A1C1E;
+  --cream:   #23262A;
+  --punch:   #FF5C1A;
+  --punch-2: #FFE033;
+  --mint:    #00F5AA;
+  --sky:     #2D3748;
+  --border:  3px solid #33383F;
+  --bs:      4px 4px 0 #0C0D0E;
+  --bs-lg:   6px 6px 0 #0C0D0E;
+  --bs-xl:   8px 8px 0 #0C0D0E;
+  --white:   #E4E7EB;
+  color:     #E4E7EB;
+}
+
+html[data-theme="dark"] body {
+  background: #0C0D0E;
+}
+
+html[data-theme="dark"] .shell {
+  background: var(--paper);
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background: #23262A;
+  color: #E4E7EB;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
