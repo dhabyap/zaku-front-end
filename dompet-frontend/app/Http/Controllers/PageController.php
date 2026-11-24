@@ -132,6 +132,6 @@ class PageController extends Controller
 
     public function onboarding()
     {
-        return view('onboarding');
+        return redirect()->route('dashboard');
     }
 }
