@@ -26,6 +26,12 @@
                 <div class="msg-time" x-text="msg.time"></div>
             </div>
         </template>
+        <div class="msg ai" x-show="loading" style="display: none;" id="typing">
+            <div class="msg-bub" style="display:flex;align-items:center;gap:8px;">
+                <div class="dots"><span></span><span></span><span></span></div>
+                <span style="font-size:11px;color:rgba(17,16,16,.5);font-family:var(--font-mono);">ZAKU sedang memproses...</span>
+            </div>
+        </div>
     </div>
 
     <div class="chat-input-area">
@@ -43,9 +49,16 @@
                 @keydown="handleKey($event)"
             ></textarea>
             <button class="send-btn" @click="sendMsg()" :disabled="!message.trim() || loading">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
+                <template x-if="!loading">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </template>
+                <template x-if="loading">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="animate-spin">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="32" stroke-linecap="round"></circle>
+                    </svg>
+                </template>
             </button>
         </div>
     </div>
@@ -58,6 +71,35 @@
             loading: false,
             message: '',
             charCount: 0,
+            STORAGE_KEY: 'zaku_chat_history',
+            messages: [],
+            init() {
+                try {
+                    const saved = localStorage.getItem(this.STORAGE_KEY);
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            this.messages = parsed;
+                            this.scrollBottom();
+                            return;
+                        }
+                    }
+                } catch { /* ignore */ }
+
+                const userName = window.auth.getUser()?.name?.split(' ')[0] || 'Teman';
+                this.messages.push({
+                    role: 'ai',
+                    html: true,
+                    content: 'Halo, <strong>' + userName + '</strong>! 👋 Saya ZAKU AI, asisten keuangan pribadimu.<br><br>Kamu bisa catat pengeluaran atau pemasukan langsung lewat chat ini. Contoh:<br><em>"Makan siang bakso 25rb"</em><br><em>"Dapat transfer freelance 500rb"</em>',
+                    time: this.now()
+                });
+                this.scrollBottom();
+            },
+            persist() {
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.messages));
+                } catch { /* quota exceeded */ }
+            },
             updateCharCount() {
                 this.charCount = this.message.length;
             },
@@ -67,38 +109,40 @@
                     this.sendMsg();
                 }
             },
+            now() {
+                return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            },
+            scrollBottom() {
+                this.$nextTick(() => {
+                    const msgs = this.$refs.msgs;
+                    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+                });
+            },
             async sendMsg() {
                 const val = this.message.trim();
                 if (!val || this.loading) return;
                 this.message = '';
                 this.charCount = 0;
 
-                const msgs = this.$refs.msgs;
-                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-                const u = document.createElement('div');
-                u.className = 'msg usr';
-                u.innerHTML = '<div class="msg-bub">' + this.escapeHtml(val) + '</div><div class="msg-time">' + now + '</div>';
-                msgs.appendChild(u);
-
-                const t = document.createElement('div');
-                t.className = 'msg ai';
-                t.id = 'typing';
-                t.innerHTML = '<div class="msg-bub"><div class="dots"><span></span><span></span><span></span></div></div>';
-                msgs.appendChild(t);
-                msgs.scrollTop = msgs.scrollHeight;
+                // Push user message
+                this.messages.push({
+                    role: 'usr',
+                    html: false,
+                    content: val,
+                    time: this.now()
+                });
+                this.persist();
 
                 this.loading = true;
-                try {
-                    const res = await window.apiClient.post('/v1/ai/chat', { message: val });
-                    t.remove();
+                this.scrollBottom();
 
+                try {
+                    const res = await window.apiClient.post('/v1/ai/chat', { message: val }, { timeout: 20000 });
                     const data = res.data;
                     let bubbleHtml = '';
 
                     if (data.data) {
                         const inner = data.data;
-                        // Backend returns reply_message + parsed_data
                         const parsed = inner.parsed_data || inner;
                         if (inner.reply_message) {
                             bubbleHtml = this.escapeHtml(inner.reply_message);
@@ -124,25 +168,38 @@
                         bubbleHtml = this.escapeHtml(data.message);
                     }
 
-                    // Fallback if bubbleHtml is still empty
                     if (!bubbleHtml) {
-                        bubbleHtml = '<em style="color: #999;">Maaf, tidak ada respons dari server. Coba lagi ya!</em>';
+                        bubbleHtml = 'Transaksi berhasil diproses, tapi format respons tidak lengkap.';
                     }
 
-                    const a = document.createElement('div');
-                    a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">' + bubbleHtml + '</div><div class="msg-time">' + now + '</div>';
-                    msgs.appendChild(a);
+                    this.messages.push({
+                        role: 'ai',
+                        html: true,
+                        content: bubbleHtml,
+                        time: this.now()
+                    });
                 } catch (e) {
-                    t.remove();
-                    const errorMsg = window.utils.parseApiError(e, 'Maaf, lagi ada gangguan. Coba lagi ya!');
-                    const a = document.createElement('div');
-                    a.className = 'msg ai';
-                    a.innerHTML = '<div class="msg-bub">' + this.escapeHtml(errorMsg) + '</div><div class="msg-time">' + now + '</div>';
-                    msgs.appendChild(a);
+                    console.error('AI chat error:', e);
+                    let errorMsg = '⚠️ Maaf, AI sedang lambat atau tidak dapat merespons. ';
+                    if (e.code === 'ECONNABORTED' || e.message?.includes('timeout')) {
+                        errorMsg = '⏱️ Waktu tunggu habis (timeout). AI sedang sibuk. Silakan coba kirim ulang atau gunakan menu Input Manual.';
+                    } else if (e.response && e.response.status === 429) {
+                        errorMsg = '⏳ Terlalu banyak permintaan dalam waktu singkat. Mohon tunggu beberapa detik lagi.';
+                    } else {
+                        const parsed = window.utils.parseApiError(e, '');
+                        if (parsed) errorMsg += parsed;
+                        else errorMsg += 'Silakan coba lagi beberapa saat lagi atau input manual.';
+                    }
+                    this.messages.push({
+                        role: 'ai',
+                        html: false,
+                        content: errorMsg,
+                        time: this.now()
+                    });
                 } finally {
                     this.loading = false;
-                    msgs.scrollTop = msgs.scrollHeight;
+                    this.persist();
+                    this.scrollBottom();
                 }
             },
             sendQuick(text) {
@@ -158,7 +215,15 @@
                     danger: false
                 });
                 if (!ok) return;
-                this.$refs.msgs.innerHTML = '<div class="msg ai"><div class="msg-bub">Chat dibersihkan. Ada transaksi yang mau dicatat? 😊</div><div class="msg-time">Sekarang</div></div>';
+                localStorage.removeItem(this.STORAGE_KEY);
+                this.messages = [];
+                this.messages.push({
+                    role: 'ai',
+                    html: true,
+                    content: 'Chat dibersihkan. Ada transaksi yang mau dicatat? 😊',
+                    time: this.now()
+                });
+                this.persist();
             },
             formatAmount(n) {
                 return 'Rp ' + Number(n).toLocaleString('id-ID');
