@@ -12,7 +12,7 @@ const apiClient = axios.create({
 });
 
 // Auth endpoints that should NOT redirect on 401 (invalid credentials is expected)
-const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification', '/v1/auth/change-password', '/v1/auth/me', '/v1/auth/refresh', '/v1/auth/logout'];
+const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification', '/v1/auth/change-password'];
 
 // Response interceptor: handle 401 and network errors
 apiClient.interceptors.response.use(
@@ -25,9 +25,9 @@ apiClient.interceptors.response.use(
                 // Clear user data and redirect to login
                 localStorage.removeItem('user');
                 sessionStorage.removeItem('user');
-                if (window.location.pathname !== '/login') {
-                    const separator = window.location.search ? '&' : '?';
-                    window.location.href = `/login${separator}session=expired`;
+                if (window.location.pathname !== '/login' && !window.__sessionRedirecting) {
+                    window.__sessionRedirecting = true;
+                    window.location.replace('/login?session=expired');
                 }
             }
             return Promise.reject(error);
