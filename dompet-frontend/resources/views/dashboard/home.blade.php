@@ -138,7 +138,7 @@
                                 <div class="cat-budget-mini">
                                     <div class="cat-budget-mini-top">
                                         <span class="cat-budget-mini-name">
-                                            <span x-text="catEmoji(cb.name)"></span>
+                                            <span x-text="getEmoji(cb.name)"></span>
                                             <span x-text="cb.name"></span>
                                         </span>
                                         <span class="cat-budget-mini-amt" x-text="'Rp ' + formatNumber(cb.spent) + ' / Rp ' + formatNumber(cb.amount)"></span>
