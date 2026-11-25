@@ -13,8 +13,7 @@ export const setToken = (access, refresh = null, remember = false) => {
 export const clearToken = () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
-    document.cookie = 'token=; path=/; max-age=-1; SameSite=Lax; Secure';
-    document.cookie = 'token=; path=/; domain=.abysoft.my.id; max-age=-1; SameSite=None; Secure';
+    // httpOnly cookie cleared by backend on logout call
 
     if (window.location.pathname !== '/login') {
         const separator = window.location.search ? '&' : '?';

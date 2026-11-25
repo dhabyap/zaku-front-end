@@ -59,6 +59,14 @@ export function showToast(type, message, persistent = false) {
     }
 }
 
+export function greeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'SELAMAT PAGI ☀️';
+    if (h < 15) return 'SELAMAT SIANG 🌤️';
+    if (h < 18) return 'SELAMAT SORE 🌅';
+    return 'SELAMAT MALAM 🌙';
+}
+
 export function confirmDialog({ title = 'Yakin?', message = '', okLabel = 'YA, LANJUTKAN', danger = false } = {}) {
     const titleEl = document.getElementById('confirm-modal-title');
     const msgEl = document.getElementById('confirm-modal-message');

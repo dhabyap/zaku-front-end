@@ -5,7 +5,7 @@
         <header class="dash-header" x-data="{ user: window.auth.getUser() }">
             <div class="dh-row">
                 <div>
-                    <div class="dh-greet" x-text="greeting()"></div>
+                    <div class="dh-greet" x-text="window.utils.greeting()"></div>
                     <div class="dh-name" x-text="user?.name || 'Teman'"></div>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;">
@@ -309,47 +309,7 @@
                     }
                 }
             </style>
-
-
-
-    <script>
-        function greeting() {
-            const h = new Date().getHours();
-            let g = 'SELAMAT MALAM 🌙';
-            if (h < 12) g = 'SELAMAT PAGI ☀️';
-            else if (h < 15) g = 'SELAMAT SIANG 🌤️';
-            else if (h < 18) g = 'SELAMAT SORE 🌅';
-            return g;
-        }
-
-        function dashboardHome() {
-            return {
-                balance: 0,
-                income: 0,
-                expense: 0,
-                transactions: [],
-                categories: [],
-                maxCategory: null,
-                maxCategoryAmount: 0,
-                maxCategoryPct: 0,
-                insightText: '',
-                insightDetail: '',
-                insightType: 'info',
-                showAmount: localStorage.getItem('zaku_hide_amount') !== 'false',
-                isDark: localStorage.getItem('zaku_theme') === 'dark',
-                toggleTheme() {
-                    this.isDark = !this.isDark;
-                    const nextTheme = this.isDark ? 'dark' : 'light';
-                    localStorage.setItem('zaku_theme', nextTheme);
-                    if (this.isDark) {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                    } else {
-                        document.documentElement.removeAttribute('data-theme');
-                    }
-                    if (window.utils && window.utils.showToast) {
-                        window.utils.showToast('Tema diubah ke ' + (this.isDark ? 'Cyber Dark 🌙' : 'Light ☀️'), 'success');
-                    }
-                },
+@endsection
                 budget: {
                     limit: 0,
                     used: 0,

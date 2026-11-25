@@ -23,8 +23,8 @@
             <div class="field">
                 <label>PASSWORD</label>
                 <div class="pw-row">
-                    <input type="password" placeholder="Min. 8 karakter" id="rg-pw" x-model="formData.password">
-                    <button type="button" class="pw-eye" onclick="togglePw('rg-pw',this)">LIHAT</button>
+                    <input :type="showPassword ? 'text' : 'password'" placeholder="Min. 8 karakter" x-model="formData.password">
+                    <button type="button" class="pw-eye" @click="showPassword = !showPassword" x-text="showPassword ? 'SEMBUNYIKAN' : 'LIHAT'"></button>
                 </div>
             </div>
             <div class="field">
@@ -36,52 +36,7 @@
                 <span x-show="loading" x-cloak>MEMPROSES...</span>
             </button>
         </form>
-        <div class="auth-link" style="margin-top:18px">Sudah punya akun? <a onclick="window.location.href='/login'">Masuk</a></div>
+        <div class="auth-link" style="margin-top:18px">Sudah punya akun? <a href="/login">Masuk</a></div>
     </div>
 </div>
-
-<script>
-    function togglePw(id, btn) {
-        const inp = document.getElementById(id);
-        if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'SEMBUNYIKAN'; }
-        else { inp.type = 'password'; btn.textContent = 'LIHAT'; }
-    }
-
-    function registerForm() {
-        return {
-            formData: {
-                name: '',
-                email: '',
-                password: '',
-                password_confirmation: ''
-            },
-            loading: false,
-            async submit() {
-                if (this.loading) return;
-                if (this.formData.password !== this.formData.password_confirmation) {
-                    window.utils.showToast('error', 'Konfirmasi password tidak sesuai.');
-                    return;
-                }
-                if (this.formData.password.length < 8) {
-                    window.utils.showToast('error', 'Password harus minimal 8 karakter.');
-                    return;
-                }
-                this.loading = true;
-                try {
-                    await window.apiClient.post('/v1/auth/register', this.formData);
-                    window.utils.showToast('success', 'Akun berhasil dibuat! Silakan masuk.');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 1500);
-                } catch (error) {
-                    console.error('Registration error:', error);
-                    const detailedMsg = window.utils.parseApiError(error, 'Gagal membuat akun. Silakan periksa kembali data Anda.');
-                    window.utils.showToast('error', detailedMsg, true);
-                } finally {
-                    this.loading = false;
-                }
-            }
-        }
-    }
-</script>
 @endsection

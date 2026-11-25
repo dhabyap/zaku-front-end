@@ -13,7 +13,7 @@ class JwtSession
      */
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->cookie('token');
+        $token = $request->cookie('zaku_token');
 
         if (! $token || $token === '') {
             return redirect()->route('login');

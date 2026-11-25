@@ -35,8 +35,8 @@
                 <div class="field">
                     <label>PASSWORD</label>
                     <div class="pw-row">
-                        <input type="password" placeholder="••••••••" id="li-pw" x-model="formData.password">
-                        <button type="button" class="pw-eye" onclick="togglePw('li-pw',this)">LIHAT</button>
+                        <input type="password" placeholder="••••••••" id="li-pw" x-model="formData.password" @keydown="e => { if (e.key === 'Enter') submit() }">
+                        <button type="button" class="pw-eye" @click="showPassword = !showPassword" x-text="showPassword ? 'SEMBUNYIKAN' : 'LIHAT'"></button>
                     </div>
                 </div>
 
@@ -53,66 +53,7 @@
 
             <button class="btn-main alt" onclick="window.location.href='/register'">BUAT AKUN BARU</button>
 
-            <div class="auth-link">Demo? <a onclick="demoLogin()">Langsung masuk →</a></div>
+            <div class="auth-link">Demo? <a @click="demoLogin()">Langsung masuk →</a></div>
         </div>
     </div>
-
-    <script>
-        function togglePw(id, btn) {
-            const inp = document.getElementById(id);
-            if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'SEMBUNYIKAN'; }
-            else { inp.type = 'password'; btn.textContent = 'LIHAT'; }
-        }
-
-        function loginForm() {
-            return {
-                formData: {
-                    email: '',
-                    password: '',
-                    remember: false
-                },
-                loading: false,
-                init() {
-                    const params = new URLSearchParams(window.location.search);
-                    if (params.get('session') === 'expired') {
-                        window.utils.showToast('error', 'Sesi Anda telah berakhir. Silakan login kembali.', true);
-                        return;
-                    }
-
-                    if (window.auth.isLoggedIn()) {
-                        window.location.replace('/dashboard');
-                    }
-                },
-                async submit() {
-                    if (this.loading) return;
-                    this.loading = true;
-                    try {
-                        const response = await window.apiClient.post('/v1/auth/login', this.formData);
-                        const { token, user } = response.data.data;
-                        // In case browser rejects cross-site cookie, set fallback token cookie on current domain
-                        if (token) {
-                            const maxAge = this.formData.remember ? 30 * 86400 : 86400;
-                            document.cookie = `token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
-                        }
-                        window.auth.setUser(user, this.formData.remember);
-                        window.utils.showToast('success', 'Login berhasil! Sedang mengalihkan...');
-                        setTimeout(() => {
-                            window.location.href = '/dashboard';
-                        }, 1000);
-                    } catch (error) {
-                        console.error('Login error:', error);
-                        const detailedMsg = window.utils.parseApiError(error, 'Email atau password salah. Silakan coba lagi.');
-                        window.utils.showToast('error', detailedMsg, true);
-                    } finally {
-                        this.loading = false;
-                    }
-                }
-            }
-        }
-
-        function demoLogin() {
-            window.auth.setUser({ name: 'Budi Santoso', email: 'budi@email.com' }, true);
-            window.location.href = '/dashboard';
-        }
-    </script>
 @endsection

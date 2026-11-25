@@ -33,27 +33,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    function forgotPasswordForm() {
-        return {
-            email: '',
-            loading: false,
-            async submit() {
-                if (this.loading) return;
-                this.loading = true;
-                try {
-                    await window.apiClient.post('/v1/auth/forgot-password', { email: this.email });
-                    window.utils.showToast('success', 'Instruksi reset password telah dikirim ke email Anda.');
-                    this.email = '';
-                } catch (error) {
-                    console.error('Forgot password error:', error);
-                    window.utils.showToast('error', window.utils.parseApiError(error, 'Alamat email tidak ditemukan.'), true);
-                } finally {
-                    this.loading = false;
-                }
-            }
-        }
-    }
-</script>
 @endsection

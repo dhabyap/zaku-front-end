@@ -3,36 +3,16 @@ import axios from "axios";
 
 // Create an axios instance with base URL and JSON headers
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-zaku.abysoft.my.id/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || '',
     headers: {
         "Content-Type": "application/json",
     },
     timeout: 15000,
-    withCredentials: true, // Important: send cookies with cross-origin requests
+    withCredentials: true, // Important: send httpOnly cookies with cross-origin requests
 });
 
-// Auth endpoints that should NOT attach or validate existing tokens
+// Auth endpoints that should NOT redirect on 401 (invalid credentials is expected)
 const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification', '/v1/auth/change-password', '/v1/auth/me', '/v1/auth/refresh', '/v1/auth/logout'];
-
-// Helper to get cookie by name
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
-
-// Request interceptor: attach Authorization header if cookie exists as fallback
-apiClient.interceptors.request.use(
-    (config) => {
-        const token = getCookie('token') || getCookie('zaku_token');
-        if (token && !config.headers.Authorization) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error),
-);
 
 // Response interceptor: handle 401 and network errors
 apiClient.interceptors.response.use(

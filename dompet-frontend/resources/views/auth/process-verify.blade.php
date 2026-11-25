@@ -38,36 +38,4 @@
 
     </div>
 </div>
-
-<script>
-    function processVerification() {
-        return {
-            status: 'loading',
-            errorMessage: 'Tautan verifikasi tidak valid atau sudah kadaluarsa.',
-            async init() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const token = urlParams.get('token');
-                if (!token) {
-                    this.status = 'error';
-                    this.errorMessage = 'Token verifikasi tidak ditemukan di URL.';
-                    window.utils.showToast('error', this.errorMessage, true);
-                    return;
-                }
-                try {
-                    await window.apiClient.post('/v1/auth/verify-email', { email: '', code: token });
-                    this.status = 'success';
-                    window.utils.showToast('success', 'Email berhasil diverifikasi!');
-                    setTimeout(() => {
-                        window.location.href = window.auth.isLoggedIn() ? '/dashboard' : '/login';
-                    }, 2000);
-                } catch (error) {
-                    this.status = 'error';
-                    console.error('Verification error:', error);
-                    this.errorMessage = window.utils.parseApiError(error, 'Gagal memverifikasi email. Tautan mungkin sudah kadaluarsa.');
-                    window.utils.showToast('error', this.errorMessage, true);
-                }
-            }
-        }
-    }
-</script>
 @endsection

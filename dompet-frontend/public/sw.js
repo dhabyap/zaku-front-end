@@ -1,9 +1,17 @@
-const CACHE_NAME = 'zaku-pwa-v1';
+const CACHE_NAME = 'zaku-pwa-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/dashboard',
   '/zaku-favicon.svg',
-  '/site.webmanifest'
+  '/site.webmanifest',
+  '/icons/icon-72.png',
+  '/icons/icon-96.png',
+  '/icons/icon-128.png',
+  '/icons/icon-144.png',
+  '/icons/icon-152.png',
+  '/icons/icon-192.png',
+  '/icons/icon-384.png',
+  '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

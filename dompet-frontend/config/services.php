@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'api' => [
+        'base_url' => env('VITE_API_BASE_URL', 'https://api-zaku.abysoft.my.id/api'),
+    ],
+
 ];

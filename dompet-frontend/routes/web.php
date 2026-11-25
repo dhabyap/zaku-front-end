@@ -34,8 +34,23 @@ Route::get('/logout', function () {
     auth()->guard('web')->logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
-    // Also clear JWT cookie if exists
+
+    // Call backend API to clear httpOnly cookie
+    try {
+        $apiBase = config('services.api.base_url') ?? env('VITE_API_BASE_URL', 'https://api-zaku.abysoft.my.id/api');
+        $client = new \GuzzleHttp\Client();
+        $client->post(rtrim($apiBase, '/') . '/v1/auth/logout', [
+            'cookies' => true,
+            'headers' => [
+                'Cookie' => request()->header('Cookie'),
+            ],
+        ]);
+    } catch (\Exception) {
+        // Ignore if backend call fails
+    }
+
     $response = redirect('/login')->with('status', 'Logged out');
     $response->withCookie(cookie()->forget('zaku_token'));
+
     return $response;
 })->name('logout');

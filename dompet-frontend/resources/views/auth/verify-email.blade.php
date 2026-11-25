@@ -27,33 +27,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    function verifyEmail() {
-        return {
-            loading: false,
-            userEmail: new URLSearchParams(window.location.search).get('email') || window.auth.getUser()?.email,
-            async resend() {
-                if (this.loading) return;
-                if (!this.userEmail) {
-                    window.utils.showToast('error', 'Alamat email tidak ditemukan. Silakan login kembali.');
-                    return;
-                }
-                this.loading = true;
-                try {
-                    await window.apiClient.post('/v1/auth/resend-verification', { email: this.userEmail });
-                    window.utils.showToast('success', 'Email verifikasi baru telah dikirim ke alamat Anda.');
-                } catch (error) {
-                    console.error('Resend error:', error);
-                    window.utils.showToast('error', window.utils.parseApiError(error, 'Gagal mengirim ulang email.'), true);
-                } finally {
-                    this.loading = false;
-                }
-            },
-            logout() {
-                window.auth.clearToken();
-            }
-        }
-    }
-</script>
 @endsection
