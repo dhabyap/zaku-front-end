@@ -23,9 +23,6 @@ export function registerAuth(Alpine) {
                 window.utils.showToast('error', 'Sesi Anda telah berakhir. Silakan login kembali.', true);
             }
 
-            if (window.auth.isLoggedIn()) {
-                window.location.replace('/dashboard');
-            }
         },
         async submit() {
             if (this.loading || !this.validate()) return;
