@@ -13,7 +13,9 @@ class JwtSession
      */
     public function handle(Request $request, Closure $next)
     {
-        $token = $request->cookie('zaku_token');
+        // Backend currently issues the auth cookie as `token`.
+        // Accept the legacy `zaku_token` name too for existing sessions.
+        $token = $request->cookie('token') ?: $request->cookie('zaku_token');
 
         if (! $token || $token === '') {
             return redirect()->route('login');

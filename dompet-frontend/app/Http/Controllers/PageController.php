@@ -13,7 +13,7 @@ class PageController extends Controller
 
     public function login(Request $request)
     {
-        if ($request->cookie('zaku_token')) {
+        if ($request->cookie('token') || $request->cookie('zaku_token')) {
             return redirect()->route('dashboard');
         }
 
