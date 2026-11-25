@@ -309,7 +309,19 @@
                     }
                 }
             </style>
-@endsection
+
+    <script>
+        function greeting() {
+            const h = new Date().getHours();
+            let g = 'SELAMAT MALAM 🌙';
+            if (h < 12) g = 'SELAMAT PAGI ☀️';
+            else if (h < 15) g = 'SELAMAT SIANG 🌤️';
+            else if (h < 18) g = 'SELAMAT SORE 🌅';
+            return g;
+        }
+
+        function dashboardHome() {
+            return {
                 budget: {
                     limit: 0,
                     used: 0,
