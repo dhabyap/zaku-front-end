@@ -13,7 +13,10 @@ class PageController extends Controller
 
     public function login(Request $request)
     {
-        if ($request->cookie('token') || $request->cookie('zaku_token')) {
+        // An expired/invalid HttpOnly cookie cannot be removed by JavaScript.
+        // Keep the login form visible when the API client redirects an expired session here.
+        if ($request->query('session') !== 'expired'
+            && ($request->cookie('token') || $request->cookie('zaku_token'))) {
             return redirect()->route('dashboard');
         }
 
