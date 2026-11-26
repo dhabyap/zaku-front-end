@@ -1,18 +1,22 @@
 // resources/js/auth.js
-// Token is now stored in httpOnly cookie (set by backend), not accessible via JS.
-// We only store user data in localStorage/sessionStorage.
-
-export const getToken = () => null; // Token in httpOnly cookie, not readable by JS
+// Prefer the backend's HttpOnly cookie; keep a JS-readable fallback for browsers
+// that omit cross-subdomain cookies from credentialed API requests.
+export const getToken = () => localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
 export const getRefreshToken = () => null;
 
 export const setToken = (access, refresh = null, remember = false) => {
-    // No-op: token is in httpOnly cookie managed by backend
-    // We only store user data
+    localStorage.removeItem('access_token');
+    sessionStorage.removeItem('access_token');
+    if (!access) return;
+    const storage = remember ? localStorage : sessionStorage;
+    storage.setItem('access_token', access);
 };
 
 export const clearToken = () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('access_token');
+    sessionStorage.removeItem('access_token');
     // httpOnly cookie cleared by backend on logout call
 
     if (window.location.pathname !== '/login') {

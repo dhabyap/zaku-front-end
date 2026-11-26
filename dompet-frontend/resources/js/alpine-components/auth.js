@@ -29,7 +29,8 @@ export function registerAuth(Alpine) {
             this.loading = true;
             try {
                 const response = await window.apiClient.post('/v1/auth/login', this.formData);
-                const { user } = response.data.data;
+                const { user, token } = response.data.data;
+                window.auth.setToken(token, null, this.formData.remember);
                 window.auth.setUser(user, this.formData.remember);
                 window.utils.showToast('success', 'Anda berhasil masuk!');
                 window.location.assign('/dashboard');

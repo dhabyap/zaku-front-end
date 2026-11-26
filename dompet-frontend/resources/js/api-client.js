@@ -14,6 +14,17 @@ const apiClient = axios.create({
 // Auth endpoints that should NOT redirect on 401 (invalid credentials is expected)
 const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-password', '/v1/auth/verify-email', '/v1/auth/resend-verification', '/v1/auth/change-password'];
 
+// Fallback for browsers that omit cross-subdomain cookies. The backend also
+// accepts the HttpOnly `token` cookie, so this does not replace cookie auth.
+apiClient.interceptors.request.use((config) => {
+    const token = window.auth?.getToken?.();
+    if (token) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // Response interceptor: handle 401 and network errors
 apiClient.interceptors.response.use(
     (response) => response,
@@ -34,6 +45,8 @@ apiClient.interceptors.response.use(
         if (invalidSession && !isAuthEndpoint) {
             localStorage.removeItem('user');
             sessionStorage.removeItem('user');
+            localStorage.removeItem('access_token');
+            sessionStorage.removeItem('access_token');
             if (window.location.pathname !== '/login' && !window.__sessionRedirecting) {
                 window.__sessionRedirecting = true;
                 window.location.replace('/login?session=expired');
