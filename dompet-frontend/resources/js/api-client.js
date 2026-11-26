@@ -18,18 +18,29 @@ const AUTH_ENDPOINTS = ['/v1/auth/login', '/v1/auth/register', '/v1/auth/forgot-
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
-            const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => error.config?.url?.endsWith(ep));
-            // Don't redirect on 401 from auth endpoints (invalid credentials is expected)
-            if (!isAuthEndpoint) {
-                // Clear user data and redirect to login
-                localStorage.removeItem('user');
-                sessionStorage.removeItem('user');
-                if (window.location.pathname !== '/login' && !window.__sessionRedirecting) {
-                    window.__sessionRedirecting = true;
-                    window.location.replace('/login?session=expired');
-                }
+        const status = error.response?.status;
+        const isAuthEndpoint = AUTH_ENDPOINTS.some(ep => error.config?.url?.endsWith(ep));
+        const body = error.response?.data;
+        const apiMessage = [body?.message, body?.error, body?.errors?.token]
+            .flat()
+            .filter((value) => typeof value === 'string')
+            .join(' ');
+        const invalidSession = status === 401
+            || (status >= 400
+                && /token|session|sesi/i.test(apiMessage)
+                && /expired|invalid|not registered|unregistered|revoked|invalidated|kedaluwarsa|tidak valid|tidak terdaftar|tidak berakses/i.test(apiMessage));
+
+        // Login/register errors are user-correctable; don't treat those as expired sessions.
+        if (invalidSession && !isAuthEndpoint) {
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
+            if (window.location.pathname !== '/login' && !window.__sessionRedirecting) {
+                window.__sessionRedirecting = true;
+                window.location.replace('/login?session=expired');
             }
+        }
+
+        if (status === 401) {
             return Promise.reject(error);
         }
         return Promise.reject(error);
